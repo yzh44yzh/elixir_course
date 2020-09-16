@@ -1,12 +1,7 @@
 defmodule FizzBuzz01 do
   @moduledoc """
   Элементарная задача на понимание базовых конструкций программирования.
-
-  Источник:
-  https://blog.codinghorror.com/why-cant-programmers-program/
-
-  Перевод на русский:
-  https://habr.com/ru/post/298134/
+  https://ru.wikipedia.org/wiki/Fizz_buzz
   """
 
 
