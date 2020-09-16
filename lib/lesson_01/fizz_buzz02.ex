@@ -9,6 +9,7 @@ defmodule FizzBuzz02 do
   https://habr.com/ru/post/298134/
   """
 
+
   def main() do
     1..100
     |> Enum.map(&fizzbuzz/1)
@@ -16,7 +17,8 @@ defmodule FizzBuzz02 do
     |> IO.puts
   end
 
-  @spec fizzbuzz(integer) :: string
+
+  @spec fizzbuzz(integer) :: String.t
   def fizzbuzz(n) do
     divisible_by_3 = rem(n, 3) == 0
     divisible_by_5 = rem(n, 5) == 0

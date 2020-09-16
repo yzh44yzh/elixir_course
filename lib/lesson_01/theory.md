@@ -13,3 +13,8 @@
 > r FizzBuzz02
 > FizzBuzz02.main
 ```
+
+Вариант 3 с тестом
+```
+elixir lib/lesson_01/fizz_buzz03.exs
+```

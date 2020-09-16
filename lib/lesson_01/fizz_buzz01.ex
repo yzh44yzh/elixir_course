@@ -9,9 +9,11 @@ defmodule FizzBuzz01 do
   https://habr.com/ru/post/298134/
   """
 
+
   def main() do
     Enum.each(1..100, &fizzbuzz/1)
   end
+
 
   def fizzbuzz(n) do
     cond do
