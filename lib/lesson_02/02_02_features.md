@@ -185,40 +185,60 @@ IO не выполняется в каждом потоке отдельно, а
 До сих пор мы рассматривали свойства виртуальной машины BEAM. А значит, они общие и для Эликсир, и для Эрланг, и для других языков, которые комплируются в байткод BEAM. Теперь рассмотрим свойства Эликсир, отличающие его от Эрланг.
 
 
+## Мощная система макросов, дающая гибкость и расширяемость языка
+
+TODO
+
+Метапрограммирование дает возможность прямого манипулирования абстрактным синтаксическим деревом (АСД)[8]. 
+Meta programming allowing direct manipulation of abstract syntax tree (AST)[28]
+
 Extensibility and DSLs
 Elixir has been designed to be extensible, letting developers naturally extend the language to particular domains, in order to increase their productivity.
+
+Используется очень широко. Даже конструкции для создания модулей, функций, if cond case являются макросами.
+    
+На эрланг трудно сделать что-то похожее на Ruby on Rails или Django. Попытки были, но не удачные. Не хватает гибкости языка. 
+
+
+## Эликсир более высокоуровневый язык, чем Эрланг
+
+TODO
+
+оператор Pipe 
+
+Railway oriented programming via the with construct
+
+Enum
+
+Полиморфизм, реализованный через механизм протоколов, которые, как и в Clojure, обеспечивают механизм диспетчеризации (не стоит путать с множественной диспетчеризацией). 
+Enumerable, Collectable
+
+Stream
+Lazy and async collections with streams
+
+Более лаконичный синтаксис.
+В итоге Эликсир обычно требует меньше кода, чем Эрланг, для реализации одинаковых бла-бла-бла.
+
+
+## Экосистема и сообщество
+
+TODO
+Здесь Эликсир выгодно отличается от Эрланг.
+Больше инструментов и библиотек. Больше сообщество. Все это быстрее развивается.
 
 A growing ecosystem
 Elixir ships with a great set of tools to ease development. Mix is a build tool that allows you to easily create projects, manage tasks, run tests and more:
 
-compilation of features Erlang, Clojure, Ruby
+Документация
+Юнит-тесты, тесты на документацию.
 
-Elixir — функциональный, распределённый язык программирования общего назначения, который работает на виртуальной машине Erlang (BEAM). Построен поверх Erlang, что обеспечивает распределённость, отказоустойчивость, исполнение в режиме мягкого реального времени, метапрограммирование с макросами и полиморфизмом, реализованным через протоколы[3]. Использует Erlang/OTP для работы с деревьями потоков[4]. 
+Built-in tooling for managing dependencies, code compilation, running tests, formatting code, remote debugging and more
+
+
+# Связь Эликсир и Эрланг 
+
+TODO промежуточные представления, куда что компилируется
 
 Программы компилируются в байт-код для виртуальной машины Erlang (BEAM)[8]. Каждый элемент программы является выражением[8], функции языка Erlang могут быть вызваны без влияния на время исполнения из-за компиляции байт-кода в Erlang и наоборот.
 
-Метапрограммирование дает возможность прямого манипулирования абстрактным синтаксическим деревом (АСД)[8]. Полиморфизм, реализованный через механизм протоколов, которые, как и в Clojure, обеспечивают механизм диспетчеризации (не стоит путать с множественной диспетчеризацией). Параллельное программирование — без разделения ресурсов, через передачу сообщений (модель акторов)[9]. На практике упор делается на рекурсии и функциях высшего порядка вместо применения циклов, основанных на побочных эффектах. Для реализации простого параллелизма использованы механизмы Erlang с упрощённым синтаксисом (например, Task)[8].
-
-Реализованы ленивые вычисления и асинхронные коллекции с потоками, сопоставление с образцом[8].
-
-Язык поддерживает Unicode и UTF-8-строки. Реализована поддержка документирования кода по синтаксису напоминающая строки документации языка Python, но в формате Markdown[8]. 
-
-Elixir был задуман как улучшение Erlang, в частности, значительного упрощения синтаксиса. Одним из основных отличий является возможность повторного присваивания значений переменных. В Elixir не требуется завершать каждую команду точкой (по примеру Пролога), так как выражения разделяются переводом строки и точкой с запятой (;). В Elixir не требуется экспортировать функции модуля, тогда как в Erlang по умолчанию все функции недоступны из других модулей, если не упомянуты в директиве -export. Тем самым, синтаксис Elixir больше похож на синтаксис Ruby[6]. 
-
-Features
-
-    compiles to bytecode for the Erlang Virtual Machine (BEAM)[28]
-    Everything is an expression[28]
-    Erlang functions can be called from Elixir without run time impact, due to compilation to Erlang bytecode, and vice versa
-    Meta programming allowing direct manipulation of abstract syntax tree (AST)[28]
-    Polymorphism via a mechanism called protocols. Like in Clojure, protocols provide a dynamic dispatch mechanism. However, this is not to be confused with multiple dispatch as Elixir protocols dispatch on a single type.
-    Support for documentation via Python-like docstrings in the Markdown formatting language[28]
-    Shared nothing concurrent programming via message passing (Actor model)[29]
-    Emphasis on recursion and higher-order functions instead of side-effect-based looping
-    Lightweight concurrency utilizing Erlang's mechanisms[28]
-    Railway oriented programming via the with construct
-    Built-in tooling for managing dependencies, code compilation, running tests, formatting code, remote debugging and more
-    Lazy and async collections with streams
-    Pattern matching[28] to promote assertive code[30]
-    Unicode support and UTF-8 strings
-    
+Erlang functions can be called from Elixir without run time impact, due to compilation to Erlang bytecode, and vice versa
