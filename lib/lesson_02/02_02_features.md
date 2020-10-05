@@ -228,22 +228,25 @@ func1() |> func2() |> func3()
 
 ## Экосистема и сообщество
 
-TODO
-Здесь Эликсир выгодно отличается от Эрланг.
-Больше инструментов и библиотек. Больше сообщество. Все это быстрее развивается.
+Несмотря на то, что Эликсир значительно моложе Эрланг, его сообщество крупнее и активнее. Благодаря этому, активнее развивается экосистема: библиотеки и инструменты разработки.
 
-A growing ecosystem
-Elixir ships with a great set of tools to ease development. Mix is a build tool that allows you to easily create projects, manage tasks, run tests and more:
+Эрланг -- консервативный язык. Развивается он не быстро. Для команды разработки разработки приоритетом является развитие виртуальной машины, а не языка. (Язык Эрланг и его виртуальная машина разрабатываются одной и той же командой).
 
-Документация
-Юнит-тесты, тесты на документацию.
-
-Built-in tooling for managing dependencies, code compilation, running tests, formatting code, remote debugging and more
+Поэтому многие идеи появляются сперва в Эликсир, а потом портируются в Эрланг. Например, инструмент для управления зависимостями и сборкой проекта **mix** является эталоном для аналогичного инструмента **rebar** в Эрланг. 
 
 
 # Связь Эликсир и Эрланг 
 
 TODO промежуточные представления, куда что компилируется
+
+Erlang AST -> Core Erlang -> Kernel Erlang -> Beam SSA -> Beam Asm
+TODO откуда эта инфа? Во что компилируется эликсир?
+
+https://medium.com/intermediate-representation-toolchain-and/intermediate-representations-toolchain-and-internals-in-erlang-50d13ba61cad
+IR Intermediate Representation
+SSA (Static Single Assignment)
+
+ERTS Erlang Runtime System
 
 Программы компилируются в байт-код для виртуальной машины Erlang (BEAM)[8]. Каждый элемент программы является выражением[8], функции языка Erlang могут быть вызваны без влияния на время исполнения из-за компиляции байт-кода в Erlang и наоборот.
 
