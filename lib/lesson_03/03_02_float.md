@@ -8,23 +8,24 @@
 
 Таков стандарт IEEE 754 :) 
 
-реализовать функцию is_equal/3, которая сравнивает два float значения на равенство с допустимой погрешностью. Погрешность передается 3-м аргументом.
+1) реализовать функцию is_equal/3, которая сравнивает два float значения на равенство с допустимой погрешностью. Погрешность передается 3-м аргументом.
 
-is_equal(F1, F2, Precision) ->
-    abs(F1 - F2) < Precision.
+2) реализовать функцию distance/2, которая вычисляет расстояние между двумя точками
 
+Запуск:
+```
+iex(1)> c "lib/lesson_03/task_03_02_float.exs"
+iex(2)> alias Lesson_03.Task_03_02_Float, as: TF
+Lesson_03.Task_03_02_Float
+iex(3)> TF.is_equal(0.1, 0.2)
+false
+iex(4)> TF.is_equal(0.1, 0.11)
+true
+iex(5)> TF.is_equal(0.1, 0.11, 0.001)
+false
+```
 
-is_equal_test() ->
-    ?assertEqual(true, is_equal(3.5, 3.5, 0.01)),
-    ?assertEqual(true, is_equal(3.51, 3.51, 0.01)),
-    ?assertEqual(false, is_equal(3.51, 3.53, 0.01)),
-    ?assertEqual(true, is_equal(3.51, 3.53, 0.1)),
-    ?assertEqual(false, is_equal(3.501, 3.503, 0.001)),
-    ?assertEqual(true, is_equal(3.501, 3.503, 0.01)),
-    ?assertEqual(true, is_equal(-7.77, -7.75, 0.1)),
-    ?assertEqual(true, is_equal(-10.95, -11.0, 0.2)),
-    ?assertEqual(true, is_equal(-10.95, -11.0, 0.06)),
-    ?assertEqual(false, is_equal(-10.95, -11.0, 0.02)),
-    ok.
-
-реализовать функцию distance/2, которая вычисляет расстояние между двумя точками
+Запуск тестов:
+```
+elixir lib/lesson_03/task_03_02_float.exs
+```
