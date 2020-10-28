@@ -23,13 +23,30 @@ port является идентификатором специального п
 reference является идентификатором общего назначения, который можно использовать по своему усмотрению. Например, как ключ для хранения объекта в ets таблице. Или им можно пометить сообщение, отправленное другому потоку, и ждать ответное сообщение, помеченное тем же ключом.
 
 1> Ref = make_ref().
-#Ref<0.0.0.30>
+Ref<0.0.0.30>
 2> Pid = spawn(timer, sleep, [10000]).
 <0.36.0>
 3> Pid ! {Ref, hello}.
 {#Ref<0.0.0.30>,hello}
 
 Эрланг гарантирует, что make_ref при каждом вызове генерирует новый уникальный ключ.
+
+### IO List
+
+Recursive data structure, consists of:
+- byte (integer in range 0-255)
+- binary
+- IO List
+
+Useful for incrementally building output that will be forwarded to an IO device (socket or file).
+
+
+### Comparison
+
+=== == !== == > >= < <=
+
+Comparison is based on type according to this rule:
+number < atom < reference < function < port < pid < tuple < map < list < binary
 
 
 ### function
