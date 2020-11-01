@@ -33,25 +33,25 @@ any more and you’ll probably want to look at Map or Struct.
  
 Обычно кортежи бывают небольшими -- 2-5 элементов. Для небольших кортежей смысл вложенных в них значений понятен из контекста. Если нужно хранить больше элементов, тогда лучше использовать другие структуры данных -- struct или map. О них пойдет речь ниже.
  
-пересекаются ли два прямоугольника (что-то в этом роде)
-
 реализовать функцию distance/2, которая вычисляет расстояние между двумя точками
 
-distance({X1, Y1}, {X2, Y2}) ->
-    W = abs(X1 - X2),
-    H = abs(Y1 - Y2),
-    math:sqrt(W * W + H * H).
+```
+iex(6)> c "lib/lesson_03/task_03_04_atom_tuple.exs"
+[Lesson_03.Task_03_04_AtomTuple]
+iex(7)> import Lesson_03.Task_03_04_AtomTuple
+Lesson_03.Task_03_04_AtomTuple
+iex(8)> p1 = {:point, 1, 1}
+{:point, 1, 1}
+iex(9)> p2 = {:point, 10, 10}
+{:point, 10, 10}
+iex(10)> distance(p1, p2)
+12.727922061357855
+```
 
+```
+elixir lib/lesson_03/task_03_04_atom_tuple.exs
+```    
 
-distance_test() ->
-    ?assertEqual(5.0, distance({0, 0}, {0, 5})),
-    ?assertEqual(5.0, distance({5, 0}, {0, 0})),
-    ?assertEqual(0.0, distance({5, 5}, {5, 5})),
-    ?assertEqual(5.0, distance({0, 0}, {3, 4})),
-    ?assertEqual(5.0, distance({0, 0}, {-3, -4})),
-    ?assertEqual(12.806248474865697, distance({2, 2}, {10, 12})),
-    ?assertEqual(21.213203435596427, distance({-5, -5}, {10, 10})),
-    ?assertEqual(21.400934559032695, distance({-5, 5}, {8, -12})),
-    ?assertEqual(17.26267650163207, distance({-5, 5}, {-8, -12})),
-    ok.
-    
+TODO:
+intersect(:rect, rect)
+пересекаются ли два прямоугольника (что-то в этом роде)

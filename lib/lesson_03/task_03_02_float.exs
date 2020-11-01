@@ -4,8 +4,6 @@ defmodule Lesson_03.Task_03_02_Float do
     abs(f1 - f2) < precision
   end
 
-  # TODO реализовать функцию distance/2, которая вычисляет расстояние между двумя точками
-
 end
 
 ExUnit.start()
