@@ -16,3 +16,5 @@
 – Lists
 – Maps
 – Binaries
+
+Functions are a type too.
