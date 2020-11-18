@@ -52,6 +52,4 @@ iex(10)> distance(p1, p2)
 elixir lib/lesson_03/task_03_04_atom_tuple.exs
 ```    
 
-TODO:
-intersect(:rect, rect)
-пересекаются ли два прямоугольника (что-то в этом роде)
+Реализовать функцию is_point_inside_figure для прямоугольника и круга.
