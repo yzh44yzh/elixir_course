@@ -25,3 +25,17 @@ defmodule Lesson_03.Task_03_06_Map do
   end
 
 end
+
+ExUnit.start()
+
+defmodule Task_06_Test do
+  use ExUnit.Case
+  import Lesson_03.Task_03_06_Map
+
+  test "count words" do
+    assert %{"Hello" => 1, "world" =>1} == count_words("Hello world")
+    assert %{"Bip" => 2, "bop" => 5, "bip" => 2, "bam" => 1} ==
+             count_words(" Bip bop bip bop bop Bip bop bip bop bam ")
+  end
+
+end
