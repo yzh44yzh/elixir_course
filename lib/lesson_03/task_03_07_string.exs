@@ -24,9 +24,13 @@ defmodule Task_07_Test do
   import Lesson_03.Task_03_07_String
 
   test "align word" do
+    assert " bob " == align_word("bob", 5)
+    assert " bob  " == align_word("bob", 6)
+    assert "  bob  " == align_word("bob", 7)
   end
 
   test "align" do
+    assert "  cat   \n zebra  \nelephant" == align(~w'cat zebra elephant')
   end
 
 end
