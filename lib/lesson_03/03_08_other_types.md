@@ -1,37 +1,38 @@
-### Другие типы 
+# Другие типы 
 
-ref, pid, port, 
+## Служебные идентификаторы
 
-Эти типы являются идентификаторами.
+**pid** является идентификатором потока, зная который, можно отправлять потоку сообщения.
 
-pid является идентификатором потока, зная который, можно отправлять потоку сообщения.
+```
+iex(1)> f = fn -> :ok end
+#Function<45.97283095/0 in :erl_eval.expr/5>
+iex(2)> pid = spawn(f)
+#PID<0.110.0>
+iex(3)> send(pid, :hello)
+:hello
+```
 
-1> F = fun() -> timer:sleep(5000) end.
-#Fun<erl_eval.20.90072148>
-2> Pid = spawn(F).
-<0.36.0>
-3> Pid ! hello.
-hello
+**port** является идентификатором специального процесса, связанного с сокетом.
 
-port является идентификатором специального процесса, связанного с сокетом.
+```
+iex(4)> :gen_tcp.listen(8080, []) 
+{:ok, #Port<0.6>}
+iex(5)> :gen_udp.open(9090)
+{:ok, #Port<0.7>}
+```
 
-1> gen_tcp:listen(8080, []).
-{ok,#Port<0.588>}
-2> gen_udp:open(9090).
-{ok,#Port<0.593>}
+**reference** является идентификатором общего назначения, который можно использовать по своему усмотрению. Например, как ключ для хранения объекта в ets таблице. Или им можно пометить сообщение, отправленное другому потоку, и ждать ответное сообщение, помеченное тем же ключом.
 
-reference является идентификатором общего назначения, который можно использовать по своему усмотрению. Например, как ключ для хранения объекта в ets таблице. Или им можно пометить сообщение, отправленное другому потоку, и ждать ответное сообщение, помеченное тем же ключом.
+```
+iex(6)> make_ref()
+#Reference<0.2063296336.1072955394.111887>
+```
 
-1> Ref = make_ref().
-Ref<0.0.0.30>
-2> Pid = spawn(timer, sleep, [10000]).
-<0.36.0>
-3> Pid ! {Ref, hello}.
-{#Ref<0.0.0.30>,hello}
+BEAM гарантирует, что make_ref при каждом вызове генерирует новый уникальный ключ.
 
-Эрланг гарантирует, что make_ref при каждом вызове генерирует новый уникальный ключ.
 
-### IO List
+## IO List
 
 Recursive data structure, consists of:
 - byte (integer in range 0-255)
@@ -40,24 +41,54 @@ Recursive data structure, consists of:
 
 Useful for incrementally building output that will be forwarded to an IO device (socket or file).
 
+Не эффективно:
+```
+iex(8)> header = "<html><body>"
+"<html><body>"
+iex(9)> footer = "</body></html>"
+"</body></html>"
+iex(10)> name = "Bob"
+"Bob"
+iex(11)> body = "hello " <> name <> "!"
+"hello Bob!"
+iex(12)> page = header <> body <> footer
+iex(15)> IO.puts page
+<html><body>hello Bob!</body></html>
+```
 
-### Comparison
+Эффективно:
+```
+iex(8)> header = "<html><body>"
+"<html><body>"
+iex(9)> footer = "</body></html>"
+"</body></html>"
+iex(10)> name = "Bob"
+"Bob"
+iex(13)> body_io = ["hello ", name, "!"] 
+["hello ", "Bob", "!"]
+iex(14)> page_io = [header, body_io, footer]
+["<html><body>", ["hello ", "Bob", "!"], "</body></html>"]
+iex(16)> IO.puts page_io
+<html><body>hello Bob!</body></html>
+:ok
+```
 
-=== == !== == > >= < <=
-
-Comparison is based on type according to this rule:
-number < atom < reference < function < port < pid < tuple < map < list < binary
-
-
-### function
+## function
 
 Конечно, функциональный язык не может обойтись без анонимных функций, они же лямбды, они же замыкания. Для них тоже есть отдельный тип данных. Эти функции можно сохранять в переменную, передавать как аргументы в другие функции, и даже посылать на другую ноду, чтобы выполнить там.
 
-1> F = fun(Val) -> Val rem 2 =:= 0 end.
-#Fun<erl_eval.6.90072148>
-2> lists:filter(F, [1,2,3,4,5,6]).
-[2,4,6]
+```
+iex(18)> f = fn(val) -> rem(val, 2) == 0 end
+#Function<44.97283095/1 in :erl_eval.expr/5>
+iex(19)> Enum.filter([1,2,3,4,5], f)
+[2, 4]
+```
 
 
-Простые и составные типы данных. Условность этого разделения (pid простой или составной?)
+## Некоторые нюансы типов данных в BEAM
 
+Простые и составные типы данных. 
+Условность этого разделения (pid простой или составной?)
+
+Сравнение значений:
+number < atom < reference < function < port < pid < tuple < map < list < binary
