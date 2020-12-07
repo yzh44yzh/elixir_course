@@ -1,5 +1,9 @@
 ## Рекурсивные функции с аккумуляторами
 
+TODO
+https://github.com/yzh44yzh/practical_erlang/blob/master/02_list_recursion/list_samples.erl
+https://github.com/yzh44yzh/practical_erlang/blob/master/02_list_recursion/main.erl
+
 Типичный способ работы со списками -- использование рекурсивных функций и аккумуляторов.
 Рассмотрим эту тему на конкретных примерах.
 

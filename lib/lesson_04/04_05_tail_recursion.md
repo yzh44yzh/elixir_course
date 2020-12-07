@@ -43,3 +43,4 @@ The common approach to creating tail-recursive functions is to replace the use o
 That’s a huge improvement! However, at the same time we made our code a bit more complex. It’s a serious trade-off that we need to think about before deciding if we should write a body-recursive or a tail-recursive function. In general, if you’re expecting millions of iterations or the tail-recursive function isn’t hard to read and maintain, go with tail-recursive. If the number of iterations is small and the tail-recursive function is hard to understand and maintain, go with body-recursive.
 
 
+TODO примеры, как аккумуляторы помогают перейти от non-tail к tail
