@@ -3,7 +3,7 @@ Strategy
 
 Divide and conquer
 
-Decrease and concuer
+Decrease and conquer
 
 это из книги LFPwE
 TODO посмотреть, какие там есть примеры для каждой стратегии
