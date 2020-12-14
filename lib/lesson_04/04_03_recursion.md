@@ -1,3 +1,4 @@
+В Эликсир, как и во всех функциональных языках, нет циклов. Их заменяет рекурсия.
 
 Strategy
 
@@ -21,3 +22,5 @@ Write a max(list) that returns the element with the maximum value in the list.
 def square([]), do: []
 def square([ head | tail ]), do: [ head*head | square(tail) ]
 ```
+
+TODO Еще неплохо было бы придумать пример опосредованой рекурсии, через 2 функции.

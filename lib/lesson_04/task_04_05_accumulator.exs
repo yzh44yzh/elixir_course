@@ -1,4 +1,4 @@
-defmodule Lesson_04.Task_04_04_Accumulator do
+defmodule Lesson_04.Task_04_05_Accumulator do
 
   def test_data() do
     # {:user, id, name, age}
@@ -57,7 +57,7 @@ ExUnit.start()
 
 defmodule Task_04_Test do
   use ExUnit.Case
-  import Lesson_04.Task_04_04_Accumulator
+  import Lesson_04.Task_04_05_Accumulator
 
   test "align word" do
     # assert " bob " == align_word("bob", 5)

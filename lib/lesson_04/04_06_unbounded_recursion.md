@@ -1,10 +1,13 @@
-## Unbounded recursion
+## Неограниченная рекурсия (Unbounded recursion)
 
-Unbounded recursion is when we can’t predict the number of repetitions for a recursive function. For example, it’s hard to predict how many iterations a web crawler that navigates and downloads web pages will have. 
+В случае неограниченной рекурсии мы не может предсказать число итераций. Например, мы реализуем веб-паука, который скачивает веб-страницу, а затем проходит по всем ссылкам на этой странице. Другой пример -- обход файловой системы по дереву каталогов. 
 
- similar problem occurs when software tries to map a machine’s file system, even if it’s a more controlled environment than the web. Each directory it finds can have many more directories inside. Let’s explore this type of recursion, creating a program that prints and navigates through a given system directory. 
- Годится как упражнение
+Давайте реализуем второй пример.
 
-To create more predictable functions, let’s write some code to reduce the number of iterations. We’ll explore two strategies—one that focuses on limiting the number of iterations and another that focuses on avoiding infinite loops.
+TODO
 
-We’ll add a depth restriction that will flag how many child directories deep we want to dive from the given directory. 
+Иногда мы хотим как-то ограничить число итераций. В нашем случае мы можем ограничить глубину обхода каталогов.
+
+TODO реализация.
+
+Или мы хотим гарантировать, что не попадем в бесконечный цикл. В нашем случае нужно проверять, не является ли каталог символической ссылкой, и если является, то игнорировать его. Это оставим для домашнего задания.
