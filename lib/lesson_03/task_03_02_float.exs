@@ -8,7 +8,7 @@ end
 
 ExUnit.start()
 
-defmodule Task_02_Test do
+defmodule Task_03_02_Test do
   use ExUnit.Case
   import Lesson_03.Task_03_02_Float
 

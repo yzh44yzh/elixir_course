@@ -55,7 +55,7 @@ end
 
 ExUnit.start()
 
-defmodule Task_04_Test do
+defmodule Task_04_05_Test do
   use ExUnit.Case
   import Lesson_04.Task_04_05_Accumulator
 

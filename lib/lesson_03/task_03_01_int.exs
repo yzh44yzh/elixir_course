@@ -19,7 +19,7 @@ end
 
 ExUnit.start()
 
-defmodule Task_01_Test do
+defmodule Task_03_01_Test do
   use ExUnit.Case
   import Lesson_03.Task_03_01_Int
 

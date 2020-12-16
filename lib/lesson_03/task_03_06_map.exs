@@ -28,7 +28,7 @@ end
 
 ExUnit.start()
 
-defmodule Task_06_Test do
+defmodule Task_03_06_Test do
   use ExUnit.Case
   import Lesson_03.Task_03_06_Map
 
