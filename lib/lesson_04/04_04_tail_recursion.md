@@ -285,3 +285,76 @@ Tail
   {code,             7,198,291},
   {ets,                389,408}]
 ```
+
+
+heap_size -- Size is the size in words of youngest heap generation of the process. This generation currently include the stack of the process. This information is highly implementation dependent, and may change if the implementation change.
+
+total_heap_size -- Size is the total size in words of all heap fragments of the process. This currently include the stack of the process.
+
+Промежуточные результаты -- огромные числа на несколько экранов, занимают место в куче.
+
+Попробуем анализ памяти для fibonacci:
+
+```
+$ iex lib/lesson_04/task_04_04_tail_recursion.exs
+iex> alias Lesson_04.Task_04_04_TailRecursion, as: R
+iex> Enum.map(0..20, fn n -> R.fibonacci(n) end)
+[0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584,
+ 4181, 6765]
+iex> Enum.map(0..20, fn n -> R.fibonacci_t(n) end)  
+[0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584,
+ 4181, 6765]
+iex> R.fibonacci(40)
+102334155
+iex> R.fibonacci_t(40)
+102334155
+```
+
+Тоже не очень подходит, много итераций не сделаешь. Надо что-то другое.
+
+```
+iex(20)> R.fibonacci(6) 
+memory 34988, heap 4184, stack 58
+memory 34988, heap 4184, stack 60
+memory 34988, heap 4184, stack 62
+memory 34988, heap 4184, stack 64
+memory 34988, heap 4184, stack 66
+memory 34988, heap 4184, stack 64
+memory 34988, heap 4184, stack 62
+memory 34988, heap 4184, stack 64
+memory 34988, heap 4184, stack 60
+memory 34988, heap 4184, stack 62
+memory 34988, heap 4184, stack 64
+memory 34988, heap 4184, stack 62
+8
+iex(21)> R.fibonacci_t(20)
+memory 34988, heap 4184, stack 58
+memory 34988, heap 4184, stack 59
+6765
+```
+
+Пробуем sum
+
+```
+iex(32)> list = Enum.to_list(0..100)
+[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+ 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
+ 42, 43, 44, 45, 46, 47, 48, 49, ...]
+iex(33)> R.sum(list)
+5050
+iex(34)> R.sum_t(list)
+5050
+```
+
+```
+iex(36)> R.sum(list)  
+memory 427248, heap 53194, stack 59
+memory 427248, heap 53194, stack 259
+5050
+iex(37)> R.sum_t(list)
+memory 427248, heap 53194, stack 60
+memory 427248, heap 53194, stack 60
+5050
+```
+
+Ну ок, видно. Стек растет, heap не используется.
