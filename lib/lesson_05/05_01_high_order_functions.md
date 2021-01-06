@@ -71,67 +71,41 @@ iex(11)> Enum.filter(users, f)
 [{:user, 2, "Helen", 20}, {:user, 4, "Kate", 14}]
 ```
 
+## Примеры
+
 Мы можем взять примеры из прошлого урока, и переписать их с использованием map и filter.
 
-TODO stopped here
-
-Фильтрация пользователей по полу:
+Отфильтровать совершеннолетних пользователей:
 
 ```
-get_females(Users) ->
-    F = fun({user, _, _, male, _}) -> false;
-           ({user, _, _, female, _}) -> true
-        end,
-    lists:filter(F, Users).
+$ iex lib/lesson_05/task_05_01_hof.exs         
+iex(1)> alias Lesson_05.Task_05_01_HOF, as: HOF
+iex(2)> users = HOF.test_data
+[
+  {:user, 1, "Bob", 23},
+  {:user, 2, "Helen", 20},
+  {:user, 3, "Bill", 15},
+  {:user, 4, "Kate", 14}
+]
+iex(3)> Enum.filter(users, fn({:user, _, _, age}) -> age > 16 end)
+[{:user, 1, "Bob", 23}, {:user, 2, "Helen", 20}]
 ```
 
-Получение id и name пользователя:
+Получить id и name пользователя:
 
 ```
-get_id_name(Users) ->
-    F = fun({user, Id, Name, _, _}) -> {Id, Name} end,
-    lists:map(F, Users).
+iex(5)> Enum.map(users, fn({:user, id, name, _}) -> {id, name} end)
+[{1, "Bob"}, {2, "Helen"}, {3, "Bill"}, {4, "Kate"}]
 ```
 
-Если нам нужно сделать и **map**, и **filter**, то мы можем применить
-их по очереди:
+Разделить пользователей на два списка: несовершеннолетние и взрослые:
 
 ```
-get_females_id_name(Users) ->
-    Users2 = lists:filter(fun({user, _, _, Gender, _}) -> Gender =:= female end, Users),
-    lists:map(fun({user, Id, Name, _, _}) -> {Id, Name} end, Users2).
+iex(6)> adults = Enum.filter(users, fn({:user, _, _, age}) -> age > 16 end)   
+[{:user, 1, "Bob", 23}, {:user, 2, "Helen", 20}]
+iex(7)> children = Enum.filter(users, fn({:user, _, _, age}) -> age <= 16 end)
+[{:user, 3, "Bill", 15}, {:user, 4, "Kate", 14}]
 ```
 
-Но так мы получим 2 прохода по списку. Можно сделать это в один проход,
-если воспользоваться функцией [lists:filtermap/2](http://www.erlang.org/doc/man/lists.html#filtermap-2).
-
-```
-get_females_id_name2(Users) ->
-    lists:filtermap(fun({user, _, _, male, _}) -> false;
-                       ({user, Id, Name, female, _}) -> {true, {Id, Name}}
-                    end, Users).
-```
-
-Есть много примеров, где функция передается аргументом в другую
-функцию.  Но довольно редко бывает, чтобы функция возвращалась как
-значение.  Учебные примеры в книгах вы найдете. А что насчет
-применения на практике, в реальной работе?  Кое что есть :)
-
-В **EUnit**, фреймворке для модульного тестирования, используются
-генераторы юнит тестов.  Они возвращают список функций.
-
-Бывает, что один модуль запрашивает у другого функцию обратного вызова
-(callback), чтобы сохранить ее у себя и потом, при каких-то условиях,
-вызвать. Второй модуль может определить для этого API-функцию, которая
-вернет callback-функцию.
-
-Примеров мало, и это не повседневная практика, а какие-то особые случаи.
-
-Еще с помощью функций, возвращающих функции, можно реализовать ленивые
-вычисления.  Кому интересно, почитайте об этом в 9-й главе книги Чезарини.
-
-
-
-
-
+Здесь мы сделали два прохода по списку. Разделение в один проход сделаем немного позже с помощью Enum.reduce.
 

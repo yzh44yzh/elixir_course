@@ -10,5 +10,4 @@ defmodule Lesson_05.Task_05_01_HOF do
     ]
   end
 
-
 end
