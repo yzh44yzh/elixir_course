@@ -25,9 +25,9 @@ iex(3)> Enum.map(lst, f)
 ```
 
 ```
-$ iex lib/lesson_05/task_05_01_hof.exs
-iex(1)> alias Lesson_05.Task_05_01_HOF, as: HOF 
-Lesson_05.Task_05_01_HOF
+$ iex lib/lesson_05/task_05_02_hof.exs
+iex(1)> alias Lesson_05.Task_05_02_HOF, as: HOF 
+Lesson_05.Task_05_02_HOF
 iex(2)> lst = HOF.test_data
 [
   {:user, 1, "Bob", 23},
@@ -78,8 +78,8 @@ iex(11)> Enum.filter(users, f)
 Отфильтровать совершеннолетних пользователей:
 
 ```
-$ iex lib/lesson_05/task_05_01_hof.exs         
-iex(1)> alias Lesson_05.Task_05_01_HOF, as: HOF
+$ iex lib/lesson_05/task_05_02_hof.exs         
+iex(1)> alias Lesson_05.Task_05_02_HOF, as: HOF
 iex(2)> users = HOF.test_data
 [
   {:user, 1, "Bob", 23},
