@@ -32,6 +32,16 @@ iex(16)> for {:user, _id, name, age} <- users, age > 16, do: name
 TODO теория, синтаксис
 https://elixir-lang.org/getting-started/comprehensions.html
 
+The general syntax for comprehensions is deceptively simple:
+result = for generator or filter... [ , into: value ] , do: expression
+
+A generator specifies how you want to extract values from a collection.
+pattern <- enumerable_thing
+
+A filter is a predicate. It acts as a gatekeeper for the rest of the comprehen-
+sion—if the condition is false, then the comprehension moves on to the next
+iteration without generating an output value.
+
 Конструкторы списков позволяют обрабатывать несколько списков одновременно:
 
 ```
@@ -61,6 +71,9 @@ iex(22)> for x <- list1, y <- list2, z <- list3, x > 2, y != :b, do: {x, y, z}
   {4, :c, "world"}
 ]
 ```
+
+TODO таблица умножения
+for x <- 1..9, y <- 1..9, do: {x, y, x * y}
 
 
 ## Пифагоровы тройки
