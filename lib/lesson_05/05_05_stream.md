@@ -1,4 +1,4 @@
-# Stream
+# Модуль Stream
 
 Delay the Function Call
 Sometimes you want to give developers the flexibility to decide when a function

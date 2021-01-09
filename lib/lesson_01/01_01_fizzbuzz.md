@@ -1,4 +1,4 @@
-# FizzBuzz
+# Решаем задачу FizzBuzz
 
 Первое знакомство с языком на примере решения задачи [FizzBuzz](https://ru.wikipedia.org/wiki/Fizz_buzz):
 
