@@ -33,7 +33,7 @@ defmodule Lesson_05.Task_05_02_HOF do
 
 
   def split_by_age(users, age) do
-    splitter = fn ({:user, _id, _name, user_age} = user, {older, younger}) ->
+    splitter = fn({:user, _id, _name, user_age} = user, {older, younger}) ->
       if user_age > age do
         {[user | older], younger}
       else
@@ -41,6 +41,27 @@ defmodule Lesson_05.Task_05_02_HOF do
       end
     end
     Enum.reduce(users, {[], []}, splitter)
+  end
+
+
+  def get_longest_name_user(users) do
+    [first | rest] = users
+    finder = fn(user, longest_name_user) ->
+      {:user, _, name, _} = user
+      {:user, _, longest_name, _} = longest_name_user
+      if String.length(longest_name) < String.length(name), do: user, else: longest_name_user
+    end
+    Enum.reduce(rest, first, finder)
+  end
+
+
+  def get_oldest_user(users) do
+    finder = fn(user, oldest_user) ->
+      {:user, _, _, age} = user
+      {:user, _, _, oldest_age} = oldest_user
+      if oldest_age < age, do: user, else: oldest_user
+    end
+    Enum.reduce(users, finder)
   end
 
 end

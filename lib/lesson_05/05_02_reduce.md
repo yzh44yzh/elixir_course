@@ -83,3 +83,36 @@ iex(10)> HOF.split_by_age(users, 10)
    {:user, 1, "Bob", 23}
  ], []}
 ```
+
+
+## Пример 3
+
+Найдем двух пользователей -- с самым длинным именем, и самого старшего. 
+
+В качестве начального значения аккумулятора можно взять любого пользователя, кто уже есть в списке. Удобно взять первого.
+
+```
+$ iex lib/lesson_05/task_05_02_hof.exs
+iex(1)> alias Lesson_05.Task_05_02_HOF, as: HOF
+Lesson_05.Task_05_02_HOF
+iex(2)> users = HOF.test_data
+[
+  {:user, 1, "Bob", 23},
+  {:user, 2, "Helen", 20},
+  {:user, 3, "Bill", 15},
+  {:user, 4, "Kate", 14}
+]
+iex(3)> HOF.get_longest_name_user(users)
+{:user, 2, "Helen", 20}
+iex(4)> HOF.get_oldest_user(users)
+{:user, 1, "Bob", 23}
+```
+
+Впрочем, в модуле Enum есть функция reduce от двух аргументов, которая так и работает -- в качестве начального значения аккумулятора берет первый элемент списка. Исправим код, и поведение не изменится:
+
+```
+iex(13)> r HOF
+iex(14)> HOF.get_oldest_user(users)
+{:user, 1, "Bob", 23}
+```
+
