@@ -3,6 +3,7 @@
 Конструкторы списков (lists comprehension) -- еще один высокоуровневый способ работы с коллекциями.
 
 Они позволяют делать многое из того, что делается рассмотренными раньше функциями map и filter, но в более лаконичном синтаксисе.
+Comprehensions generally provide a much more concise representation than using the equivalent functions from the Enum and Stream modules.
 
 Пример map:
 ```
@@ -29,8 +30,23 @@ iex(16)> for {:user, _id, name, age} <- users, age > 16, do: name
 ["Bob", "Helen"]
 ```
 
-TODO теория, синтаксис
-https://elixir-lang.org/getting-started/comprehensions.html
+The idea of a comprehension is fairly simple: 
+given one or more collections,
+extract all combinations of values from each, 
+optionally filter the values, 
+and then generate a new collection using the values that remain.
+
+The general syntax for comprehensions is deceptively simple:
+```
+result = for generator or filter... [ , into: value ] , do: expression
+```
+
+In the expression above, n <- [1, 2, 3, 4] is the generator. It is literally generating values to be used in the comprehension. Any enumerable can be passed on the right-hand side of the generator expression.
+
+Generator expressions also support pattern matching on their left-hand side; all non-matching patterns are ignored. (TODO example)
+
+Alternatively to pattern matching, filters can be used to select some particular elements.
+Comprehensions discard all elements for which the filter expression returns false or nil; all other values are selected.
 
 The general syntax for comprehensions is deceptively simple:
 result = for generator or filter... [ , into: value ] , do: expression

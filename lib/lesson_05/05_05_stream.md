@@ -1,5 +1,7 @@
 # Модуль Stream
 
+https://hexdocs.pm/elixir/Stream.html
+
 Delay the Function Call
 Sometimes you want to give developers the flexibility to decide when a function
 will be evaluated, by building a new function using the existing one. 
@@ -37,6 +39,17 @@ TODO пример Enum.map |> Enum.map |> Enum.filter -- несколько пр
 
 to make iteration happen последний в pipeline должен быть Enum
 to_list, take
+
+Before calling Enum.to_list the result is:
+```
+#Stream<[
+enum: [1, 2, 3, 4], 
+funs: [
+  #Function<26.133702391 in Stream.filter/2>,
+  #Function<32.133702391 in Stream.map/2>,
+  #Function<32.133702391 in Stream.map/2>
+] ]>
+```
 
 consuming slow and potentially large input
 особенно из внешнего мира -- файл или сокет

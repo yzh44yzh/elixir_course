@@ -42,6 +42,7 @@
 протокол
 
 ## Урок №7. Обработка ошибок.
+try..rescue, try..catch
 
 ## Урок №8. Способы композиции функций.
 https://github.com/yzh44yzh/erl_fun_composition
@@ -55,6 +56,7 @@ https://github.com/yzh44yzh/erl_fun_composition
 Registry
 
 ## Урок №11. Supervisor, Application.
+
 
 ## Урок №12. Erlang Term Storage.
 
