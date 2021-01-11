@@ -3,7 +3,6 @@
 Конструкторы списков (lists comprehension) -- еще один высокоуровневый способ работы с коллекциями.
 
 Они позволяют делать многое из того, что делается рассмотренными раньше функциями map и filter, но в более лаконичном синтаксисе.
-Comprehensions generally provide a much more concise representation than using the equivalent functions from the Enum and Stream modules.
 
 Пример map:
 ```
@@ -30,36 +29,7 @@ iex(16)> for {:user, _id, name, age} <- users, age > 16, do: name
 ["Bob", "Helen"]
 ```
 
-The idea of a comprehension is fairly simple: 
-given one or more collections,
-extract all combinations of values from each, 
-optionally filter the values, 
-and then generate a new collection using the values that remain.
-
-The general syntax for comprehensions is deceptively simple:
-```
-result = for generator or filter... [ , into: value ] , do: expression
-```
-
-In the expression above, n <- [1, 2, 3, 4] is the generator. It is literally generating values to be used in the comprehension. Any enumerable can be passed on the right-hand side of the generator expression.
-
-Generator expressions also support pattern matching on their left-hand side; all non-matching patterns are ignored. (TODO example)
-
-Alternatively to pattern matching, filters can be used to select some particular elements.
-Comprehensions discard all elements for which the filter expression returns false or nil; all other values are selected.
-
-The general syntax for comprehensions is deceptively simple:
-result = for generator or filter... [ , into: value ] , do: expression
-
-A generator specifies how you want to extract values from a collection.
-pattern <- enumerable_thing
-
-A filter is a predicate. It acts as a gatekeeper for the rest of the comprehen-
-sion—if the condition is false, then the comprehension moves on to the next
-iteration without generating an output value.
-
 Конструкторы списков позволяют обрабатывать несколько списков одновременно:
-
 ```
 iex(21)> for x <- list1, y <- list2, z <- list3, do: {x, y, z}
 [
@@ -69,11 +39,9 @@ iex(21)> for x <- list1, y <- list2, z <- list3, do: {x, y, z}
 ]
 
 ```
-
 Как видно, элементы списков соединяются "каждый с каждым".
 
 Ну и, конечно, все эти списки можно фильтровать:
-
 ```
 iex(22)> for x <- list1, y <- list2, z <- list3, x > 2, y != :b, do: {x, y, z}
 [
@@ -88,9 +56,47 @@ iex(22)> for x <- list1, y <- list2, z <- list3, x > 2, y != :b, do: {x, y, z}
 ]
 ```
 
-TODO таблица умножения
-for x <- 1..9, y <- 1..9, do: {x, y, x * y}
+## Синтаксис
 
+Синтаксис конструкторов списков не очень сложный, но с ним нужно разобраться.
+```
+result = for generator, generator, filter, filter, ... [, into: value ], do: expression
+```
+
+Генератор имеет вид:
+```
+pattern <- collection
+```
+Коллекция может быть любой структурой данных, реализующей протокол Enumerable. Каждый элемент коллекции сопоставляется с шаблоном, и если не происходит совпадения, то этот элемент отбрасывается.
+
+```
+iex(15)> animals = [{:cat, "Cat A"}, {:dog, "Dog B"}, {:cat, "Cat C"}, {:dog, "Dog E"}]
+[cat: "Cat A", dog: "Dog B", cat: "Cat C", dog: "Dog E"]
+iex(16)> for {:cat, name} <- animals, do: name 
+["Cat A", "Cat C"]
+```
+
+Фильтр представляет собой функцию-предикат. Она принимает текущий элемент и возвращает булевое значение. Фильтры мы уже видели выше.
+
+into позволяет добавить результ генератора списка в существующую коллецию. Это может быть полезно, например, для map:
+```
+iex(18)> data = %{a: 1, b: 2}
+%{a: 1, b: 2}
+iex(19)> for {k,v} <- [{:c, 3}, {:d, 4}, {:cat, "Cat A"}, :boom], into: data, do: {k,v}
+%{a: 1, b: 2, c: 3, cat: "Cat A", d: 4}
+```
+
+И последний элемент синтаксиса, блок do, определяет, как нужно преобразовать промежуточные элементы в конечный результат. 
+
+Для примера выведем таблицу умножения:
+```
+iex(23)> for x <- 1..5, y <- 1..5, do: "#{x} * #{y} = #{x * y}"
+["1 * 1 = 1", "1 * 2 = 2", "1 * 3 = 3", "1 * 4 = 4", "1 * 5 = 5", "2 * 1 = 2",
+ "2 * 2 = 4", "2 * 3 = 6", "2 * 4 = 8", "2 * 5 = 10", "3 * 1 = 3", "3 * 2 = 6",
+ "3 * 3 = 9", "3 * 4 = 12", "3 * 5 = 15", "4 * 1 = 4", "4 * 2 = 8",
+ "4 * 3 = 12", "4 * 4 = 16", "4 * 5 = 20", "5 * 1 = 5", "5 * 2 = 10",
+ "5 * 3 = 15", "5 * 4 = 20", "5 * 5 = 25"]
+```
 
 ## Пифагоровы тройки
 
