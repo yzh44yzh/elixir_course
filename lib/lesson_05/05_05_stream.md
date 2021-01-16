@@ -1,139 +1,165 @@
 # Модуль Stream
 
-https://hexdocs.pm/elixir/Stream.html
+## Ленивые вычисления
 
-Delay the Function Call
-Sometimes you want to give developers the flexibility to decide when a function
-will be evaluated, by building a new function using the existing one. 
+Начать стоит с самой идеи ленивых вычислений. Идея простая -- у нас есть некие вычисления (некая функция), которые мы хотим сделать не прямо сейчас, а когда-нибудь потом, когда понадобится. Почему мы можем захотеть так сделать, увидим ниже на примерах.
 
-Other func-
-tional languages have currying, which is a feature that delays a function’s evalu-
-ation when you pass fewer arguments than the function requires. Elixir has partial
-application, a feature you can use to postpone a function’s execution by wrapping
-it in a new function and fixing a value to any of the function’s arguments.
+Язык Хаскель возводит эту идею в абсолют, в нем по-умолчанию все вычисления ленивые. Но большинство языков предпочитают энергичные вычисления. (Энергичное -- противоположность ленивому вычислению, код выполняется сразу).
+
+На базовом уровне это реализуется просто -- создаем функцию, сохраняем ее в переменную, вызываем позже. Сложность появляется, когда мы хотим комбинировать такие функции вместе, и позже выполнять всю комбинацию целиком. Это и делает модуль [Stream](https://hexdocs.pm/elixir/Stream.html).
+
+Здесь мы увидим такой же набор функций, как в модуле Enum: map, filter, reduce и др. Но давайте посмотрим, в чем отличие.
+
+Возьмем некую коллекцию и прогоним ее через цепочку функций:
+```
+iex(3)> [1,2,3,4,5] |>
+...(3)> Enum.map(&(&1 * &1)) |>
+...(3)> Enum.zip([:a, :b, :c, :d, :e]) |>
+...(3)> Enum.filter(fn({n, a}) -> n > 5 and a != :c end)
+[{16, :d}, {25, :e}]
+```
+
+В цепочке 3 функции, и мы прошли по всему списку 3 раза. После каждой функции мы получаем промежуточные данные -- новый список, и подаем его в следущую функцию. В сравнении с обычным циклом в императивном языке, мы расходуем в 3 раз больше CPU, и в 3 раза больше памяти. 
+
+Теперь сделаем тоже самое с модулем Stream:
+```
+[1,2,3,4,5] |>
+Stream.map(&(&1 * &1)) |>
+Stream.zip([:a, :b, :c, :d, :e]) |>
+Stream.filter(fn({n, a}) -> n > 5 and a != :c end) |>
+Enum.to_list
+```
+
+Результат получился тот же. Обратите внимание, что в конце цепочки мы добавили Enum.to_list. Этот вызов является энергичным вычислением, и именно он запускает всю цепочку. Без него результат будет таким:
+```
+iex(5)> [1,2,3,4,5] |>
+...(5)> Stream.map(&(&1 * &1)) |>
+...(5)> Stream.zip([:a, :b, :c, :d, :e]) |>
+...(5)> Stream.filter(fn({n, a}) -> n > 5 and a != :c end)
+#Stream<[
+  enum: #Function<67.104660160/2 in Stream.zip/1>,
+  funs: [#Function<39.104660160/1 in Stream.filter/2>]
+]>
+```
+
+Это некая структура данных, хранящее ленивое вычисление, которое пока еще не запустилось.
 
 ```
-iex> Enum.map(1..10_000_000, &(&1+1)) |> Enum.take(5)
+iex(9)> lazy_computation = [1,2,3,4,5] |>
+...(9)> Stream.map(&(&1 * &1)) |>
+...(9)> Stream.zip([:a, :b, :c, :d, :e]) |>
+...(9)> Stream.filter(fn({n, a}) -> n > 5 and a != :c end)
+#Stream<[
+  enum: #Function<67.104660160/2 in Stream.zip/1>,
+  funs: [#Function<39.104660160/1 in Stream.filter/2>]
+]>
+iex(10)> Enum.to_list(lazy_computation)
+[{16, :d}, {25, :e}]
+```
+
+Здесь мы составили композицию из ленивых функций, сохранили ее в переменную, а позже запустили вычисление через вызов энергичной функции.
+
+Первая выгода, которую мы получили -- проход по списку выполняется только один раз. И здесь нет промежуточных результатов вычислений, на хранение которых нужно расходовать память. То есть, это сравнимо по эффективности с циклом в императивном языке.
+
+Но это не единственная выгода.
+
+
+## Большие коллекции
+
+Если мы создадим список из 10 миллионов элементов, то такой список займет много памяти и будет долго обрабатываться. Даже если нам нужны не все эти элементы, а лишь небольшая их часть:
+
+```
+iex(14)> Enum.map(1..10_000_000, &(&1+1)) |> Enum.take(5)
 [2, 3, 4, 5, 6]
 ```
-it takes about 8 seconds before I see the result. Elixir is creating a 10-million-
-element list, then taking the first five elements from it. If instead I write
+
+Нам нужны только первые 5 элементов, но вычисление заняло несколько секунд.
+
 ```
 iex> Stream.map(1..10_000_000, &(&1+1)) |> Enum.take(5)
 [2, 3, 4, 5, 6]
 ```
-the result comes back instantaneously. The take call just needs five values,
-which it gets from the stream. Once it has them, there’s no more processing.
+С модулем Stream такой же код выполняется мгновенно, потому что Stream не создает и не обрабатывает всю коллекцию, а только ту её часть, которая нужна для получения результата.
 
+Более практичный пример -- чтение данных из внешнего мира, из файла или по сети через сокет. В случае с файлом данных может быть очень много, десятки гигабайт. В случае с сокетом размер данных вообще не известен, сокет может быть открыт неделями и месяцами, и все это время получать данные.
 
-TODO пример Enum.map |> Enum.map |> Enum.filter -- несколько проходов по списку.
-То же самое со Stream -- один проход.
-
+Возьмем пример с чтением из файла. Допустим, у нас есть некий словарь, хранящий термины и аббревиатуры в таком виде:
 ```
-[1,2,3,4]
-|> Stream.map(&(&1*&1))
-|> Stream.map(&(&1+1))
-|> Stream.filter(fn x -> rem(x,2) == 1 end)
-|> Enum.to_list
+$ cat lib/lesson_05/dictionary.txt 
+ISO 8601: Date and time format
+MIT: Massachusetts Institute of Technology
+OpenGL: Open Graphics Library
+OSF: Open Software Foundation
+SASL: Simple Authentication and Security Layer
+TLS: Transport Layer Security
+UUID: universally unique identifier
 ```
+И, допустим, этот файл имеет размер 15 Гб.
 
-to make iteration happen последний в pipeline должен быть Enum
-to_list, take
-
-Before calling Enum.to_list the result is:
+Мы хотим найти в нем самый длинный термин:
 ```
-#Stream<[
-enum: [1, 2, 3, 4], 
-funs: [
-  #Function<26.133702391 in Stream.filter/2>,
-  #Function<32.133702391 in Stream.map/2>,
-  #Function<32.133702391 in Stream.map/2>
-] ]>
+File.read!("lib/lesson_05/dictionary.txt") |> 
+String.split("\n") |> 
+Enum.map(fn(line) -> String.split(line, ":") end) |> 
+Enum.map(fn([term, _definition]) -> String.length(term) end) |>
+Enum.max 
 ```
+В этой реализации мы загружаем в память весь файл, 15 Гб, и 4 раза выполняем проход по словарю.
 
-consuming slow and potentially large input
-особенно из внешнего мира -- файл или сокет
-File.stream! позволяет не загружать сразу весь файл в память, а читать его построчно.
-
+Воспользуемся Stream:
 ```
-IO.puts File.read!("/usr/share/dict/words")
-|> String.split
-|> Enum.max_by(&String.length/1)
+File.stream!("lib/lesson_05/dictionary.txt") |>
+Stream.map(fn(line) -> String.split(line, ":") end) |> 
+Stream.map(fn([term, _definition]) -> String.length(term) end) |>
+Enum.max 
 ```
-In this case, we read the whole dictionary into memory (on my machine that’s
-2.4MB), then split it into a list of words (236,000 of them) before processing
-it to find the longest (which happens to be formaldehydesulphoxylate).
+Функция File.stream! возвращает ленивую коллекцию, отдающие данные из файла построчно. В этом случае мы загружаем данные в память небольшими порциями, и выполняем только один проход по нему. Последний вызов в цепочке должен активировать вычисления, поэтому там Enum а не Stream.
 
+Этот код не обязательно будет быстрее, т.к. мы много раз читаем данные с диска, но он точно расходуем меньше оперативной памяти. 
+
+
+## Бесконечные коллекции
+
+Коллекции бывают не просто большие, они бывают бесконечные. В модуле Stream есть 5 функций, которые генерируют такие коллекции: **cycle**, **repeatedly**, **iterate**, **unfold**, and **resource**. Рассмотрим две из них.
+
+**Stream.cycle** принимает на вход коллекцию и генерирует бесконечную коллецию, состоящую из повторения элементов исходной:
 ```
-IO.puts File.open!("/usr/share/dict/words")
-|> IO.stream(:line)
-|> Enum.max_by(&String.length/1)
-```
-The magic here is the call to IO.stream , which converts an IO device (in this
-case the open file) into a stream that serves one line at a time. In fact, this is
-such a useful concept that there’s a shortcut:
-```
-IO.puts File.stream!("/usr/share/dict/words") |> Enum.max_by(&String.length/1)
-```
-The good news is that there is no intermediate storage. 
-The bad news is that it runs about two times slower than the previous version.
-
-TODO Упражнения:
-- длина каждой строки в файле
-- самая длинная строка в файле
-- количество слов в каждой строке файла, и во всем файле суммарно. 
-
-
-## Устройство
-
-Stream основаны на функциях, которые возвращают функции.
-TODO какой-нибудь упрощенный пример, как устроены Stream.
-
-
-## Infinite Streams
-
-cycle, repeatedly, iterate, unfold, and resource.
-
-Stream.cycle takes an enumerable and returns an infinite stream containing
-that enumerable’s elements. When it gets to the end, it repeats from the
-beginning, indefinitely. Here’s an example that generates the rows in an HTML
-table with alternating green and white classes:
-```
-iex> Stream.cycle(~w{ green white }) |>
-...> Stream.zip(1..5) |>
-...> Enum.map(fn {class, value} ->
-...>
-"<tr class='#{class}'><td>#{value}</td></tr>\n" end) |>
-...> IO.puts
-<tr class="green"><td>1</td></tr>
-<tr class="white"><td>2</td></tr>
-<tr class="green"><td>3</td></tr>
-<tr class="white"><td>4</td></tr>
-<tr class="green"><td>5</td></tr>
-:ok
+iex(9)> Stream.cycle([1,2,3]) |> Enum.take(20)
+[1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2]
 ```
 
+Это можно использовать, например, для генерации html таблицы с чередующимся фоновым цветом для строк:
+```
+data = ["row 1", "row 2", "row 3", "row 4", "row 5"]
+Stream.cycle(["white", "grey"]) |>
+Stream.zip(data) |>
+Enum.map(
+fn {bg_color, row_data} -> "<tr class='#{bg_color}'><td>#{row_data}</td></tr>\n" end) |>
+IO.puts
 
-Stream.unfold
-звучит как противоположность fold (reduce) -- берем одиночное зрачение, и разворачиваем его в список.
+<tr class='white'><td>row 1</td></tr>
+<tr class='grey'><td>row 2</td></tr>
+<tr class='white'><td>row 3</td></tr>
+<tr class='grey'><td>row 4</td></tr>
+<tr class='white'><td>row 5</td></tr>
+```
 
-You supply an initial value and
-a function. The function uses the argument to create two values, returned as
-a tuple. The first is the value to be returned by this iteration of the stream,
-and the second is the value to be passed to the function on the next iteration
-of the stream. If the function returns nil , the stream terminates.
+**Stream.unfold** можно рассматривать как функцию, противоположную fold (reduce). Если fold сворачивает список в одиночное значение, то unfold разворачивает список из одиночного значения. Она принимает на вход начальное состояние и разворачивающую функцию. Разворачивающая функция принимает на вход текущее состояние, и возвращает кортеж из двух значений. Первый элемент кортежа, это то, что становится очередным элементом списка. Второй элемент кортежа, это новое состояние, которое передается в разворачивающую функцию на следущем шаге.
 
-it is a general way of creating
-a potentially infinite stream of values where each value is some function of
-the previous state.
-
-The key is the generating function. Its general form is
+```
 fn state -> { stream_value, new_state } end
+```
 
-For example, here’s a stream of Fibonacci numbers:
-iex> Stream.unfold({0,1}, fn {f1,f2} -> {f1, {f2, f1+f2}} end) |> Enum.take(15)
+Давайте рассмотрим на примере. Вот так можно сгенерировать бесконечную последовательность чисел Фибоначчи:
+```
+initial_state = {0,1}
+unfolder = fn({val1, val2}) -> 
+  curr_val = val1
+  new_state = {val2, val1 + val2}
+  {curr_val, new_state}
+end
+Stream.unfold(initial_state, unfolder) |> Enum.take(15)
 [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377]
+```
 
-
-TODO
-Stream.resource -- можно взять как домашнее задание.
+Как всегда, нам нужна энергичная функция (Enum.take), чтобы запустить вычисления. И мы не можем увидеть бесконечную коллекцию как таковую, а может только взять какую-то ее часть.

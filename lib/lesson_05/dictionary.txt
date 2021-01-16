@@ -1,0 +1,8 @@
+ISO 8601: Date and time format
+MIT: Massachusetts Institute of Technology
+OpenGL: Open Graphics Library
+OSF: Open Software Foundation
+SASL: Simple Authentication and Security Layer
+TLS: Transport Layer Security
+UUID: universally unique identifier
+Xerox PARC: Xerox Palo Alto Research Center
