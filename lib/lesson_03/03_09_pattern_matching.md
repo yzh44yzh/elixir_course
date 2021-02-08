@@ -24,6 +24,20 @@ TODO sketch
 - извлечения значений из сложных структур данных;
 - условных переходов.
 
+https://hexdocs.pm/elixir/patterns-and-guards.html#content
+
+Patterns in Elixir are made of variables, literals, and data-structure specific syntax. One of the most used constructs to perform pattern matching is the match operator (=).
+
+patterns are allowed only on the left side of =. The right side of = follows the regular evaluation semantics of the language.
+
+If the same variable appears twice in the same pattern, then they must be bound to the same value.
+
+The underscore variable (_) has a special meaning as it can never be bound to any value. It is especially useful when you don't care about certain value in a pattern.
+
+numbers in patterns perform strict comparison. In other words, integers to do not match floats.
+
+Note that the empty map will match all maps, which is a contrast to tuples and lists, where an empty tuple or an empty list will only match empty tuples and empty lists respectively.
+
 
 ### Присвоение значений переменным
 
@@ -79,6 +93,8 @@ Elixir calls the = symbol the **match operator**.
 6> {cat, Name, TailLength} = User.
 ** exception error: no match of right hand side value {user,"Bob",25}
 ```
+
+When the sides do not match, a MatchError is raised.
 
 Шаблон может также содержать анонимные переменные (обозначаются
 символом подчеркивания), которые совпадают с любым значением.
@@ -141,6 +157,18 @@ iex> a = 1
 iex> [^a, 2, 3 ] = [ 1, 2, 3 ]
 # use existing value of a
 [1, 2, 3]
+```
+
+```
+iex> x = 1
+1
+iex> x = 2
+2
+
+iex> x = 1
+1
+iex> ^x = 2
+** (MatchError) no match of right hand side value: 2
 ```
 
 Elixir’s pattern matching is similar to Erlang’s 
@@ -263,6 +291,22 @@ end.
 
 ## guards
 
+Guards are a way to augment pattern matching with more complex checks. They are allowed in a predefined set of constructs where pattern matching is allowed, such as function definitions, case clauses, and others.
+
+Not all expressions are allowed in guard clauses, but only a handful of them. This is a deliberate choice. This way, Elixir (and Erlang) can make sure that nothing bad happens while executing guards and no mutations happen anywhere. It also allows the compiler to optimize the code related to guards efficiently.
+
+https://hexdocs.pm/elixir/patterns-and-guards.html#list-of-allowed-functions-and-operators
+
+Macros constructed out of any combination of the above guards are also valid guards - for example, Integer.is_even/1. 
+
+Guards start with the when operator, followed by a guard expression. The clause will be executed if and only if the guard expression returns true. Multiple boolean conditions can be combined with the and and or operators.
+
+A function clause will be executed if and only if its guard expression evaluates to true. If any other value is returned, the function clause will be skipped. In particular, guards have no concept of "truthy" or "falsey".
+
+In guards, when functions would normally raise exceptions, they cause the guard to fail instead.
+that if any function call in a guard raises an exception, the entire guard fails. 
+
+
 **guard** переводится как "охранное выражение".
 
 Гарды используются там, где сопоставление с образцом применяется для
@@ -325,3 +369,5 @@ check_user({user, _, Gender, Age})
 Если при вычислении выражения в гарде возникает исключение, то
 оно не распространяется дальше, а просто гард не срабатывает
 (данная ветка кода не выполняется).
+
+Keep in mind errors in guards do not leak but simply make the guard fail

@@ -83,63 +83,11 @@ end
 
 The if expression returns the result of the executed block. If the condition isn't met and the else clause isn't specified, the return value is the atom nil.
 
-
-## cond
-
-```
-cond do
-  rem(current, 3) == 0 and rem(current, 5) == 0 ->
-    "FizzBuzz"
-  rem(current, 3) == 0 ->
-    "Fizz"
-  rem(current, 5) == 0 ->
-    "Buzz"
-  true ->
-    current
-end
-```
-
-
-Конструкция **if** представляет собой упрощенный **case** без выражения и
-без шаблонов, а ветки представлены только гардами.
-
-```
-if
-    GuardSeq1 ->
-        Body1;
-    ...;
-    GuardSeqN ->
-        BodyN
-end
-```
-
-Здесь, как и с case, если ни один гард не сработал, генерируется
-исключение.  Довольно часто бывает, что последним гардом ставят true,
-и он срабатывает всегда.
-
-```
-valid_char(Char) ->
-    IsDigit = is_digit(Char),
-    IsAlpha = is_alpha(Char),
-    if
-        IsDigit -> true;
-        IsAlpha -> true;
-        true -> false
-    end.
-```
-
-Еще в этом примере мы видим, как обойти ограничение на использование
-своих функций в гардах. Мы просто вызываем эти функции за пределами
-if, присваиваем результат в переменные, и уже переменные используем в
-гардах.
-
-Для case тоже можно делать последний шаблон, который обязательно
-совпадет с любым выражением (catch all pattern).  Но так делают реже,
-чем в случае с if. А почему, мы выясним на одном из следующих уроков,
-когда будем изучать обработку ошибок и принцип **Let It Crash**.
-
+ An interesting note regarding if/2 and unless/2 is that they are implemented as macros in the language; they aren’t special language constructs as they would be in many languages.
 
 ## case
+
+case allows us to compare a value against many patterns until we find a matching one
 
 ```
 case File.open("case.ex") do
@@ -197,3 +145,67 @@ close_room(UserId, RoomId) ->
 что может оказаться не определена.  Правильный вариант -- не
 использовать переменную за пределами ветки case, в которой она
 объявлена, либо объявить во всех ветках.
+
+
+
+## cond
+
+case is useful when you need to match against different values. However, in many circumstances, we want to check different conditions and find the first one that does not evaluate to nil or false.
+
+This is equivalent to else if clauses in many imperative languages (although used much less frequently here).
+
+```
+cond do
+  rem(current, 3) == 0 and rem(current, 5) == 0 ->
+    "FizzBuzz"
+  rem(current, 3) == 0 ->
+    "Fizz"
+  rem(current, 5) == 0 ->
+    "Buzz"
+  true ->
+    current
+end
+```
+
+
+Конструкция **if** представляет собой упрощенный **case** без выражения и
+без шаблонов, а ветки представлены только гардами.
+
+```
+if
+    GuardSeq1 ->
+        Body1;
+    ...;
+    GuardSeqN ->
+        BodyN
+end
+```
+
+Здесь, как и с case, если ни один гард не сработал, генерируется
+исключение.  Довольно часто бывает, что последним гардом ставят true,
+и он срабатывает всегда.
+
+If all of the conditions return nil or false, an error (CondClauseError) is raised. For this reason, it may be necessary to add a final condition, equal to true, which will always match.
+
+Finally, note cond considers any value besides nil and false to be true
+
+```
+valid_char(Char) ->
+    IsDigit = is_digit(Char),
+    IsAlpha = is_alpha(Char),
+    if
+        IsDigit -> true;
+        IsAlpha -> true;
+        true -> false
+    end.
+```
+
+Еще в этом примере мы видим, как обойти ограничение на использование
+своих функций в гардах. Мы просто вызываем эти функции за пределами
+if, присваиваем результат в переменные, и уже переменные используем в
+гардах.
+
+Для case тоже можно делать последний шаблон, который обязательно
+совпадет с любым выражением (catch all pattern).  Но так делают реже,
+чем в случае с if. А почему, мы выясним на одном из следующих уроков,
+когда будем изучать обработку ошибок и принцип **Let It Crash**.
