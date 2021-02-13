@@ -1,9 +1,112 @@
-# Pattern Matching
+# Сопоставление с образцом (Pattern Matching)
 
-TODO sketch
+Одна из главных особенностей функционального программирования -- сопоставление с образцом. Применяется очень широко, так что вряд ли можно найти такую программу на функциональном языке, где нет pattern matching.
 
-Образ: розетка и вилка. Для case -- несколько разных розеток и одна вилка.
-Найти картинки/фотки в инете, как выглядят разные реальные розетки и вилки, нарисовать.
+Сопоставление с образцом используется для:
+- присвоения значений переменным;
+- извлечения значений из сложных структур данных;
+- условных переходов.
+
+Рассмотрим все эти случаи на примерах.
+
+
+## Присвоение значений переменным
+
+```
+iex(1)> a = 123
+123
+iex(2)> a
+123
+```
+
+Эта элементарная конструкция, которая выглядит как присваивание значения переменной, на самом деле не является присваиванием. Присваивания в Эликсире нет, а оператор **=** называеся оператор сопоставления (match operator).
+
+В данном коде значение справа -- **123**, сопоставляется с шаблоном слева -- переменной **a**. И поскольку шаблон соответствует значению, то сопоставление происходит успешно, и переменная **а** связывается со значением.
+
+Однако, это тривиальный случай. Чтобы понять PM нужно рассмотреть более сложные случаи.
+
+
+## Извлечение значений из сложных структур данных
+
+```
+iex(3)> user = {:user, "Bob", 25}
+{:user, "Bob", 25}
+iex(4)> {:user, name, age} = user
+{:user, "Bob", 25}
+iex(5)> name
+"Bob"
+iex(6)> age
+25
+```
+
+Первая строка опять выглядит как присваивание. Только значение более сложноее -- кортеж их трех элементов. А вот вторая строка уже интереснее. 
+
+Слева от оператора **=** шаблон, который ограничивает множество значений. Этот шаблон может совпасть только с такими значениями, которые являются кортежами из трех элементов, первым элементом обязательно должен быть атом **:user**, а второй и третий элемент могут быть любыми. 
+
+Справа от оператора **=** находится значение, которое мы сравниваем с шаблоном. В данном случае значение извлекается из переменной **user**, но оно может быть и результатом вызова функции или литералом.
+
+Сопоставление проходит успешно, и в результате переменные шаблона **name** и **age** получают значения **"Bob"** и **25**.
+
+В случае, если значение не совпадает с шаблоном, возникает исключение:
+```
+iex(7)> {:user, name, age} = {:dog, "Sharik", 5}
+** (MatchError) no match of right hand side value: {:dog, "Sharik", 5}
+
+iex(7)> {:user, name, age} = {:user, "Bob", 25, :developer}
+** (MatchError) no match of right hand side value: {:user, "Bob", 25, :developer}
+```
+
+Первое значение не совпало, потому что :dog != :user. Второе значение не совпало, потому что в кортеже 4 элемента, а не 3.
+
+И значение, и шаблон могут быть сложными структурами с любой глубиной вложенности:
+```
+
+users = [
+{:user, "Bob", :developer, {:lang, ["Erlang", "Elixir"]}},
+{:user, "Bill", :developer, {:lang, ["Python", "JavaScript"]}}
+]
+
+[{:user, _, _, _}, {:user, name, _, {:lang, [lang1, lang2]}}] = users
+[
+  {:user, "Bob", :developer, {:lang, ["Erlang", "Elixir"]}},
+  {:user, "Bill", :developer, {:lang, ["Python", "JavaScript"]}}
+]
+iex(14)> name
+"Bill"
+iex(15)> lang1
+"Python"
+iex(16)> lang2
+"JavaScript"
+```
+
+Здесь у нас список из двух элементов. Каждый элемент является кортежем из 4х элементов. 4-й элемент кортежа, это вложенный кортеж. И в нем еще один вложенный список. Наш шаблон повторяет всю эту структуру и извлекает значения из 4-го уровня вложенности.
+
+Обратите внимания на символ подчеркивания. Он совпадает с любым значением, и применяется, когда это значение не нужно, мы не хотим сохранять его в переменную.
+
+Если переменная встречается два раза, то значения в этих местах должны быть одинаковыми: 
+```
+iex(20)> {a, a, 42} = {10, 10, 42}
+{10, 10, 42}
+iex(21)> {a, a, 42} = {20, 20, 42}
+{20, 20, 42}
+iex(22)> {a, a, 42} = {10, 20, 42}
+** (MatchError) no match of right hand side value: {10, 20, 42}
+```
+
+Но это не касается символа подчеркивания:
+```
+iex(22)> {_, _, 42} = {10, 10, 42}
+{10, 10, 42}
+iex(23)> {_, _, 42} = {20, 20, 42}
+{20, 20, 42}
+iex(24)> {_, _, 42} = {10, 20, 42}
+{10, 20, 42}
+```
+
+
+## Как устроен Pattern Matching
+
+TODO stopped here
 
 [pattern] = [value]
 Слева:
@@ -15,139 +118,9 @@ TODO sketch
 литералы
 связанные переменные
 
-Обе части могут быть сложной структурой любой вложенности.
-
-====================
-
-Итак, сопоставление с образцом используется для:
-- присвоения значений переменным;
-- извлечения значений из сложных структур данных;
-- условных переходов.
-
-https://hexdocs.pm/elixir/patterns-and-guards.html#content
-
-Patterns in Elixir are made of variables, literals, and data-structure specific syntax. One of the most used constructs to perform pattern matching is the match operator (=).
-
-patterns are allowed only on the left side of =. The right side of = follows the regular evaluation semantics of the language.
-
-If the same variable appears twice in the same pattern, then they must be bound to the same value.
-
-The underscore variable (_) has a special meaning as it can never be bound to any value. It is especially useful when you don't care about certain value in a pattern.
-
 numbers in patterns perform strict comparison. In other words, integers to do not match floats.
 
 Note that the empty map will match all maps, which is a contrast to tuples and lists, where an empty tuple or an empty list will only match empty tuples and empty lists respectively.
-
-
-### Присвоение значений переменным
-
-```
-1> A = 123.
-123
-```
-
-Даже эта элементарная конструкция, которая выглядит как оператор
-присваивания, на самом деле является сопоставлением с образцом. А
-оператора присваивания в эрланг нет вообще.
-
-Переменные в эрланг могут быть несвязанные (unbound) и связанные
-(bound).  Несвязанная переменная объявлена, но еще не получила никакого
-значения.  Связанная переменная уже получила значение, и теперь не
-может его изменить.
-
-В данном коде несвязанная переменная **А**, с помощью сопоставления с
-образцом получает значение **123**, и становится связанной.
-
-The equals sign is not an assignment. Instead it’s like an assertion. 
-It succeeds if Elixir can find a way of making the left-hand side (pattern) equal the right-hand side (expression). 
-Elixir calls the = symbol the **match operator**. 
-
-
-### Извлечение значений из сложных структур данных
-
-```
-2> User = {user, "Bob", 25}.
-{user,"Bob",25}
-3> {user, Name, Age} = User.
-{user,"Bob",25}
-4> Name.
-"Bob"
-5> Age.
-25
-```
-
-Это мы уже делали на предыдущих уроках, сейчас разберем подробнее, что
-здесь происходит.  Слева от знака **=** находится шаблон (pattern),
-справа значение, которое мы пытаемся сопоставить с шаблоном.
-
-Шаблон может быть любой структурой данных и может содержать
-несвязанные и связанные переменные.  Значение справа может быть любой
-структурой данных, но может содержать только связанные переменные.
-
-Сопоставление может пройти успешно, и тогда несвязанные переменные в
-шаблоне (если они есть), получат свои значения. Или сопоставление
-может не пройти, и тогда генерируется исключение -- ошибка времени
-выполнения.
-
-```
-6> {cat, Name, TailLength} = User.
-** exception error: no match of right hand side value {user,"Bob",25}
-```
-
-When the sides do not match, a MatchError is raised.
-
-Шаблон может также содержать анонимные переменные (обозначаются
-символом подчеркивания), которые совпадают с любым значением.
-
-```
-8> {_, Name, _} = User.
-{user,"Bob",25}
-9> Name.
-"Bob"
-```
-
-Но их нужно отличать от именованных переменных, чьи имена начинаются
-с символа подчеркивания:
-
-```
-10> {_Some, Name, _Some} = User.
-** exception error: no match of right hand side value {user,"Bob",25}
-```
-
-Здесь первое и третье значения кортежа должны быть одинаковыми, чтобы
-шаблон совпал.  Но в значении **User** они разные, поэтому получаем исключение.
-
-Понятие связанной и не связанной переменной. Bound / Unbound.
-Есть ли в Эликсир такая терминология? Тут мешается повторное присваивание и pin operator.
-Даже если в Эликсире нет такой терминологии, она есть в ФП, так что надо вводить.
-
-```
-list = [ 1, 2, 3 ]
-[a, b, c ] = list
-iex> a
-1
-```
-
-A pattern (the left side) is matched if the values (the right side) have the same structure 
-and if each term in the pattern can be matched to the corresponding term in the values. 
-A literal value in the pattern matches that exact value, 
-and a variable in the pattern matches by taking on the corresponding value.
-
-Ignoring a Value with _ (anonymouse variable)
-it is like a wildcard saying, “I’ll accept any value here.”
-
-Variables Bind Once (per Match)
-```
-iex> [a, a] = [1, 1]
-[1, 1]
-iex> a
-1
-iex> [b, b] = [1, 2]
-** (MatchError) no match of right hand side value: [1, 2]
-```
-
-However, a variable can be bound to a new value in a subsequent match, 
-and its current value does not participate in the new match.
 
 pin operator
 Prefix variable with ^ (a caret)
@@ -159,23 +132,6 @@ iex> [^a, 2, 3 ] = [ 1, 2, 3 ]
 [1, 2, 3]
 ```
 
-```
-iex> x = 1
-1
-iex> x = 2
-2
-
-iex> x = 1
-1
-iex> ^x = 2
-** (MatchError) no match of right hand side value: 2
-```
-
-Elixir’s pattern matching is similar to Erlang’s 
-(the main difference being that Elixir allows a match to reassign to a variable that was assigned in a prior match, 
-whereas in Erlang a variable can be assigned only once).
-
-
 Joe Armstrong, Erlang’s creator, compares the equals sign in Erlang to that used in algebra. 
 When you write the equation x = a + 1, you are not assigning the value of a + 1 to x. 
 Instead you’re simply asserting that the expressions x and a + 1 have the same value. 
@@ -185,22 +141,14 @@ when you first came across assignment in imperative programming languages.
 Now’s the time to un-unlearn it.
 _это хорошо, это надо взять_
 
-patterns can be arbitrarily nested
-```
-[_, {name, _}, _] = [{"Bob", 25}, {"Alice", 30}, {"John", 35}]
-```
 
-What happens here:
-- The expression on the right side is evaluated
-- The resulting value is matched against the left-side pattern
-- If the match succeeds:
-  - Variables from pattern are bound
-  - The result of the match expression is the result of the rigth-side term
-- If the match fails:
-  - MatchError is raised
-  
+## Условные переходы
 
-### Условные переходы
+Сопоставление с образцом также используется для ветвлений в коде (условных переходов):
+- конструкция case
+- function clause
+- обработка исключений (resque, catch)
+- чтение сообщений из mailbox (receive) 
 
 ```
 6> case User of
@@ -210,9 +158,6 @@ What happens here:
 "this is user"
 ```
 
-Сопоставление с образцом также используется в клозах (clause) функций
-и в конструкциях **case**, **receive**, **try** для выбора ветки кода,
-которая будет выполняться. То есть, для условного перехода.
 
 Ниже мы рассмотрим все эти варианты. А сейчас один пример из реального
 проекта. Это игра, где несколько пользователей собираются за одним
@@ -239,135 +184,3 @@ is_user_owner_of_room(UserId, RoomId) ->
  - что владелец у нее именно UserId, а не кто-то другой.
 
 В императивном языке тут было бы две конструкции **if**.
-
-
-## clause
-
-Рассмотрим подробнее клозы функции.  Этот термин пишется **clause**,
-произносится **[klôz]** и означает одно из нескольких тел функции.
-
-Общепринятого перевода на русский язык нет, поэтому я буду писать без
-перевода -- **клоз**, потому что каждый раз писать "одно из нескольких
-тел функции", несколько утомительно :)
-
-Примеры мы видели, когда писали рекурсивные функции с аккумуляторами.
-Вообще клозов у функции может быть много:
-
-```
-area({rect, Width, Height}) -> Width * Height;
-area({square, Size}) -> Size * Size;
-area({circle, Radius}) -> math:pi() * Radius * Radius.
-```
-
-Очередность клозов важна, потому что шаблоны проверяются сверху вниз,
-и первое совпадение приводит к выполнению соответствующего клоза.
-Поэтому более специфичные шаблоны должны идти раньше, а более общие
-позже. Компилятор может предупредить о неправильной
-последовательности шаблонов, но не всегда.
-
-Вот неправильная последовательность шаблонов:
-
-```
-case List of
-    [] -> empty_list;
-    [Head | _] -> process(Head);
-    [{X, Y} | _] -> process(X, Y)
-end.
-```
-
-Шаблон **Head** более общий, чем **{X, Y}**, и третья вертка кода
-никогда не сработает, все перехватит вторая ветка.
-
-Вот правильная последовательность шаблонов:
-
-```
-case List of
-    [] -> empty_list;
-    [{X, Y} | _] -> process(X, Y);
-    [Head | _] -> process(Head)
-end.
-```
-
-
-## guards
-
-Guards are a way to augment pattern matching with more complex checks. They are allowed in a predefined set of constructs where pattern matching is allowed, such as function definitions, case clauses, and others.
-
-Not all expressions are allowed in guard clauses, but only a handful of them. This is a deliberate choice. This way, Elixir (and Erlang) can make sure that nothing bad happens while executing guards and no mutations happen anywhere. It also allows the compiler to optimize the code related to guards efficiently.
-
-https://hexdocs.pm/elixir/patterns-and-guards.html#list-of-allowed-functions-and-operators
-
-Macros constructed out of any combination of the above guards are also valid guards - for example, Integer.is_even/1. 
-
-Guards start with the when operator, followed by a guard expression. The clause will be executed if and only if the guard expression returns true. Multiple boolean conditions can be combined with the and and or operators.
-
-A function clause will be executed if and only if its guard expression evaluates to true. If any other value is returned, the function clause will be skipped. In particular, guards have no concept of "truthy" or "falsey".
-
-In guards, when functions would normally raise exceptions, they cause the guard to fail instead.
-that if any function call in a guard raises an exception, the entire guard fails. 
-
-
-**guard** переводится как "охранное выражение".
-
-Гарды используются там, где сопоставление с образцом применяется для
-условных переходов: то есть, в клозах функций, в case, try и receive
-конструкциях.  Они дополняют сопоставление с образцом, позволяя
-указать дополнительные условия.
-
-Гадром является последовательность выражений, разделенных запятой,
-каждое из которых вычисляется в булевое значение.
-
-```
-check_user({user, _, Gender, Age}) when Gender =:= female, Age < 14 -> girl;
-check_user({user, _, Gender, Age}) when Gender =:= female, Age >= 14, Age < 21 -> teenage_girl;
-check_user({user, _, Gender, Age}) when Gender =:= female, Age >= 21 -> woman;
-check_user({user, _, Gender, Age}) when Gender =:= male, Age < 14 -> boy;
-check_user({user, _, Gender, Age}) when Gender =:= male, Age >= 14, Age < 21 -> teenage_boy;
-check_user({user, _, Gender, Age}) when Gender =:= male, Age >= 21 -> man.
-```
-
-Гард срабатывает (разрешает выполнение данной ветки кода), если все
-выражения вычисляются в true.
-
-Гарды могут объединяться в последовательности, разделенные точкой с запятой:
-
-```
-check_user({user, _, Gender, Age})
-  when Gender =:= female, Age < 14;
-       Gender =:= male, Age < 14
-       -> child;
-check_user({user, _, Gender, Age})
-  when Gender =:= female, Age >= 21;
-       Gender =:= male, Age >= 21
-       -> adult.
-```
-
-Последовательность гардов срабатывает, если срабатывает любой из
-гардов в ней.
-
-То есть, запятая работает как **andalso**, а точка с запятой работает
-как **orelse**, и код выше эквивалентен коду:
-
-```
-check_user({user, _, Gender, Age})
-  when (Gender =:= female andalso Age < 14) orelse
-       (Gender =:= male andalso Age < 14)
-       -> child;
-check_user({user, _, Gender, Age})
-  when (Gender =:= male andalso Age >= 21) orelse
-       (Gender =:= male andalso Age >= 21)
-       -> adult.
-```
-
-
-Выражения в гардах не должны иметь побочных эффектов. Поэтому
-разрешены не любые эрланговские выражения, а только их
-подмножество. Например, запрещен вызов пользовательских функций. Да и
-встроенные функции можно вызывать не все.  Что именно разрешено,
-[смотрите в документации](http://erlang.org/doc/reference_manual/expressions.html#id81911)
-
-Если при вычислении выражения в гарде возникает исключение, то
-оно не распространяется дальше, а просто гард не срабатывает
-(данная ветка кода не выполняется).
-
-Keep in mind errors in guards do not leak but simply make the guard fail
