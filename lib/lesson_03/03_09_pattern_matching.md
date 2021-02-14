@@ -106,40 +106,96 @@ iex(24)> {_, _, 42} = {10, 20, 42}
 
 ## Как устроен Pattern Matching
 
-TODO stopped here
+Теперь формализуем то, что мы узнали. Итак, у нас есть оператор сопоставления **=**, слева от него шаблон, и справа значение.
 
 [pattern] = [value]
-Слева:
-литералы
-несвязанные переменные
-связанные переменные (pin operator)
 
-Справа:
-литералы
-связанные переменные
+Шаблон может включать:
+- литералы
+- переменные
+- универсальный шаблон (символ подчеркивания)
 
-numbers in patterns perform strict comparison. In other words, integers to do not match floats.
+Значение может включать:
+- литералы
+- переменные
+- выражения
 
-Note that the empty map will match all maps, which is a contrast to tuples and lists, where an empty tuple or an empty list will only match empty tuples and empty lists respectively.
+Литералы в шаблоне слева должны совпасть с литералами, переменными, и результатами вычисления значений справа. Все в целом должно совпасть по структуре. Тогда переменные в шаблоне слева получают свои значения из соответствующих позиций справа. Универсальный шаблон совпадает с чем угодно.
 
-pin operator
-Prefix variable with ^ (a caret)
+
+## pin operator
+
+Переменная в шаблоне может выполнять две роли. Либо мы хотим, чтобы эта переменная получила новое значение, и тогда не важно, использовалась ли эта переменная раньше, было ли у нее какое-то значение. Либо мы хотим использовать значение, которое переменная уже имеет, как часть шаблона. Во втором случае понадобится pin operator.
+
 ```
-iex> a = 1
+iex(1)> animal = :cat
+:cat
+iex(2)> {^animal, "Tihon"} = {:cat, "Tihon"}
+{:cat, "Tihon"}
+iex(3)> {^animal, "Tihon"} = {:dog, "Tihon"}
+** (MatchError) no match of right hand side value: {:dog, "Tihon"}
+```
+
+pin operator извлекает текущее значение переменной и подставляет его в шаблон. И дальше это значение в шаблоне работает как литерал.
+
+
+## Pattern matching for maps
+
+Есть некоторые нюансы при работе с map. (Есть нюансы не только с map, но с ними редко приходится сталкиваться, а с map часто).
+
+В шаблоне не нужно перечислять все ключи, какие есть в map. Мы указываем только те ключи, которые нам нужны. 
+
+```
+iex(4)> my_map = %{a: 1, b: 2, c: 3}
+%{a: 1, b: 2, c: 3}
+iex(5)> %{a: value} = my_map  
+%{a: 1, b: 2, c: 3}
+iex(6)> value
 1
-iex> [^a, 2, 3 ] = [ 1, 2, 3 ]
-# use existing value of a
-[1, 2, 3]
 ```
 
-Joe Armstrong, Erlang’s creator, compares the equals sign in Erlang to that used in algebra. 
-When you write the equation x = a + 1, you are not assigning the value of a + 1 to x. 
-Instead you’re simply asserting that the expressions x and a + 1 have the same value. 
-If you know the value of x, you can work out the value of a, and vice versa.
-His point is that you had to unlearn the algebraic meaning of = 
-when you first came across assignment in imperative programming languages. 
-Now’s the time to un-unlearn it.
-_это хорошо, это надо взять_
+Если ключи не являются атомами, то синтаксис отличается.
+```
+iex(7)> my_map = %{"a" => 1, "b" => 2, "c" => 3}
+%{"a" => 1, "b" => 2, "c" => 3}
+iex(8)> %{"a" => value1} = my_map
+%{"a" => 1, "b" => 2, "c" => 3}
+iex(9)> %{"a" => value1, "b" => value2} = my_map
+%{"a" => 1, "b" => 2, "c" => 3}
+iex(10)> value1
+1
+iex(11)> value2
+2
+```
+
+Шаблон **%{}** совпадает с любой map. Это может быть контринтуитивно, кто-то может ожидать, что этот шаблон совпадает только с пустой map. По сути, такой шаблон проверяет, что значение является map, а не каким-то другим типом.
+
+```
+iex(13)> %{} = my_map 
+%{"a" => 1, "b" => 2, "c" => 3}
+```
+
+Переменные можно использовать для извлечения значений, но не для ключей:
+```
+iex(15)> %{"c" => my_var} = my_map
+%{"a" => 1, "b" => 2, "c" => 3}
+iex(16)> my_var
+3
+iex(17)> %{my_var => 1} = my_map
+** (CompileError) iex:17: cannot use variable my_var as map key inside a pattern.
+```
+
+А pin operator можно использовать и для ключа, и для значения:
+```
+iex(18)> value1
+1
+iex(19)> %{"a" => ^value1} = my_map
+%{"a" => 1, "b" => 2, "c" => 3}
+iex(20)> keyb = "b"
+"b"
+iex(21)> %{^keyb => _} = my_map
+%{"a" => 1, "b" => 2, "c" => 3
+```
 
 
 ## Условные переходы
@@ -150,37 +206,4 @@ _это хорошо, это надо взять_
 - обработка исключений (resque, catch)
 - чтение сообщений из mailbox (receive) 
 
-```
-6> case User of
-6> {user, _, _} -> "this is user";
-6> {cat, _, _} -> "this is cat"
-6> end.
-"this is user"
-```
-
-
-Ниже мы рассмотрим все эти варианты. А сейчас один пример из реального
-проекта. Это игра, где несколько пользователей собираются за одним
-столом. Один из игроков является владельцем комнаты.  Данная функция
-позволяет определить, является ли данный игрок владельцем данной
-комнаты:
-
-```
-is_user_owner_of_room(UserId, RoomId) ->
-    case rooms:find_room(RoomId) of
-        {ok, #room{owner = UserId}} -> true;
-        _ -> false
-    end.
-```
-
-Здесь **rooms:find_room/1** может вернуть либо **{ok, #room{}}**, либо
-**{error, not_found}**. В первом шаблоне конструкции **case** мы
-проверяем, что find_room вернула **{ok, #room{}}**, причем owner
-совпадает с UserId.
-
-Таким образом, мы одним шаблоном проверяем сразу два условия:
-
- - что комната с таким RoomId существует;
- - что владелец у нее именно UserId, а не кто-то другой.
-
-В императивном языке тут было бы две конструкции **if**.
+Конструкци case и function clause рассмотрим в следущей теме. Обработка исключений и чтение сообщений будут позже в курсе.
