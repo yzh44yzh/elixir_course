@@ -1,120 +1,53 @@
-# Control Flow
+# Условные переходы (Control Flow)
 
-## Control flow
+Условные переходы в функциональных языках сильно отличаются от императивных, потому что основаны на сопоставлении с образцом. Основная идея в том, что некое значение по-очереди сравнивается с несколькими шаблонами, и в зависимости от того, с каким шаблоном оно совпадет, выполняется та или иная ветка кода.
 
-Small functions and a combination of guard clauses and pattern matching of parameters 
-replaces most of the control flow.
-Functions written without explicit control flow tend to be shorter and more focused.
-However, Elixir does have a small set of control-flow constructs.
+Есть несколько вариантов условных переходов:
+- конструкция case
+- клозы функций (clause)
+- обработка исключений (resque, catch)
+- чтение сообщений из mailbox (receive) 
+
+Все они реализуют эту идею. 
 
 
-## do-end block, do: form
+## Конструкция case
 
-Way of grouping expressions and passing them to other code:
-- module definitions
-- function definitions
-- control structures
-- any place in Elixir where code needs to be handled as an entity.
-
-do-end block is syntax sugar:
+Начнем с примеров, которые мы уже видели:
 ```
-def double(n) do
-  n * 2
-end
-```
-
-The actual syntax do: form:
-```
-def double(n), do: n * 2
-```
-
-You can pass multiple lines by grouping them with parentheses:
-```
-def double(n), do: (
-  IO.puts(n)
-  n * 2
-)
-```
-And the do: form itself is nothing special; it is simply a term in a keyword list.
-
-Typically people use the do: form for single-line blocks, 
-and do-end block for multiline ones.
-
-```
-defmodule Greeter do
-
-  def hello(name) do
-    "Hello " <> name <> "!"
+def gcd(a, b) do
+  case rem(a, b) do
+    0 -> b
+    c -> gcd(b, c)
   end
-
 end
 ```
+Здесь вычисляется значение **rem(a, b)**, и сравнивается с двумя шаблонами. Первый шаблон -- литерал **0**. Если значение совпадает с ним, то выполняется код, завершающий рекурсию и возвращающий **b**. Второй шаблон -- переменная **c**. С этим шаблоном совпадут любые значения. И выполняется код -- вызов **gcd(b, c)**.
 
-Same:
+Второй пример:
 ```
-defmodule Greeter, do: (
-  def hello(name), do: (
-    "Hello " <> name <> "!"
-  )
-)
-```
-
-
-## if expression
-
-```
-if false, do: :this, else: :that
-syntax sugar for:macros
-if(false, [do: :this, else: :that])
-syntax sugar for:
-if(false, [{:do, :this}, {:else, :that}])
-```
-
-unless is similar:
-```
-unless 1 == 2, do: "OK", else: "error"
-
-unless 1 == 2 do
-  "OK"
-else
-  "error"
+case Map.fetch(acc, word) do
+  {:ok, count} -> Map.put(acc, word, count + 1)
+  :error -> Map.put(acc, word, 1)
 end
 ```
+Здесь выполняется вызов функции **Map.fetch(acc, word)**. Получившееся значение сравнивается с двумя шаблонами и выполняется соответствующий код.
 
-The if expression returns the result of the executed block. If the condition isn't met and the else clause isn't specified, the return value is the atom nil.
+Шаблонов может быть несколько. И важен их порядок, потому что первый совпавший шаблон останавливает перебор оставшихся шаблонов. Если не совпал ни один из шаблонов, то генерируется исключение.
 
- An interesting note regarding if/2 and unless/2 is that they are implemented as macros in the language; they aren’t special language constructs as they would be in many languages.
-
-## case
-
-case allows us to compare a value against many patterns until we find a matching one
-
+В общем виде конструкция **case** выглядит так: 
 ```
-case File.open("case.ex") do
-  {:ok, file} ->
-    IO.puts "First line: #{IO.read(file, :line)}"
-  {:error, reason} ->
-    IO.puts "Failed to open file: #{reason}"
-end
-```
-
-Конструкция **case** аналогична клозам функции, но может
-использоваться в любом месте в коде.
-
-```
-case Expr of
-    Pattern1 [when GuardSeq1] ->
-        Body1;
-    ...;
-    PatternN [when GuardSeqN] ->
+case Expr do
+    Pattern1 [when GuardSequence1] ->
+        Body1
+    ...
+    PatternN [when GuardSequenceN] ->
         BodyN
 end
 ```
+Что такое GuardSequence -- цепочка охранных выражений, мы рассмотрим позже.
 
-Как и с клозами, шаблоны применяются к выражению по очереди, сверху
-вниз.  Первый совпавший шаблон определяет ветку кода, которая будет
-выполняться. Если ни один шаблон не совпал, то генерируется
-исключение.
+TODO stopped here
 
 case могут быть вложенными друг в друга. 2 уровня вложенности
 допустимы.  3 уровня читаются (и пишутся) плохо, этого лучше избегать.
@@ -146,72 +79,13 @@ close_room(UserId, RoomId) ->
 использовать переменную за пределами ветки case, в которой она
 объявлена, либо объявить во всех ветках.
 
-
-
-## cond
-
-case is useful when you need to match against different values. However, in many circumstances, we want to check different conditions and find the first one that does not evaluate to nil or false.
-
-This is equivalent to else if clauses in many imperative languages (although used much less frequently here).
-
-```
-cond do
-  rem(current, 3) == 0 and rem(current, 5) == 0 ->
-    "FizzBuzz"
-  rem(current, 3) == 0 ->
-    "Fizz"
-  rem(current, 5) == 0 ->
-    "Buzz"
-  true ->
-    current
-end
-```
-
-
-Конструкция **if** представляет собой упрощенный **case** без выражения и
-без шаблонов, а ветки представлены только гардами.
-
-```
-if
-    GuardSeq1 ->
-        Body1;
-    ...;
-    GuardSeqN ->
-        BodyN
-end
-```
-
-Здесь, как и с case, если ни один гард не сработал, генерируется
-исключение.  Довольно часто бывает, что последним гардом ставят true,
-и он срабатывает всегда.
-
-If all of the conditions return nil or false, an error (CondClauseError) is raised. For this reason, it may be necessary to add a final condition, equal to true, which will always match.
-
-Finally, note cond considers any value besides nil and false to be true
-
-```
-valid_char(Char) ->
-    IsDigit = is_digit(Char),
-    IsAlpha = is_alpha(Char),
-    if
-        IsDigit -> true;
-        IsAlpha -> true;
-        true -> false
-    end.
-```
-
-Еще в этом примере мы видим, как обойти ограничение на использование
-своих функций в гардах. Мы просто вызываем эти функции за пределами
-if, присваиваем результат в переменные, и уже переменные используем в
-гардах.
-
 Для case тоже можно делать последний шаблон, который обязательно
 совпадет с любым выражением (catch all pattern).  Но так делают реже,
 чем в случае с if. А почему, мы выясним на одном из следующих уроков,
 когда будем изучать обработку ошибок и принцип **Let It Crash**.
 
 
-## clause
+## Клозы функций (Clause)
 
 Рассмотрим подробнее клозы функции.  Этот термин пишется **clause**,
 произносится **[klôz]** и означает одно из нескольких тел функции.
@@ -262,7 +136,6 @@ end.
 ## Охранные выражения (Guards)
 
 https://hexdocs.pm/elixir/patterns-and-guards.html#content
-
 
 Guards are a way to augment pattern matching with more complex checks. They are allowed in a predefined set of constructs where pattern matching is allowed, such as function definitions, case clauses, and others.
 
@@ -344,3 +217,121 @@ check_user({user, _, Gender, Age})
 (данная ветка кода не выполняется).
 
 Keep in mind errors in guards do not leak but simply make the guard fail
+
+
+## Конструкция cond
+
+case is useful when you need to match against different values. However, in many circumstances, we want to check different conditions and find the first one that does not evaluate to nil or false.
+
+This is equivalent to else if clauses in many imperative languages (although used much less frequently here).
+
+```
+cond do
+  rem(current, 3) == 0 and rem(current, 5) == 0 ->
+    "FizzBuzz"
+  rem(current, 3) == 0 ->
+    "Fizz"
+  rem(current, 5) == 0 ->
+    "Buzz"
+  true ->
+    current
+end
+```
+
+If all of the conditions return nil or false, an error (CondClauseError) is raised. For this reason, it may be necessary to add a final condition, equal to true, which will always match.
+
+```
+valid_char(Char) ->
+    IsDigit = is_digit(Char),
+    IsAlpha = is_alpha(Char),
+    if
+        IsDigit -> true;
+        IsAlpha -> true;
+        true -> false
+    end.
+```
+
+Еще в этом примере мы видим, как обойти ограничение на использование
+своих функций в гардах. Мы просто вызываем эти функции за пределами
+if, присваиваем результат в переменные, и уже переменные используем в
+гардах.
+
+
+## Конструкция if
+
+В Эликсир она есть, в Эрланг ее нет. Вернее сказать, в Эрланг конструкция if работает точно так же, как cond в Эликсир. А в Эликсир это не настоящая конструкция языка, а макрос. 
+
+```
+if false, do: :this, else: :that
+syntax sugar for:macros
+if(false, [do: :this, else: :that])
+syntax sugar for:
+if(false, [{:do, :this}, {:else, :that}])
+```
+
+unless is similar:
+```
+unless 1 == 2, do: "OK", else: "error"
+
+unless 1 == 2 do
+  "OK"
+else
+  "error"
+end
+```
+
+The if expression returns the result of the executed block. If the condition isn't met and the else clause isn't specified, the return value is the atom nil.
+
+ An interesting note regarding if/2 and unless/2 is that they are implemented as macros in the language; they aren’t special language constructs as they would be in many languages.
+
+
+## do-end block, do: form
+
+Way of grouping expressions and passing them to other code:
+- module definitions
+- function definitions
+- control structures
+- any place in Elixir where code needs to be handled as an entity.
+
+do-end block is syntax sugar:
+```
+def double(n) do
+  n * 2
+end
+```
+
+The actual syntax do: form:
+```
+def double(n), do: n * 2
+```
+
+You can pass multiple lines by grouping them with parentheses:
+```
+def double(n), do: (
+  IO.puts(n)
+  n * 2
+)
+```
+And the do: form itself is nothing special; it is simply a term in a keyword list.
+
+Typically people use the do: form for single-line blocks, 
+and do-end block for multiline ones.
+
+```
+defmodule Greeter do
+
+  def hello(name) do
+    "Hello " <> name <> "!"
+  end
+
+end
+```
+
+Same:
+```
+defmodule Greeter, do: (
+  def hello(name), do: (
+    "Hello " <> name <> "!"
+  )
+)
+```
