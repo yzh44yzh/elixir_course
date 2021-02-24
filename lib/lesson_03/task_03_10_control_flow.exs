@@ -37,16 +37,46 @@ defmodule Lesson_03.Task_03_10_ControlFlow do
     IO.puts("remove cat #{name}")
   end
 
+  def handle4(animal) do
+    case animal do
+      {:dog, name, age} when age > 10 -> IO.puts("#{name} is a dog older than 10")
+      {:dog, name, _} -> IO.puts("#{name} is a 10 years old or younger dog")
+      {:cat, name, age} when age > 10 -> IO.puts("#{name} is a cat older than 10")
+      {:cat, name, _} -> IO.puts("#{name} is a 10 years old or younger cat")
+    end
+  end
+
+  def handle5({:dog, name, age}) when age > 10 do
+    IO.puts("#{name} is a dog older than 10")
+  end
+  def handle5({:dog, name, _age}) do
+    IO.puts("#{name} is a 10 years old or younger dog")
+  end
+  def handle5({:cat, name, age}) when age > 10 do
+    IO.puts("#{name} is a cat older than 10")
+  end
+  def handle5({:cat, name, _age}) do
+    IO.puts("#{name} is a 10 years old or younger cat")
+  end
+
 end
 
 animal1 = {:cat, "Tihon"}
 animal2 = {:dog, "Woof"}
 
-Lesson_03.Task_03_10_ControlFlow.handle(animal1, :add)
-Lesson_03.Task_03_10_ControlFlow.handle(animal2, :remove)
+alias Lesson_03.Task_03_10_ControlFlow, as: CF
 
-Lesson_03.Task_03_10_ControlFlow.handle2(animal2, :add)
-Lesson_03.Task_03_10_ControlFlow.handle2(animal1, :remove)
+CF.handle(animal1, :add)
+CF.handle(animal2, :remove)
 
-Lesson_03.Task_03_10_ControlFlow.handle3(animal1, :add)
-Lesson_03.Task_03_10_ControlFlow.handle3(animal2, :add)
+CF.handle2(animal2, :add)
+CF.handle2(animal1, :remove)
+
+CF.handle3(animal1, :add)
+CF.handle3(animal2, :add)
+
+CF.handle4({:dog, "Woof", 14})
+CF.handle4({:dog, "Woof", 9})
+
+CF.handle5({:cat, "Tihon", 12})
+CF.handle5({:cat, "Tihon", 10})

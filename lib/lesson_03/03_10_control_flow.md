@@ -101,42 +101,64 @@ case могут быть вложенными друг в друга:
   end
 ```
 
-Шаблоны описываются прямо в аргументах функции, отдельно для каждого тела. Принцип такой же, как и с конструкцией cond -- шаблоны проверяются по очереди на совпадение с входящими аргументами функции. Первый совпавший шаблон вызывает соответствующий блок кода и останавливает дальшейший перебор. Если ни один шаблон не совпал, то генерируется исключение.
+Шаблоны описываются прямо в аргументах функции, отдельно для каждого тела. Принцип такой же, как и с конструкцией **case** -- шаблоны проверяются по очереди на совпадение с входящими аргументами функции. Первый совпавший шаблон вызывает соответствующий блок кода и останавливает дальшейший перебор. Если ни один шаблон не совпал, то генерируется исключение.
 
-
-TODO stopped here
-
-Очередность клозов важна, потому что шаблоны проверяются сверху вниз,
-и первое совпадение приводит к выполнению соответствующего клоза.
-Поэтому более специфичные шаблоны должны идти раньше, а более общие
-позже. Компилятор может предупредить о неправильной
-последовательности шаблонов, но не всегда.
-
-Вот неправильная последовательность шаблонов:
-
+Как и в случае с **case**, здесь тоже важна очередность шаблонов. Типичная ошибка -- расположить более общий шаблон выше, чем более специфичный шаблон:
 ```
-case List of
-    [] -> empty_list;
-    [Head | _] -> process(Head);
-    [{X, Y} | _] -> process(X, Y)
-end.
+  def handle3(animal, action) do
+    IO.puts("do something")
+  end
+  def handle3({:dog, name}, :add) do
+    IO.puts("add dog #{name}")
+  end
+
+``` 
+Во многих таких случаях компилятор выдаст предупреждение:
 ```
-
-Шаблон **Head** более общий, чем **{X, Y}**, и третья вертка кода
-никогда не сработает, все перехватит вторая ветка.
-
-Вот правильная последовательность шаблонов:
-
+warning: this clause for handle3/2 cannot match because a previous clause at line 27 always matches
+  lib/lesson_03/task_03_10_control_flow.exs:30
 ```
-case List of
-    [] -> empty_list;
-    [{X, Y} | _] -> process(X, Y);
-    [Head | _] -> process(Head)
-end.
+Но бывает, что компилятор не замечает проблему:
+```
+  def handle3(animal, :add) do
 ```
 
 
 ## Охранные выражения (Guards)
+
+Теперь вернемся к упомянутым выше охранным выражениям. 
+
+Не всегда достаточно шаблона, чтобы проверить все условия для ветвления в коде. Например, шаблоном нельзя проверить попадание числа в определенный диапазон.
+
+```
+  def handle4(animal) do
+    case animal do
+      {:dog, name, age} when age > 10 -> IO.puts("#{name} is a dog older than 10")
+      {:dog, name, _} -> IO.puts("#{name} is a 10 years old or younger dog")
+      {:cat, name, age} when age > 10 -> IO.puts("#{name} is a cat older than 10")
+      {:cat, name, _} -> IO.puts("#{name} is a 10 years old or younger cat")
+    end
+  end
+```
+
+Охранные выражения могут использоваться и с **case**, и с телами функций:
+```
+  def handle5({:dog, name, age}) when age > 10 do
+    IO.puts("#{name} is a dog older than 10")
+  end
+  def handle5({:dog, name, _age}) do
+    IO.puts("#{name} is a 10 years old or younger dog")
+  end
+  def handle5({:cat, name, age}) when age > 10 do
+    IO.puts("#{name} is a cat older than 10")
+  end
+  def handle5({:cat, name, _age}) do
+    IO.puts("#{name} is a 10 years old or younger cat")
+  end
+```
+
+TODO stopped here
+
 
 https://hexdocs.pm/elixir/patterns-and-guards.html#content
 
