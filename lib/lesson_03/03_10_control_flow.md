@@ -254,81 +254,53 @@ CF.handle7(3)
 
 В Эрланг есть конструкция **if**, но она точно такая же, как **cond** в Эликсир. 
 
-TODO stopped here
-
-В Эликсир она есть, в Эрланг ее нет. Вернее сказать, в Эрланг конструкция if работает точно так же, как cond в Эликсир. А в Эликсир это не настоящая конструкция языка, а макрос. 
-
+В Элисир есть привычный всем **if**:
 ```
-if false, do: :this, else: :that
-syntax sugar for:macros
-if(false, [do: :this, else: :that])
-syntax sugar for:
-if(false, [{:do, :this}, {:else, :that}])
-```
-
-unless is similar:
-```
-unless 1 == 2, do: "OK", else: "error"
-
-unless 1 == 2 do
-  "OK"
-else
-  "error"
-end
-```
-
-The if expression returns the result of the executed block. If the condition isn't met and the else clause isn't specified, the return value is the atom nil.
-
- An interesting note regarding if/2 and unless/2 is that they are implemented as macros in the language; they aren’t special language constructs as they would be in many languages.
-
-
-## do-end block, do: form
-
-Way of grouping expressions and passing them to other code:
-- module definitions
-- function definitions
-- control structures
-- any place in Elixir where code needs to be handled as an entity.
-
-do-end block is syntax sugar:
-```
-def double(n) do
-  n * 2
-end
-```
-
-The actual syntax do: form:
-```
-def double(n), do: n * 2
-```
-
-You can pass multiple lines by grouping them with parentheses:
-```
-def double(n), do: (
-  IO.puts(n)
-  n * 2
-)
-```
-And the do: form itself is nothing special; it is simply a term in a keyword list.
-
-Typically people use the do: form for single-line blocks, 
-and do-end block for multiline ones.
-
-```
-defmodule Greeter do
-
-  def hello(name) do
-    "Hello " <> name <> "!"
+  def gcd(a, b) do
+    if rem(a, b) == 0 do
+      b
+    else
+      gcd(b, c)
+    end
   end
-
-end
 ```
 
-Same:
+Только это не настоящая конструкция языка, а макрос. Впрочем, в Эликсир очень многое является макросами. В некоторых случаях это важно знать, в некоторых не важно. 
+
+Есть и конструкция **unless**, тоже макрос:
 ```
-defmodule Greeter, do: (
-  def hello(name), do: (
-    "Hello " <> name <> "!"
-  )
-)
+  def gcd(a, b) do
+    unless rem(a, b) != 0 do
+      b
+    else
+      gcd(b, c)
+    end
+  end
+```
+
+Есть важное отличие от императивных языков -- в функциональных языках **if** всегда возвращает какое-то значение.
+```
+iex(4)> a = 5
+5
+iex(5)> b = 10
+10
+iex(6)> c = if a > b do
+...(6)> a
+...(6)> else
+...(6)> b
+...(6)> end
+10
+iex(7)> c
+10
+```
+
+Некоторые функциональные языки требуют, чтобы часть **else** всегда присутствовала, потому что значение нужно вернуть в любом случае, выполняется условие **if** или не выполняется. Эликсир этого не требует:
+
+```
+iex(8)> c = if a > b do
+...(8)> a
+...(8)> end
+nil
+iex(9)> c
+nil
 ```
