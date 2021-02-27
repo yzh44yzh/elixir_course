@@ -59,6 +59,20 @@ defmodule Lesson_03.Task_03_10_ControlFlow do
     IO.puts("#{name} is a 10 years old or younger cat")
   end
 
+  def handle6(num) when 10 / num > 2 do
+    IO.puts("clause 1")
+  end
+  def handle6(num) do
+    IO.puts("clause 2")
+  end
+
+  def handle7(num) do
+    cond do
+      num > 10 -> IO.puts("more than 10")
+      num > 5 -> IO.puts("more than 5")
+    end
+  end
+
 end
 
 animal1 = {:cat, "Tihon"}
@@ -80,3 +94,11 @@ CF.handle4({:dog, "Woof", 9})
 
 CF.handle5({:cat, "Tihon", 12})
 CF.handle5({:cat, "Tihon", 10})
+
+CF.handle6(0)
+CF.handle6(5)
+CF.handle6(3)
+
+CF.handle7(20)
+CF.handle7(8)
+CF.handle7(3)

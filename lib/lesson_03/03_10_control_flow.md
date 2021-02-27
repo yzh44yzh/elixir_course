@@ -157,132 +157,104 @@ warning: this clause for handle3/2 cannot match because a previous clause at lin
   end
 ```
 
-TODO stopped here
-
-
-https://hexdocs.pm/elixir/patterns-and-guards.html#content
-
-Guards are a way to augment pattern matching with more complex checks. They are allowed in a predefined set of constructs where pattern matching is allowed, such as function definitions, case clauses, and others.
-
-Not all expressions are allowed in guard clauses, but only a handful of them. This is a deliberate choice. This way, Elixir (and Erlang) can make sure that nothing bad happens while executing guards and no mutations happen anywhere. It also allows the compiler to optimize the code related to guards efficiently.
-
-https://hexdocs.pm/elixir/patterns-and-guards.html#list-of-allowed-functions-and-operators
-
-Macros constructed out of any combination of the above guards are also valid guards - for example, Integer.is_even/1. 
-
-Guards start with the when operator, followed by a guard expression. The clause will be executed if and only if the guard expression returns true. Multiple boolean conditions can be combined with the and and or operators.
-
-A function clause will be executed if and only if its guard expression evaluates to true. If any other value is returned, the function clause will be skipped. In particular, guards have no concept of "truthy" or "falsey".
-
-In guards, when functions would normally raise exceptions, they cause the guard to fail instead.
-that if any function call in a guard raises an exception, the entire guard fails. 
-
-
-**guard** переводится как "охранное выражение".
-
-Гарды используются там, где сопоставление с образцом применяется для
-условных переходов: то есть, в клозах функций, в case, try и receive
-конструкциях.  Они дополняют сопоставление с образцом, позволяя
-указать дополнительные условия.
-
-Гадром является последовательность выражений, разделенных запятой,
-каждое из которых вычисляется в булевое значение.
-
+Охранное выражение представляет собой предикат, или цепочку предикатов:
 ```
-check_user({user, _, Gender, Age}) when Gender =:= female, Age < 14 -> girl;
-check_user({user, _, Gender, Age}) when Gender =:= female, Age >= 14, Age < 21 -> teenage_girl;
-check_user({user, _, Gender, Age}) when Gender =:= female, Age >= 21 -> woman;
-check_user({user, _, Gender, Age}) when Gender =:= male, Age < 14 -> boy;
-check_user({user, _, Gender, Age}) when Gender =:= male, Age >= 14, Age < 21 -> teenage_boy;
-check_user({user, _, Gender, Age}) when Gender =:= male, Age >= 21 -> man.
+when predicat1 and predicat2 or ... predicatN ->
 ```
 
-Гард срабатывает (разрешает выполнение данной ветки кода), если все
-выражения вычисляются в true.
+В предикатах можно использовать ограниченный набор функций, описанный в [документации](https://hexdocs.pm/elixir/patterns-and-guards.html#list-of-allowed-functions-and-operators). Некоторые функциональные языки разрешают вызывать любые функции в охранных выражениях. Но Эликсир (и Эрланг) не относятся к таким языкам.
 
-Гарды могут объединяться в последовательности, разделенные точкой с запятой:
-
+Если при вычислении охранного выражения возникает исключение, то оно не приводит к остановке процесса, а приводит к тому, что все выражение вычисляется в false:
 ```
-check_user({user, _, Gender, Age})
-  when Gender =:= female, Age < 14;
-       Gender =:= male, Age < 14
-       -> child;
-check_user({user, _, Gender, Age})
-  when Gender =:= female, Age >= 21;
-       Gender =:= male, Age >= 21
-       -> adult.
+  def handle6(num) when 10 / num > 2 do
+    IO.puts("clause 1")
+  end
+  def handle6(num) do
+    IO.puts("clause 2")
+  end
 ```
 
-Последовательность гардов срабатывает, если срабатывает любой из
-гардов в ней.
-
-То есть, запятая работает как **andalso**, а точка с запятой работает
-как **orelse**, и код выше эквивалентен коду:
-
+Это позволяет писать выражения проще. Вместо:
 ```
-check_user({user, _, Gender, Age})
-  when (Gender =:= female andalso Age < 14) orelse
-       (Gender =:= male andalso Age < 14)
-       -> child;
-check_user({user, _, Gender, Age})
-  when (Gender =:= male andalso Age >= 21) orelse
-       (Gender =:= male andalso Age >= 21)
-       -> adult.
+when is_map(a) and map_size(a) > 10 ->
 ```
-
-
-Выражения в гардах не должны иметь побочных эффектов. Поэтому
-разрешены не любые эрланговские выражения, а только их
-подмножество. Например, запрещен вызов пользовательских функций. Да и
-встроенные функции можно вызывать не все.  Что именно разрешено,
-[смотрите в документации](http://erlang.org/doc/reference_manual/expressions.html#id81911)
-
-Если при вычислении выражения в гарде возникает исключение, то
-оно не распространяется дальше, а просто гард не срабатывает
-(данная ветка кода не выполняется).
-
-Keep in mind errors in guards do not leak but simply make the guard fail
+можно сразу писать:
+```
+when map_size(a) > 10 ->
+```
 
 
 ## Конструкция cond
 
-case is useful when you need to match against different values. However, in many circumstances, we want to check different conditions and find the first one that does not evaluate to nil or false.
+Если из **case** убрать шаблоны, но оставить охранные выражения, то получится конструкция **cond**. 
 
-This is equivalent to else if clauses in many imperative languages (although used much less frequently here).
-
+Было:
 ```
-cond do
-  rem(current, 3) == 0 and rem(current, 5) == 0 ->
-    "FizzBuzz"
-  rem(current, 3) == 0 ->
-    "Fizz"
-  rem(current, 5) == 0 ->
-    "Buzz"
-  true ->
-    current
+case Expr do
+    Pattern1 [when GuardSequence1] ->
+        Body1
+    ...
+    PatternN [when GuardSequenceN] ->
+        BodyN
 end
 ```
 
-If all of the conditions return nil or false, an error (CondClauseError) is raised. For this reason, it may be necessary to add a final condition, equal to true, which will always match.
-
+Стало:
 ```
-valid_char(Char) ->
-    IsDigit = is_digit(Char),
-    IsAlpha = is_alpha(Char),
-    if
-        IsDigit -> true;
-        IsAlpha -> true;
-        true -> false
-    end.
+cond do
+    GuardSequence1 ->
+        Body1
+    ...
+    GuardSequenceN ->
+        BodyN
+end
 ```
 
-Еще в этом примере мы видим, как обойти ограничение на использование
-своих функций в гардах. Мы просто вызываем эти функции за пределами
-if, присваиваем результат в переменные, и уже переменные используем в
-гардах.
+Мы использовали эту конструкцию в первом уроке, когда реализовывали FizzBuzz:
+```
+  def fizzbuzz(n) do
+    cond do
+      rem(n, 3) == 0 and rem(n, 5) == 0 -> IO.puts("FizzBuzz")
+      rem(n, 3) == 0 -> IO.puts("Fizz")
+      rem(n, 5) == 0 -> IO.puts("Buzz")
+      true -> IO.puts(n)
+    end
+  end
+```
+
+В принципе, это эквивалент цепочки **if...else if**, которая не редко встречается в императивных языках. Python, например:
+```
+a = int(input())
+if a < -5:
+    print('Low')
+elif -5 <= a <= 5:
+    print('Mid')
+else:
+    print('High')
+```
+
+Как и в конструкции **case**, очередность выражений важна, и если ни одно из выражений не вычислилось в true, то возникает исключение.
+
+```
+  def handle7(num) do
+    cond do
+      num > 10 -> IO.puts("more than 10")
+      num > 5 -> IO.puts("more than 5")
+    end
+  end
+
+CF.handle7(20)
+CF.handle7(8)
+CF.handle7(3)
+** (CondClauseError) no cond clause evaluated to a truthy value
+```
 
 
 ## Конструкция if
+
+В Эрланг есть конструкция **if**, но она точно такая же, как **cond** в Эликсир. 
+
+TODO stopped here
 
 В Эликсир она есть, в Эрланг ее нет. Вернее сказать, в Эрланг конструкция if работает точно так же, как cond в Эликсир. А в Эликсир это не настоящая конструкция языка, а макрос. 
 
