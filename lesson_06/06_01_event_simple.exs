@@ -5,18 +5,16 @@ room = {:room, 610}
 location = {address, room}
 
 participants = [
-  {:user, "Helen", :project_manager},
-  {:user, "Bob", :developer},
-  {:user, "Kate", :developer},
+  {:human, "Helen", :project_manager},
+  {:human, "Bob", :developer},
+  {:human, "Kate", :developer},
   {:cat, "Tihon", :cat}
 ]
 
 agenda = [
   {:topic, :high, "release my_cool_service v1.2.3"},
-  {:topic, :medum, "buying food for cat"},
+  {:topic, :medium, "buying food for cat"},
   {:topic, :low, "backlog refinement"}
 ]
 
 event = {:event, "Team Meeting", datetime, location, participants, agenda}
-
-event |> inspect |> IO.puts

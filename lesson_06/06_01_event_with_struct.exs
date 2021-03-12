@@ -1,7 +1,26 @@
-alias Lesson_06.Task_06_01_ADT.{Address, Room, Location}
+alias Lesson_06.Task_06_01_Event, as: Event
 
-address = %Address{city: "Minsk", street: "Partizanskij pr", house_number: 178}
-room = %Room{number: 610}
-location = %Location{address: address, room: room}
+address = %Event.Address{city: "Minsk", street: "Partizanskij pr", house_number: 178}
+room = %Event.Room{number: 610}
+location = %Event.Location{address: address, room: room}
 
-location |> inspect |> IO.puts
+helen = %Event.Participant{name: "Helen", role: :project_manager}
+bob = %Event.Participant{name: "Bob", role: :developer}
+kate = %Event.Participant{name: "Kate", role: :developer}
+tihon = %Event.Participant{species: :cat, name: "Tihon", role: :cat}
+
+agenda = [
+  %Event.Topic{title: "release my_cool_service v1.2.3", priority: :high},
+  %Event.Topic{title: "buying food for cat"},
+  %Event.Topic{title: "backlog refinement", priority: :low}
+]
+
+event = %Event.Event{
+  title: "Team Meeting",
+  datetime: ~U[2021-03-10 19:40:00.000000Z],
+  location: location,
+  participants: [helen, bob, kate, tihon],
+  agenda: agenda
+}
+
+event |> inspect |> IO.puts
