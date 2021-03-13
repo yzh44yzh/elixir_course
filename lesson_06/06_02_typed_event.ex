@@ -1,22 +1,5 @@
 defmodule Lesson_06.Task_06_02_TypedEvent do
 
-  defmodule Event do
-    @type t :: %__MODULE__{
-      title: String.t,
-      datetime: Datetime.t,
-      location: Location.t,
-      participants: list(Participant.t),
-      agenda: list(Topic.t)
-    }
-    defstruct [
-      :title,
-      :datetime,
-      :location,
-      :participants,
-      :agenda
-    ]
-  end
-
   defmodule Address do
     @type t :: %__MODULE__{
       country: String.t,
@@ -45,7 +28,7 @@ defmodule Lesson_06.Task_06_02_TypedEvent do
   defmodule Location do
     @type t :: %__MODULE__{
       address: Address.t,
-      room: Broom.t
+      room: Room.t
     }
     @enforce_keys [:address, :room]
     defstruct [:address, :room]
@@ -74,6 +57,23 @@ defmodule Lesson_06.Task_06_02_TypedEvent do
     defstruct [
       {:priority, :medium},
       :title
+    ]
+  end
+
+  defmodule Event do
+    @type t :: %__MODULE__{
+      title: String.t,
+      datetime: DateTime.t,
+      location: Location.t,
+      participants: list(Participant.t),
+      agenda: list(Topic.t)
+    }
+    defstruct [
+      :title,
+      :datetime,
+      :location,
+      :participants,
+      :agenda
     ]
   end
 

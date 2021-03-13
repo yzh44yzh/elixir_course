@@ -1,3 +1,7 @@
 *.beam
 .idea
 *.iml
+
+_build
+deps
+ebin
