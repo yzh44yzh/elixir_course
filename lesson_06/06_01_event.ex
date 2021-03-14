@@ -32,10 +32,11 @@ defmodule Lesson_06.Task_06_01_Event do
 
   defmodule Participant do
     @enforce_keys [:name, :role]
+    # syntax sugar to define default values:
     defstruct [
-      {:species, :human},
-      :name,
-      :role
+      species: :human,
+      name: nil,
+      role: nil
     ]
   end
 
