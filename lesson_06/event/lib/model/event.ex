@@ -1,4 +1,4 @@
-defmodule Lesson_06.Task_06_01_Event do
+defmodule Model.Event do
 
   defmodule Event do
     defstruct [

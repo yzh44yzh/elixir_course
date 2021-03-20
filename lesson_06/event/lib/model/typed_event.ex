@@ -1,4 +1,4 @@
-defmodule Lesson_06.Task_06_02_TypedEvent do
+defmodule Model.TypedEvent do
 
   defmodule Address do
     @type t :: %__MODULE__{

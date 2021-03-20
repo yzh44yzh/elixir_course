@@ -1,4 +1,4 @@
-alias Lesson_06.Task_06_02_TypedEvent, as: TE
+alias Model.TypedEvent, as: TE
 
 address = %TE.Address{city: "Minsk", street: "Partizanskij pr", house_number: 178}
 room = %TE.Room{number: 610}
