@@ -12,81 +12,26 @@ TODO нарисовать схему
 
 В принципе, для моделирования сущностей любой сложности достаточно кортежей и списков. И в нашем случае это может выглядеть так:
 
-event_simple.exs:
 ```
-iex(11)> event
+$ iex -S mix
+iex(1)> SimpleExample.create()
 {:event, "Team Meeting", ~U[2021-03-10 19:40:00.000000Z],
- {{:address, "Minsk", "Partizanskij pr", 178, 2}, {:room, 610}},
- [
-   {:human, "Helen", :project_manager},
-   {:human, "Bob", :developer},
-   {:human, "Kate", :developer},
-   {:cat, "Tihon", :cat}
- ],
- [
-   {:topic, :high, "release my_cool_service v1.2.3"},
-   {:topic, :medium, "buying food for cat"},
-   {:topic, :low, "backlog refinement"}
- ]}
+ {{:address, ...
 ```
 
-Кроме tuple и list есть еще map. И все абстракции построены на базе этих трех типов.
-
-Этот вариант интересен как некий базовый подход, общий для всех функциональных языков. Но, конечно, Эликсир предлагает более удобные средства.
-
-event_with_struct.exs:
+Или можно использовать map и списки:
 ```
-c("06_01_event.ex", "ebin")
+iex(3)> SimpleExample.create_map()
+%{
+  agenda: [ ...
+```
 
-%Lesson_06.Task_06_01_Event.Event{
-  agenda: [
-    %Lesson_06.Task_06_01_Event.Topic{
-      priority: :high,
-      title: "release my_cool_service v1.2.3"
-    },
-    %Lesson_06.Task_06_01_Event.Topic{
-      priority: :medium,
-      title: "buying food for cat"
-    },
-    %Lesson_06.Task_06_01_Event.Topic{
-      priority: :low,
-      title: "backlog refinement"
-    }
-  ],
-  datetime: ~U[2021-03-10 19:40:00.000000Z],
-  location: %Lesson_06.Task_06_01_Event.Location{
-    address: %Lesson_06.Task_06_01_Event.Address{
-      city: "Minsk",
-      country: "Belarus",
-      house_number: 178,
-      street: "Partizanskij pr"
-    },
-    room: %Lesson_06.Task_06_01_Event.Room{floor: nil, number: 610}
-  },
-  participants: [
-    %Lesson_06.Task_06_01_Event.Participant{
-      name: "Helen",
-      role: :project_manager,
-      species: :human
-    },
-    %Lesson_06.Task_06_01_Event.Participant{
-      name: "Bob",
-      role: :developer,
-      species: :human
-    },
-    %Lesson_06.Task_06_01_Event.Participant{
-      name: "Kate",
-      role: :developer,
-      species: :human
-    },
-    %Lesson_06.Task_06_01_Event.Participant{
-      name: "Tihon",
-      role: :cat,
-      species: :cat
-    }
-  ],
-  title: "Team Meeting"
-}
+В принципе, tuple, list и map достаточно, чтобы построить любые структуры данных, любой сложности и вложенности. Этот вариант интересен как некий базовый подход, общий для всех функциональных языков. 
+
+Но, конечно, Эликсир предлагает более удобные средства:
+```
+iex(1)> event = StructExample.create()
+%Model.Event.Event{ ...
 ```
 
 Особенности:
@@ -102,9 +47,11 @@ c("06_01_event.ex", "ebin")
 ```
 event.agenda
 event.location.address.city
-%Event.Event{participants: participants} = event
-%Event.Event{participants: [first | _]} = event
-%Event.Event{location: %Event.Location{room: room}} = event
+
+alias Model.Event, as: E
+%E.Event{participants: participants} = event
+%E.Event{participants: [first | _]} = event
+%E.Event{location: %E.Location{room: room}} = event
 room.number
 ```
 
@@ -112,43 +59,35 @@ room.number
 
 Модифицировать данные на первом уровне вложенности легко:
 ```
-event = %Event.Event{event | title: "Team Gathering"}
+event = %E.Event{event | title: "Team Gathering"}
+event.title
 ```
 Это делается так же, как и для map.
 
 Но модифицировать данные глубже первого уровня не так просто, ведь эти данные иммутабельные. Нужно обновить каждую структуру на каждом уровне вложенности:
 ```
-new_room = %Event.Room{ room | number: 612 } 
-new_location = %Event.Location{location | room: new_room} 
-event = %Event.Event{event | location: new_location}
+new_room = %E.Room{ room | number: 612 } 
+new_location = %E.Location{event.location | room: new_room} 
+event = %E.Event{event | location: new_location}
 ```
 Не очень удобный подход.
 
 Это можно сделать в одну строку:
 ```
-event = %Event.Event{event | location: 
-    %Event.Location{location | room: 
-        %Event.Room{ room | number: 611 }}} 
+event = %E.Event{event | location: 
+    %E.Location{event.location | room: 
+        %E.Room{ room | number: 611 }}} 
 ```
 Но все равно это не удобно.
 
 
-## put_in, update_in
+## put_in, update_in для map
 
 В Эликсир есть более удобные средства для доступа к вложеным данным и их обновления. Модуль Kernel макросы и одноименные им функции: get_in, put_in, update_in. 
 
-К сожалению, они работают для map, но не работают для struct. Поэтому рассмотрим их на примере map:
+Посмотрим как они работают на примере map:
 ```
-event = %{
-  title: "Team Meeting",
-  location: %{
-    address: "Minsk, Partizanskij pr, 178",
-    room: %{
-      floor: 6,
-      number: 610
-    }
-  }
-}
+event = SimpleExample.create_map()
 ```
 
 **get_in**
@@ -176,5 +115,29 @@ keys = [:location, :room, :number]
 event = update_in(event, keys, fn(number) -> number + 10 end)
 ```
 
-На самом деле есть сторонние библиотеки, которые легко позволяют делать то же самое со Struct. Но мы пока не умеем подключать библиотеки ) 
-https://hexdocs.pm/struct_access/getting-started.html
+Со структурами из кортежей это тоже работает:
+```
+> get_in(event, [Access.elem(4), Access.all(), Access.elem(1)])
+["Helen", "Bob", "Kate", "Tihon"]
+```
+Но мы не будем вникать в тонкости использования модуля Access. Это редко используется.
+
+
+## put_in, update_in для struct
+
+Если мы попытаемся вызывать put_in, update_in для struct, то увидим, что макросы работают, а функции нет.
+```
+event = StructExample.create()
+
+event = put_in(event.location.room.number, 613)
+
+event = put_in(event, [:location, :room, :number], 612)
+** (UndefinedFunctionError) function Model.Event.Event.get_and_update/3 is undefined (Model.Event.Event does not implement the Access behaviour)
+
+event = update_in(event.location.room.number, fn(number) -> number + 10 end)
+
+event = update_in(event, [:location, :room, :number], fn(number) -> number + 10 end)
+** (UndefinedFunctionError) function Model.Event.Event.get_and_update/3 is undefined (Model.Event.Event does not implement the Access behaviour)
+```
+
+Это потому, что при компиляции сразу генерируется нужный код. А в рантайме нужно, чтобы объект, на котором мы вызываем эти функции, реализовал Access behaviour. Мы пока не изучали, что такое behaviour, так что не будем углубляться. В большинстве случаев хватает макросов.
