@@ -68,6 +68,7 @@ defmodule Model.TypedEvent do
       participants: list(Participant.t),
       agenda: list(Topic.t)
     }
+    @enforce_keys [:title, :datetime, :location, :participants, :agenda]
     defstruct [
       :title,
       :datetime,
