@@ -11,7 +11,7 @@ defmodule Model.Calendar do
   @spec new() :: t
   def new(), do: %__MODULE__{items: []}
 
-  @spec add_item(t, CalendarItem) :: t
+  @spec add_item(t, CalendarItem.t) :: t
   def add_item(calendar, item) do
     %__MODULE__{calendar | items: [item | calendar.items]}
   end
