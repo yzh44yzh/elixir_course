@@ -103,17 +103,60 @@ dyalyzer не находит ошибок.
 - List.Chars
 - String.Chars
 
-TODO
-- просмотреть доку по каждому протоколу
-- и эту доку https://hexdocs.pm/elixir/Protocol.html
-- описать, для чего нужен каждый.
+Рассмотрим их по-очереди.
 
-Enum module which provides many functions that work with any data structure that implements the Enumerable protocol:
 
-String.Chars protocol, which specifies how to convert a data structure to its human representation as a string. It’s exposed via the to_string function
+### Enumerable
 
+https://hexdocs.pm/elixir/Enumerable.html
+
+Enumerable -- пожалуй, самый часто используемый протокол. Модуль Enum находится в центре любой работы с коллекциями, и любая коллекция реализует Enumerable.
+
+Модуль Stream тоже работает с коллекциями через этот протокол.
+
+Протокол содержит 4 функции: count, member?, reduce, slice. Все многообразие функций модуля Enum реализовано через эти 4 функции.
+
+Теоретически достаточно только reduce. Все остальное -- count, map, filter, slice, any, take и даже sort можно реализовать через reduce. Но на практике это не очень эффективно. Например, member? для Map выполняется за константное время, тогда как реализация на основе reduct была бы O(n).
+
+Enumerable.reduce это не то же самое, что Enum.reduce. Там более сложная реализация, где можно управлять итерацией -- останавливать, возобновлять и прерывать. Это позволяет более эффективно реализовывать остальные функции, не проходя всю коллекцию до конца, если это не нужно, или итерироваться по двум коллециям одновременно.
+
+
+### Collectable
+
+https://hexdocs.pm/elixir/Collectable.html
+
+Этот протокол в некотором роде противоположность Enumerable. Если идея Enumerable -- итерироваться по коллекции, то есть, по очереди извлекать из нее элементы; то идея Collectable -- собирать коллекцию, добавляя в нее элементы.
+
+Зачем это нужно? Это тоже нужно для модуля Enum. Дело в том, что функции модуля Enum на входе принимают любые коллекции, но на выходе у них всегда список. А что, если нужен не список? Для этого есть функция Enum.into, которая преобразует список в другую коллекцию, реализующую Collectable.
+
+```
+iex(1)> my_map = %{a: 1, b: 2}
+%{a: 1, b: 2}
+iex(3)> Enum.map(my_map, fn({k, v}) -> {k, v + 1} end)
+[a: 2, b: 3]
+iex(4)> Enum.map(my_map, fn({k, v}) -> {k, v + 1} end) |> Enum.into(%{})
+%{a: 2, b: 3}
+```
+
+Протокол Collectable описывает, как получить нужную коллекцию из списка. Протокол содержит только одну функцию -- into. И каждая коллекция, которая хочет работать с Enum.into, реализует её.
+
+Аналогично это работает с конструкторами списков:
+```
+iex(8)> for {k,v} <- my_map, do: {k, v + 1}
+[a: 2, b: 3]
+iex(9)> for {k,v} <- my_map, into: %{}, do: {k, v + 1}
+%{a: 2, b: 3
+```
+
+
+### Inspect
+
+TODO stopped here
+
+https://hexdocs.pm/elixir/Inspect.html
 
 The Inspect protocol is the protocol used to transform any data structure into a readable textual representation.
+
 
 Мы не раз видели в iex, как отображаются разные значения. Это делает функция Kernel.inspect
 
@@ -126,3 +169,48 @@ inspect не редко используется в логировании
 require Logger
 Logger.info("data is #{inspect data})
 ```
+
+
+
+### List.Chars
+
+https://hexdocs.pm/elixir/List.Chars.html
+
+
+### String.Chars
+
+https://hexdocs.pm/elixir/String.Chars.html
+
+String.Chars protocol, which specifies how to convert a data structure to its human representation as a string. It’s exposed via the to_string function
+
+Важно для сериализации данных в строковый формат, например, JSON.
+
+
+## Критика протоколов
+
+Некоторые разработчики оспаривают пользу протоколов или прямо называют их ненужными.
+
+В языке Эрланг их нет, и там каждый модуль -- map, lists, sets -- самостоятельно реализует функции map, filter, fold и др.
+
+Например:
+```
+> MyMap = #{k => 1, v => 2}.
+> MyFun = fun(K, V) -> V + 1 end.
+> maps:map(MyFun, MyMap).
+#{k => 2,v => 3}
+```
+концептуально проще, даже если вы не знакомы с синтаксисом Эрланг.
+
+Тогда как
+```
+%{a: 1, b: 2}
+|> Enum.map(fn({k,v}) -> {k, v + 1} end)
+|> Enum.into(%{})
+```
+концептуально сложнее.
+
+На мой взгляд протоколы Enumerable, Collectable не самые удачные примеры протоколов. И это потому, что в целом модуль Enum -- не самое удачное архитектурное решение.
+
+Зато Inspect и String.Chars -- это хорошие, полезные протоколы.
+
+Как бы там ни было, вам придется иметь дело с протоколами, если не в своем коде, то в чужом. Поэтому важно знать, как они работают.
