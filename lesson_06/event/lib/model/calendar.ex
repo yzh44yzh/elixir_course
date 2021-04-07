@@ -3,7 +3,7 @@ defmodule Model.Calendar do
   alias Model.CalendarItem
 
   @type t :: %__MODULE__{
-    items: [CalendarItem]
+    items: [CalendarItem.t]
   }
   @enforce_keys [:items]
   defstruct [:items]

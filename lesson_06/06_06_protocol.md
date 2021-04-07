@@ -151,23 +151,70 @@ iex(9)> for {k,v} <- my_map, into: %{}, do: {k, v + 1}
 
 ### Inspect
 
-TODO stopped here
+Мы не раз видели в iex консоли, как отображаются разные значения. В том числе такие сложные, как наши event.
+```
+iex(4)> event = StructExample.create()
+%Model.Event.Event{
+  agenda: [
+```
+Здесь многострочное форматирование с вложенными отступами и подсветка синтаксиса.
 
-https://hexdocs.pm/elixir/Inspect.html
+Это делает функция Kernel.inspect/2. А делает она это благодаря тому, что все типы данных в Эликсир реализуют протокол Inspect.
 
-The Inspect protocol is the protocol used to transform any data structure into a readable textual representation.
-
-
-Мы не раз видели в iex, как отображаются разные значения. Это делает функция Kernel.inspect
+Каждый тип сам описывает, как он должен быть представлен в консоли. Описание является не просто строкой, а документом в специальном формате Inspect.Algebra, который позволяет по-разному представлять структуру в зависимости от настроек (Inspect.Opts).
 
 ```
-TODO примеры
+inspect(event)
+inspect(event, pretty: true)
+inspect(event, pretty: true, limit: 3)
+inspect(event, pretty: true, width: 10)
 ```
 
-inspect не редко используется в логировании
+inspect не редко используется в логировании:
 ```
 require Logger
-Logger.info("data is #{inspect data})
+Logger.info("my event is #{inspect(event)}")
+Logger.info("my event is #{inspect(event, pretty: true, width: 10)}")
+```
+
+Кроме Kernel.inspect/2 есть еще функция IO.inspect/3, которая позволяет направить вывод в фай или в консоль. В реальных проектах это не очень нужно, так как есть Logger. Но IO.inspect полезен в pipeline для отладки, чтобы посмотреть промежуточные результаты.
+
+Например, у нас есть такой pipeline:
+```
+iex(24)> data = [1, 2, 3]
+[1, 2, 3]
+iex(25)> data |>
+...(25)> Enum.map(fn(i) -> i * i end) |>
+...(25)> Enum.sum()
+14
+```
+
+Мы можем использовать IO.inspect так:
+```
+data |>
+IO.inspect(label: "step 1") |>
+Enum.map(fn(i) -> i * i end) |>
+IO.inspect(label: "step 2") |>
+Enum.sum()
+
+step 1: [1, 2, 3]
+step 2: [1, 4, 9]
+14
+```
+
+TODO:
+
+The Inspect protocol can be derived to hide certain fields from structs, so they don't show up in logs, inspects and similar. This is especially useful for fields containing private information.
+
+The options :only and :except can be used with @derive to specify which fields should and should not appear in the algebra document:
+```
+defmodule User do
+  @derive {Inspect, only: [:id, :name]}
+  defstruct [:id, :name, :address]
+end
+
+inspect(%User{id: 1, name: "Homer", address: "742 Evergreen Terrace"})
+#=> #User<id: 1, name: "Homer", ...>
 ```
 
 
