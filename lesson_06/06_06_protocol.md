@@ -223,18 +223,48 @@ step 2: [1, 4, 9]
 ```
 
 
-### List.Chars
-
-https://hexdocs.pm/elixir/List.Chars.html
-
-
-### String.Chars
+### String.Chars и List.Chars
 
 https://hexdocs.pm/elixir/String.Chars.html
 
-String.Chars protocol, which specifies how to convert a data structure to its human representation as a string. It’s exposed via the to_string function
+https://hexdocs.pm/elixir/List.Chars.html
 
-Важно для сериализации данных в строковый формат, например, JSON.
+Эти два протокола позволяют конвертировать данные в строку.
+
+String.Chars -- в строку в двойных кавычках, то есть в бинарные данные в UTF8.
+
+List.Chars -- в строку в одиночных кавычках, то есть в список Unicode Codepoints.
+
+
+В отличие от Inspect, не все типы реализуют эти протоколы по умолчанию.
+```
+iex(10)> IO.puts("here is a number: #{42}")
+here is a number: 42
+:ok
+iex(11)> IO.puts("here is a map: #{ %{a: 42} }")
+** (Protocol.UndefinedError) protocol String.Chars not implemented for
+...
+iex(11)> IO.puts("here is a map: #{ inspect(%{a: 42}) }")
+here is a map: %{a: 42}
+:ok
+```
+
+Но их можно явно реализовать для любого типа:
+```
+iex(1)> ce = %CharsExample{a: 42, b: 500}
+%CharsExample{a: 42, b: 500}
+iex(2)> "ce is #{ce}"
+"ce is #CharsExample<a=42, b=500>"
+```
+
+В том числе и для Map:
+```
+iex(3)> my_map = Map.from_struct(ce)
+%{a: 42, b: 500}
+iex(4)> "my_map is #{my_map}"
+"my_map is #Map of size:2"
+
+```
 
 
 ## Критика протоколов
