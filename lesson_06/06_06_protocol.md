@@ -202,21 +202,25 @@ step 2: [1, 4, 9]
 14
 ```
 
-TODO:
+Как мы уже видели, протокол Inspect по умолчанию работает с нашими event любой реализации. Но иногда бывает необходимость реализовать протокол явно. Например, чтобы скрыть некоторые поля наших структур, чтобы они не выводились в лог. Это важно для приватной информации -- пароли, ключи, сертификаты.
 
-The Inspect protocol can be derived to hide certain fields from structs, so they don't show up in logs, inspects and similar. This is especially useful for fields containing private information.
-
-The options :only and :except can be used with @derive to specify which fields should and should not appear in the algebra document:
+Допустим, у вас есть стуктура AuthData, содержащая логин и пароль:
 ```
-defmodule User do
-  @derive {Inspect, only: [:id, :name]}
-  defstruct [:id, :name, :address]
-end
-
-inspect(%User{id: 1, name: "Homer", address: "742 Evergreen Terrace"})
-#=> #User<id: 1, name: "Homer", ...>
+> data1 = %Model.AuthData{login: "Tihon", password: "123"}
+%Model.AuthData{login: "Tihon", password: "123"}
 ```
 
+С помощью аттрибута @derive можно указать, какие поля скрывать или показывать в реализации Inpsect для этой структуры:
+```
+> data2 = %Model.AuthDataS{login: "Tihon", password: "123"}
+#Model.AuthDataS<login: "Tihon", ...>
+```
+
+Или можно явно реализовать Inspect:
+```
+> data3 = %Model.AuthDataC{login: "Tihon", password: "123"}
+#AuthData<login:"Tihon">
+```
 
 
 ### List.Chars
