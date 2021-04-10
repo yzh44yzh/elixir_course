@@ -15,7 +15,7 @@ end
 defimpl String.Chars, for: Map do
 
   def to_string(map) do
-    "#Map of size:#{Map.size(map)}"
+    "#Map of size:#{map_size(map)}"
   end
 
 end

@@ -5,7 +5,7 @@ defmodule Model.TypedEvent do
       country: String.t,
       city: String.t,
       street: String.t,
-      house_number: String.t
+      house_number: integer
     }
     @enforce_keys [:city, :street, :house_number]
     defstruct [
@@ -79,4 +79,3 @@ defmodule Model.TypedEvent do
   end
 
 end
-
