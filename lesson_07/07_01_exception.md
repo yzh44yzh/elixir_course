@@ -38,6 +38,17 @@ in advance, so they decided to focus on recovering from failure instead.
 
 # Exceptions
 
+Показать примеры:
+- failed pattern matching
+- timeout on GenServer call
+- invalid arithmetic (division by zero, 1 + :a)
+- invocation of non-existing function
+
+Краш одного потока не влияет на остальные потоки (кроме супервизора)
+Это отличается от некоторых других ЯП, где несколько потоков реализованы в рамках одного системного процесса, и краш одного потока крашит весь процесс и все потоки в нем
+(TODO узнать подробнее об этом)
+
+
 Elixir (like Erlang) takes the view that errors should normally be fatal
 to the processes in which they occur.
 
