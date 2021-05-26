@@ -38,6 +38,62 @@ in advance, so they decided to focus on recovering from failure instead.
 
 # Exceptions
 
+Тема сложная не очень хорошо описана в книгах и документации.
+
+Сложность в том, что есть 4 вида исключений.
+
+3 из них идут из Эрланга (и там есть четкая концепция, как их применять):
+- throw
+- error
+- exit
+
+И один вид добавляет Эликсир
+- raise
+
+И есть два способа перехватывать исключения:
+- try...rescue
+- try...catch
+
+catch идет из Эрланга, rescue добавлен в Эликсире.
+
+В книгах обычно описывают 2 из 4х видов: raise и throw. И описывают оба способа перехвата, но не объясняют, зачем их два разных. И не объясняют существование эрланговских исключений, и какая концепция стоит за ними.
+
+```
+iex(1)> c "07_01_exception.exs"
+[Lesson_07.Task_01_Exception]
+iex(2)> alias Lesson_07.Task_01_Exception, as: L
+Lesson_07.Task_01_Exception
+iex(3)> L.try_resque(:raise)
+rescue from %RuntimeError{message: "something went wrong"}
+:ok
+iex(4)> L.try_resque(:throw)
+** (throw) :something_went_wrong
+    07_01_exception.exs:20: Lesson_07.Task_01_Exception.generate_exception/1
+    07_01_exception.exs:5: Lesson_07.Task_01_Exception.try_resque/1
+iex(4)> L.try_resque(:error)
+rescue from %ErlangError{original: :something_went_wrong}
+:ok
+iex(5)> L.try_resque(:exit) 
+** (exit) :something_went_wrong
+    07_01_exception.exs:22: Lesson_07.Task_01_Exception.generate_exception/1
+    07_01_exception.exs:5: Lesson_07.Task_01_Exception.try_resque/1
+iex(5)> L.try_catch(:raise)
+catch error %RuntimeError{message: "something went wrong"}
+:ok
+iex(6)> L.try_catch(:throw)
+catch throw :something_went_wrong
+:ok
+iex(7)> L.try_catch(:error)
+catch error :something_went_wrong
+:ok
+iex(8)> L.try_catch(:exit) 
+catch exit :something_went_wrong
+:ok
+```
+
+resque ловит raise и error, не ловит throw и exit
+catch ловит все
+
 Показать примеры:
 - failed pattern matching
 - timeout on GenServer call
@@ -169,13 +225,13 @@ This will always run at the end of the try function, regardless of whether an ex
 
 ```
 def checkout() do
-try do
-{quantity, _} = ask_number("Quantity?")
-{price, _} = ask_number("Price?")
-quantity * price
-rescue
-MatchError -> "It's not a number"
-end
+  try do
+    {quantity, _} = ask_number("Quantity?")
+    {price, _} = ask_number("Price?")
+    quantity * price
+  rescue
+    MatchError -> "It's not a number"
+  end
 end
 ```
 
@@ -197,6 +253,24 @@ TODO разобраться, какая структура данных лежи
 
 
 ## throw, try..catch
+
+Как и в большинстве языков программирования, в эрланг есть исключения
+и способ их перехватить и обработать. Но картина несколько усложняется
+тем, что есть три типа исключений и три разных способа их генерировать.
+
+**throw(Reason)** -- генерирует обычное исключение.
+Чаще всего именно эту функцию используют разработчики.
+
+**erlang:error(Reason)** -- генерирует фатальную ошибку,
+восстановление после которой не подразумевается, и текущий поток
+должен упасть.  Впрочем, это скорее соглашение, нежели техническое
+отличие.  Перехватить и обработать это исключение все равно можно.
+
+**exit(Reason)** -- генерирует системное сообщение. Мы это обсуждали в
+11-м уроке "Обработка ошибок на низком уровне" и помним, что с помощью
+системных сообщений реализуются связи между потоками.  Необходимость
+вызывать exit/1 и вмешиваться в этот механизм возникает очень редко,
+разве что в целях тестирования.
 
 A second kind of error are generated when a process calls error, exit, or throw.
 All three take a parameter, which is available to the catch handler.
