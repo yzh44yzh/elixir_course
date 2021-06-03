@@ -1,4 +1,4 @@
-defmodule Lesson_07.Task_01_Exception do
+defmodule Lesson_07.Task_02_ExceptionTypes do
 
   def try_resque(exc_type) do
     try do
