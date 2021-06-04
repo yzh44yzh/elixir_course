@@ -1,30 +1,53 @@
 # Исключения
 
-## raise 
+Как и во многих других языках, в Эликсир есть исключения. Наверняка вы уже встречались с многими из них.
 
-Raise an exception with the raise function.
-At its simplest, you pass it a string and it generates an exception of type RuntimeError.
+Исключение **MatchError** возникает, если не сработало совпадение с образцом:
 ```
-iex> raise "Giving up"
-** (RuntimeError) Giving up
+> {:ok, _} = {:not_ok, 42}          
+** (MatchError) no match of right hand side value: {:not_ok, 42}
 ```
 
-You can also pass the type of the exception, along with other optional attributes.
-All exceptions implement at least the message attribute.
+Исключение **ArithmeticError** возникает при неправильных аргументах для операторов арифметики:
 ```
-iex> raise RuntimeError
+> 42 + :a
+** (ArithmeticError) bad argument in arithmetic expression: 42 + :a
+    :erlang.+(42, :a)
+```
+
+Вот еще некоторые:
+```
+> some_fun()
+** (CompileError) iex:1: undefined function some_fun/0
+
+> apply(SameModule, :some_fun, [])          
+** (UndefinedFunctionError) function SameModule.some_fun/0 is undefined (module SameModule is not available)
+    SameModule.some_fun()
+```
+
+
+## raise -- генерация исключения
+
+Функция raise генерирует исключение:
+```
+> raise(RuntimeError)
 ** (RuntimeError) runtime error
-iex> raise RuntimeError, message: "override message"
-** (RuntimeError) override message
 ```
 
-Показать примеры:
-- failed pattern matching
-- invalid arithmetic (division by zero, 1 + :a)
-- invocation of non-existing function
+Можно указать аттрибут **message**, который есть у исключений всех типов:
+```
+> raise(RuntimeError, message: "some error")
+** (RuntimeError) some error
+```
+
+RuntimeError -- этот тип исключения используется по-умолчанию, так что его можно явно не указывать:
+```
+> raise("some error")                       
+** (RuntimeError) some error
+```
 
 
-## rescue
+## rescue -- перехват исключения
 
 **rescue**, **catch**, and **after** clauses are optional.
 
@@ -33,20 +56,34 @@ They take patterns and code to execute if the pattern matches.
 The subject of the pattern is the exception that was raised.
 
 ```
-try do
-  raise_error(n)
-rescue
-  [FunctionClauseError, RuntimeError] ->
-    IO.puts "no function match or runtime error"
-  error in [ArithmeticError] ->
-    IO.inspect error
-    IO.puts "Arithmetic error"
-    reraise "too late, we're doomed", System.stacktrace
-  other_errors ->
-    IO.puts "Disaster! #{inspect other_errors}"
-after
-  IO.puts "DONE!"
-end
+iex(5)> c("07_01_exception.exs")
+warning: ...
+[Lesson_07.Task_01_Exception]
+iex(6)> alias Lesson_07.Task_01_Exception, as: LE    
+Lesson_07.Task_01_Exception
+
+iex(7)> LE.try_rescue()
+This is MatchError or ArithmeticError: %MatchError{term: :b}
+after clause is always called
+:ok
+
+iex(8)> r LE                                     
+iex(9)> LE.try_rescue()
+This is MatchError or ArithmeticError: %ArithmeticError{message: "bad argument in arithmetic expression"}
+after clause is always called
+:ok
+
+iex(10)> r LE           
+iex(11)> LE.try_rescue()
+This is RuntimeError: %RuntimeError{message: "runtime error"}
+after clause is always called
+:ok
+
+iex(12)> r LE           
+iex(13)> LE.try_rescue()
+uknown error: %UndefinedFunctionError{arity: 0, function: :some_fun, message: nil, module: SameModule, reason: nil}
+after clause is always called
+:ok
 ```
 
 We define three different exception patterns.
