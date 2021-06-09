@@ -4,7 +4,7 @@
 
 Исключение **MatchError** возникает, если не сработало совпадение с образцом:
 ```
-> {:ok, _} = {:not_ok, 42}          
+> {:ok, _} = {:not_ok, 42}
 ** (MatchError) no match of right hand side value: {:not_ok, 42}
 ```
 
@@ -26,7 +26,7 @@
 ```
 
 
-## raise -- генерация исключения
+## Генерация исключения с помощью raise
 
 Функция raise генерирует исключение:
 ```
@@ -42,24 +42,20 @@
 
 RuntimeError -- этот тип исключения используется по-умолчанию, так что его можно явно не указывать:
 ```
-> raise("some error")                       
+> raise("some error")
 ** (RuntimeError) some error
 ```
 
 
-## rescue -- перехват исключения
+## Перехват исключения с помощью rescue
 
-**rescue**, **catch**, and **after** clauses are optional.
-
-The rescue and catch clauses look a bit like the body of a **case**.
-They take patterns and code to execute if the pattern matches.
-The subject of the pattern is the exception that was raised.
+Для перехвата исключения используется конструкция **try..rescue**. Она позволяет по-разному обрабатывать исключения разных типов:
 
 ```
 iex(5)> c("07_01_exception.exs")
 warning: ...
 [Lesson_07.Task_01_Exception]
-iex(6)> alias Lesson_07.Task_01_Exception, as: LE    
+iex(6)> alias Lesson_07.Task_01_Exception, as: LE
 Lesson_07.Task_01_Exception
 
 iex(7)> LE.try_rescue()
@@ -67,87 +63,72 @@ This is MatchError or ArithmeticError: %MatchError{term: :b}
 after clause is always called
 :ok
 
-iex(8)> r LE                                     
+iex(8)> r LE
 iex(9)> LE.try_rescue()
 This is MatchError or ArithmeticError: %ArithmeticError{message: "bad argument in arithmetic expression"}
 after clause is always called
 :ok
 
-iex(10)> r LE           
+iex(10)> r LE
 iex(11)> LE.try_rescue()
 This is RuntimeError: %RuntimeError{message: "runtime error"}
 after clause is always called
 :ok
 
-iex(12)> r LE           
+iex(12)> r LE
 iex(13)> LE.try_rescue()
 uknown error: %UndefinedFunctionError{arity: 0, function: :some_fun, message: nil, module: SameModule, reason: nil}
 after clause is always called
 :ok
 ```
 
-We define three different exception patterns.
-The first matches one of the two exceptions, FunctionClauseError or RuntimeError.
-The second matches an ArithmeticError and stores the exception value in the variable error.
-And the last clause catches any exception into the variable other_error.
-
-We also include an after clause.
-This will always run at the end of the try function, regardless of whether an exception was raised.
-
+Конструкция **after** позволяет указать код, который выполнится в любом случае, не зависимо от того, произошло исключение или нет.
 
 
 ## Соглашение для функций, бросающих исключения
 
-Most of the time you can easily identify the functions that can raise errors or
-throw values because their names end with an exclamation point. For example,
-the File.cd!/1 function raises an exception when the path doesn’t exist.
+Многие функции в Эликсир имеют два варианта. Один вариант возвращает `{:ok, Result} | {:error, Reason}`, другой вариант бросает исключение.
 
-File.open!
-The trailing exclamation point in the method name is an Elixir convention —
-if you see it, you know the function will raise an exception on error, and that exception will be meaningful.
-
-Many built-in functions have two forms.
-The **xxx** form returns the tuple {:ok, data}
-and the **xxx!** form returns data on success but raises an exception otherwise.
-
-
-## Использование исключений для control flow
-
+Например:
 ```
-def checkout() do
-  try do
-    {quantity, _} = ask_number("Quantity?")
-    {price, _} = ask_number("Price?")
-    quantity * price
-  rescue
-    MatchError -> "It's not a number"
-  end
-end
+> m = %{:a => 42}
+%{a: 42}
+> Map.fetch(m, :a)
+{:ok, 42}
+> Map.fetch(m, :b)
+:error
+> Map.fetch!(m, :a)
+42
+> Map.fetch!(m, :b)
+** (KeyError) key :b not found in: %{a: 42}
+    (stdlib 3.13.2) :maps.get(:b, %{a: 42})
 ```
 
-Inside the try block, we create the happy-path code. The happy path is the
-code that handles only the success scenario. Then, in the rescue block, we
-create the error-handling code. Still in the rescue block, for each line we should
-provide an exception struct to match, and a code block.
+Или другой пример:
+```
+> File.read("./README.md")
+{:ok, "..."}
+> File.read("./somefile") 
+{:error, :enoent}
+> File.read!("./README.md")
+"..."
+> File.read!("./somefile") 
+** (File.Error) could not read file "./somefile": no such file or directory
+    (elixir 1.11.3) lib/file.ex:355: File.read!/1
+```
 
-When the pattern
-matching fails the MatchError exception will be raised, and then the list of pat-
-tern-matching expressions in the rescue will try to match the exception and
-execute the code block.
+В Эликсир принято соглашение, что имя функций, бросающих исключения, должно заканчиваться восклицательным знаком.
 
-If none of the pattern-matching expressions matches
-an exception raised, Elixir will raise that exception again.
 
-В некоторых языках исключения используются как control flow. Например, в Python нельзя этого избежать, даже если не хочется. Но в функциональных языках использование исключений для control flow считается плохим тоном.
+## Использование исключений для управления потоком выполнения
 
-Позже мы рассмотрим, какие есть альтернативы такому подходу.
+Использование исключений для управления потоком выполнения (control flow) -- спорная практика. Многие рекомендуют этого избегать, другие считают это приемлемым и удобным. 
 
-First, the official warning: exceptions in Elixir are not control-flow structures.
-Instead, Elixir exceptions are intended for things that should never happen in normal operation.
+Некоторые языки программирования, например Python, применяют такой подход даже в стандартных библиотеках, так что разработчик при всем желании не может этого избежать. Некоторые другие языки программирования, например Rust, вообще не имеют исключений. В Rust вместо исключений используется panic, который нельзя перехватить, и который всегда приводит к завершению процесса. 
 
-Throwing values or raising errors is unusual in functional programming. However,
-in large applications you’ll install libraries from other developers that use this
-strategy, and you need to know how to properly handle the raised errors and
-thrown values.
+Обычная ситуация, где используются исключения для управления потоком выполения -- это длинная цепочка действий, в которой на каждом шаге может быть условие, прерывающее выполнение всей цепочки. 
 
+Например, это может быть обработка http запроса, проходящая через десятки функций принадлежащих разным модулям, и даже разным подсистемам. В этой ситуации исключения позволяют прервать обработку запроса на любом уровне и сразу вернуть ответ клиенту.
+
+Однако, для таких ситуаций в Эликсир имеются другие средства. Поэтому применение исключений считается плохим тоном. Позже мы рассмотрим конкретные примеры.
 
