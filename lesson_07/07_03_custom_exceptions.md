@@ -1,37 +1,21 @@
-# Custom exceptions
+# Пользовательские типы исключений
 
-Exceptions in Elixir are basically records.
-_Но records не описаны в книге Дейва Томаса._
-все-таки struct?
+Эликсир позволяет создавать собственные типы исключений.
 
-MatchError is too generic; it can
-happen for several reasons. It’s better to provide specific error structs to
-clarify the problem by adding more context
-
-You can define your own exceptions by creating a module.
-Inside it, use defexception to define the various fields in the exception,
-along with their default values.
-
-Because you’re creating a module, you can also add functions —
-often these are used to format the exception’s fields into meaningful messages.
+Представим себе, что у нас есть некий сервис с HTTP API. Он принимает входящий запрос в виде JSON объекта, и валидирует его по JSON схеме. Если запрос не соответствует схеме, то генерируется исключение пользовательского типа, содержащее название схемы.
 
 ```
-defmodule KinectProtocolError do
-  defexception message: "Kinect protocol error",
-    can_retry: false
+> c "07_03_custom_exception.exs"
+> alias Lesson_07.Task_03_CustomException, as: L
 
-  def full_message(me) do
-    "Kinect failed: #{me.message}, retriable: #{me.can_retry}"
-  end
-end
+> L.validate(%{})
+** (SchemaValidationError) object doesn't match schema "my_request.json"
+    07_03_custom_exceptions.exs:4: Lesson_07.Task_03_CustomException.validate/1
+
+> L.validate_and_rescue(%{})
+validation failed, schema name is my_request.json
+:ok
 ```
 
-```
-try do
-  talk_to_kinect()
-rescue
-  error in [KinectProtocolError] ->
-    IO.puts KinectProtocolError.full_message(error)
-    if error.can_retry, do: schedule_retry()
-end
-```
+TODO: два вида исключений и обработка их в одном try..rescue
+и сюда же добавить RuntimeError
