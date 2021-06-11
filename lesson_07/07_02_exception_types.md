@@ -104,11 +104,28 @@ catch exit :something_went_wrong
 
 ## timeout on GenServer call
 
-Тут мы забегаем вперед, потому что gen_server еще не рассматривали.
+Мы еще не рассматривали GenServer, будем делать это позже. Но это хороший пример того, как rescue может неожиданно вас подвести. 
 
-TODO: показать, что raise это не ловит, а catch ловит.
+Речь идет о синхронном взаимодействии между двумя потоками, где один поток выполняет роль клиента, и отправляет запрос, а другой поток выполняет роль сервера, и отвечает на этот запрос. Если обработка запроса длится слишком долго (по умолчанию лимит составляет 5 секунд), то генерируется исключение класса :exit. 
 
-TODO: Посмотреть, как это работает в Erl 24. 
-посмотреть change log erl 24.
+```
+> c "07_02_gen_server_timeout.exs"
+> alias Lesson_07.Task_02_GenServerTimeout, as: L
+> L.start_server()
 
-похоже в 24-м эрланге gen_server:call на timeout уже не бросает исключение, а возвращает {error, timeout}
+> L.normal_request()
+{:ok, 42}
+
+> L.long_request_with_resque()
+** (exit) exited in: GenServer.call(MyServer, :long_request, 5000)
+    ** (EXIT) time out
+    (elixir 1.11.3) lib/gen_server.ex:1027: GenServer.call/3
+    07_02_gen_server_timeout.exs:13: Lesson_07.Task_02_GenServerTimeout.long_request_with_resque/0
+
+> L.long_request_with_catch() 
+Got error exit {:timeout, {GenServer, :call, [MyServer, :long_request, 5000]}}
+```
+
+Как мы видим, rescue не перехватывает такое исключение, а catch перехватывает.
+
+Такое вполне может случиться в реальной жизни даже если вы не используете GenServer в своем проекте. GenServer там все равно есть, в стандартных и в сторонних библиотеках. Например, в библиотеке Logger. Вы же будете писать логи в своем проекте? :)
