@@ -105,7 +105,7 @@
 07.04. Defensive Programming vs Let It Crash
 
 
-## Урок №8. Способы композиции функций.
+## Урок №8. Композиция функций.
 
 https://github.com/yzh44yzh/erl_fun_composition
 
