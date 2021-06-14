@@ -96,7 +96,13 @@
 
 ## Урок №7. Обработка ошибок.
 
-try..rescue, try..catch
+07.01. Исключения
+
+07.02. Классы исключений
+
+07.03. Пользовательские типы исключений
+
+07.04. Defensive Programming vs Let It Crash
 
 
 ## Урок №8. Способы композиции функций.
@@ -111,6 +117,7 @@ https://github.com/yzh44yzh/erl_fun_composition
 - reliable concurrency (links, monitors, timeouts)
 
 - OTP behaviours and other system abstractions
+
 
 ## Урок №10. GenServer.
 
