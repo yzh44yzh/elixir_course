@@ -65,11 +65,39 @@ defmodule BookShop do
     %Order{customer: cat, shipping_address: address, books: books}
   end
 
+  
+  @spec get_book(binary(), binary()) :: {:ok, Book.t} | {:error, {:book_not_found, binary()}}
+  def get_book(title, author) do
+    case Utils.rand_success() do
+      true ->
+        {:ok,
+         %Book {
+           id: "ISBN 978-5-00057-917-6",
+           title: title,
+           author: author
+         }
+        }
+      false -> {:error, {:book_not_found, title}}
+    end
+  end
+
+  
+  @spec get_book!(binary(), binary()) :: Book.t
+  def get_book!(title, author) do
+    case Utils.rand_success() do
+      true ->
+        %Book {
+          id: "ISBN 978-5-00057-917-6",
+          title: title,
+          author: author
+}
+      false -> raise BookNotFoundError, title
+    end
+  end
+
 
   defmodule Validator do
 
-    alias BookShop, as: BS
-    
     @spec validate_incoming_data(map()) :: {:ok, map()} | {:error, :invalid_incoming_data}
     def validate_incoming_data(json_data) do
       case Utils.rand_success() do
@@ -79,7 +107,7 @@ defmodule BookShop do
     end
 
 
-    @spec validate_cat(binary()) :: {:ok, BS.cat()} | {:error, :cat_not_found}
+    @spec validate_cat(binary()) :: {:ok, BookShop.cat()} | {:error, :cat_not_found}
     def validate_cat(cat_name) do
       case Utils.rand_success() do
         true -> {:ok, {:cat, cat_name}}
@@ -88,27 +116,11 @@ defmodule BookShop do
     end
 
 
-    @spec validate_address(binary()) :: {:ok, BS.address()} | {:error, :invalid_address}
+    @spec validate_address(binary()) :: {:ok, BookShop.address()} | {:error, :invalid_address}
     def validate_address(address) do
       case Utils.rand_success() do
         true -> {:ok, {:address, address}}
         false -> {:error, :invalid_address}
-      end
-    end
-
-
-    @spec get_book(binary(), binary()) :: {:ok, BS.Book.t} | {:error, {:book_not_found, binary()}}
-    def get_book(title, author) do
-      case Utils.rand_success() do
-        true ->
-          {:ok,
-           %BS.Book {
-             id: "ISBN 978-5-00057-917-6",
-             title: title,
-             author: author
-           }
-          }
-        false -> {:error, {:book_not_found, title}}
       end
     end
 
@@ -117,8 +129,6 @@ defmodule BookShop do
 
   defmodule ValidatorEx do
 
-    alias BookShop, as: BS
-    
     @spec validate_incoming_data!(map()) :: map()
     def validate_incoming_data!(json_data) do
       case Utils.rand_success() do
@@ -128,7 +138,7 @@ defmodule BookShop do
     end
 
 
-    @spec validate_cat!(binary()) :: BS.cat()
+    @spec validate_cat!(binary()) :: BookShop.cat()
     def validate_cat!(cat_name) do
       case Utils.rand_success() do
         true -> {:cat, cat_name}
@@ -137,25 +147,11 @@ defmodule BookShop do
     end
 
 
-    @spec validate_address!(binary()) :: BS.address()
+    @spec validate_address!(binary()) :: BookShop.address()
     def validate_address!(address) do
       case Utils.rand_success() do
         true -> {:address, address}
         false -> raise InvalidAddressError
-      end
-    end
-
-
-    @spec get_book!(binary(), binary()) :: BS.Book.t
-    def get_book!(title, author) do
-      case Utils.rand_success() do
-        true ->
-          %BS.Book {
-            id: "ISBN 978-5-00057-917-6",
-            title: title,
-            author: author
-      }
-        false -> raise BookNotFoundError, title
       end
     end
 
