@@ -16,5 +16,24 @@ defmodule FP do
       end
     end
   end
-  
+
+
+  def pipeline(arg, funs) do
+    Enum.reduce(funs, {:ok, arg},
+      fn
+        (f, {:ok, prev_res}) -> f.(prev_res)
+        (_, {:error, reason}) -> {:error, reason}
+      end)
+  end
+
+
+  def sequence([]), do: {:ok, []}
+  def sequence([{:error, reason} | _]), do: {:error, reason} 
+  def sequence([{:ok, val} | tail]) do
+    case sequence(tail) do
+      {:ok, list} -> {:ok, [val | list]}
+      {:error, error} -> {:error, error}
+    end
+  end
+
 end
