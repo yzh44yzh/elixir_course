@@ -3,7 +3,7 @@ defmodule Solution3 do
     alias BookShop.ValidatorEx, as: V
 
     @spec main :: {:ok, BookShop.Order.t} | {:error, term}
-    def main do
+    def main() do
         BookShop.test_data |> handle_create_order
     end
 
