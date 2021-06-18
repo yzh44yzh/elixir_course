@@ -21,7 +21,7 @@ defmodule CatNotFoundError do
     
   @impl true
   def exception(cat_name) do
-    msg = "cat \"#{cat_name}\" is not found"
+    msg = "cat '#{cat_name}' is not found"
     %CatNotFoundError{message: msg, cat_name: cat_name}
   end
 
@@ -51,7 +51,7 @@ defmodule BookNotFoundError do
     
   @impl true
   def exception(title) do
-    msg = "book \"#{title}\" is not found"
+    msg = "book '#{title}' is not found"
     %BookNotFoundError{message: msg, title: title}
   end
 
