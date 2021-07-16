@@ -1,4 +1,4 @@
-defmodule Lesson_07.Task_01_CompositionSamples do
+defmodule Lesson_08.Task_01_CompositionSamples do
 
   @spec f1(integer()) :: integer()
   def f1(a) do
