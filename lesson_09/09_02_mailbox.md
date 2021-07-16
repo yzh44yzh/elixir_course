@@ -2,31 +2,33 @@
 
 У каждого процесса есть специальная область памяти -- почтовый ящик (mailbox), куда копируются адресованные ему сообщения. Там сообщения накапливаются в очереди, в порядке их появления.
 
-Чтобы прочитать сообщения в почтовом ящике, нужно использовать конструкцию **receive**.
+Чтобы прочитать сообщения в почтовом ящике, нужно использовать конструкцию `receive`. Она аналогична конструкции `case`, тоже состоит из шаблонов и охранных выражений.
 
-``` TODO elixir
-receive
-    Pattern1 [when Guard1] ->
-        Expressions1;
-    Pattern2 [when Guard2] ->
-        Expressions2;
-    ...
-end
+```
+iex(1)> c "09_02_mailbox.exs"
+[Lesson_09.Task_02_Mailbox]
+iex(2)> alias Lesson_09.Task_02_Mailbox, as: T
+Lesson_09.Task_02_Mailbox
+
+iex(3)> send(self(), {:tag1, "Hello"})
+{:tag1, "Hello"}
+iex(4)> T.check_mailbox()
+got msg with tag1: "Hello"
+:ok
+
+iex(5)> send(self(), {:tag2, "Hi"})
+{:tag2, "Hi"}
+iex(6)> send(self(), :hello)
+:hello
+iex(7)> T.check_mailbox()
+got msg with tag2: "Hi"
+:ok
+iex(8)> T.check_mailbox()
+got unknown msg :hello
+:ok
 ```
 
-Синтаксис аналогичен конструкции **case**.
 
-В этом примере процесс отправляет сообщение самому себе, и получает его с помощью receive:
-
-``` TODO elixir
-12> self() ! "hello again".
-"hello again"
-13> receive
-13> Msg -> io:format("got message:~p~n", [Msg])
-13> end.
-got message:"hello again"
-ok
-```
 
 При вызове receive процесс берет сообщение из очереди и сопоставляет его с имеющимися шаблонами. Если находится подходящий шаблон, то выполняется соответствующий блок кода, и затем код после receive. А сообщение удаляется из почтового ящика. Другие сообщения в почтовом ящике остаются до следующего вызова receive.  Если сообщение не совпало ни с одним шаблоном, то оно остается в очереди, и для проверки берется следующее.
 
