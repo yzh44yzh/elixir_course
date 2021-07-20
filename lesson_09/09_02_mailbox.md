@@ -107,71 +107,61 @@ got unknown msg :something_not_expected
 Это является хорошей практикой еще и потому, что если процесс получает неожиданные сообщения, то скорее всего где-то в коде есть баг -- сообщения отправляются не туда, куда должны отправляться. catch all шаблон позволяет заметить это. 
 
 
-TODO stopped here
-
 ## Регистрация процессов
 
-Pid -- штука хорошая, но не всегда удобная. Если мы хотим посылать сообщения в процесс из нескольких других процессов, нам придется как-то передать всем им Pid получателя.
+Pid не единственный способ обратиться к нужному процессу. Если мы хотим отправлять сообщения из нескольких других процессов, что бывает не редко, то довольно сложно всем им передать нужный Pid. А если учесть, что многие процессы живут не бесконечно, а стартуют и завершаются, то пользоваться Pid становится совсем неудобно. 
 
-Но есть альтернатива -- процессу можно дать некое имя, глобальное на уровне всей ноды, и потом обращаться к нему по этому имени.
+Процесс можно зарегистрировать под неким именем, и затем обращаться к нему по этому имени. 
 
-``` TODO elixir
-register(Name, Pid)
+```
+iex(3)> Process.register(self(), :pool_manager)
+true
+iex(4)> send(:pool_manager, :hello)
+:hello
+iex(5)> T.check_mailbox()
+got unknown msg :hello
+:ok
 ```
 
-Вызов register сгенерирует исключение, если имя уже связано с другим процессом.
+Имена глобальны на уровне всей системы, и в любой момент времени под конкретным именем может быть зарегистрирован только один процесс.
+
+```
+iex(6)> Process.register(self(), :pool_manager)
+** (ArgumentError) could not register #PID<0.107.0> with name :pool_manager because it is not alive, the name is already taken, or it has already been given another name
+```
+
+Как видно из этого сообщения, зарегистрировать процесс не удается, если:
+- имя уже занято другим процессом;
+- нужный процесс уже зарегистрирован с другим именем;
+- нужный процесс уже завершился (not alive).
+
+Мы можем узнать все имена, которые зарегистрированы в системе:
+
+```
+iex(7)> Process.registered()
+[:global_group, :elixir_config, :file_server_2, :pool_manager, :code_server,
+ :kernel_sup, IEx.Pry, Logger, :erl_prim_loader, :elixir_code_server,
+ IEx.Config, :standard_error, :erts_code_purger, :application_controller,
+ IEx.Broker, :user_drv, Logger.BackendSupervisor, :logger_sup, :kernel_safe_sup,
+ :kernel_refc, :init, :user, :logger_proxy, :logger, :standard_error_sup,
+ :global_name_server, IEx.Supervisor, :elixir_sup, :erl_signal_server,
+ Logger.Supervisor, :inet_db, :socket_registry, :logger_handler_watcher, :rex]
+```
+
+Как видим, их довольно много.
+
+Мы можем узнать Pid процесса по имени:
+
+```
+iex(11)> Process.whereis(:pool_manager)
+#PID<0.107.0>
+```
 
 Регистрацию процесса можно отменить:
 
-``` TODO elixir
-unregister(Name)
 ```
-
-Можно узнать все имена зарегистрированных процессов, какие есть в ноде:
-
-``` TODO elixir
-registered()
-```
-
-И можно узнать Pid процесса по имени:
-
-``` TODO elixir
-whereis(Name)
-```
-
-Пробуем: 
-
-``` TODO elixir
-1> registered().
-[erl_prim_loader,error_logger,kernel_safe_sup,init,user,rex,
- inet_db,kernel_sup,code_server,standard_error_sup,
- global_name_server,application_controller,file_server_2,
- user_drv,standard_error,global_group]
-2> register(erl_console, self()).
+iex(13)> Process.unregister(:pool_manager)
 true
-3> registered().
-[erl_prim_loader,error_logger,kernel_safe_sup,init,user,rex,
- inet_db,kernel_sup,code_server,standard_error_sup,
- global_name_server,erl_console,application_controller,
- file_server_2,user_drv,standard_error,global_group]
-4> whereis(erl_console).
-<0.33.0>
-5> self().
-<0.33.0>
-6> unregister(erl_console).
-true
+iex(14)> Process.whereis(:pool_manager)
+nil
 ```
-
-
-## Выводы
-
-Легкие процессы, обмен сообщениями, отсутсвие разделяемой памяти дают хорошую базу для:
-- масштабируемости;
-- распределенности;
-- устойчивости к ошибкам.
-
-Поскольку процессы -- дешевый ресурс, их можно создавать в количестве, адекватном нагрузке на систему, и менять вместе с изменением нагрузки.
-
-Если мы умеем передавать сообщения от одного процессы другому в рамках одной ноды, то не сложно это делать и между двумя нодами. Нужен только транспорт поверх TCP, и в виртуальной машине  этот транспорт есть.
-
-Поскольку процессы изолированы друг от друга, то падение одного процесса не влияет на работу других процессов.  Впрочем, устойчивость к ошибкам не появляется сама по себе, программисту еще нужно постараться, чтобы этого добиться :)
