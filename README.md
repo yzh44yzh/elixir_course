@@ -128,15 +128,30 @@
 
 - reliable concurrency (links, monitors, timeouts)
 
-- OTP behaviours and other system abstractions
-
 
 ## Урок №10. GenServer.
 
-Registry
+GenServer
+
+Task
+
+Agent
+
+Registry?
 
 
 ## Урок №11. Supervisor, Application.
+
+Supervisor
+
+Application
+
+Модель акторов
+
+Let It Crash (again)
+
+Observer
+
 
 ## Урок №12. Erlang Term Storage.
 
