@@ -5,65 +5,66 @@
 Этот механизм существенно отличается:
 - связь односторонняя;
 - информация сразу приходит в виде сообщения, а не в виде сигнала;
-- мониторов может быть несколько, и каждый работает независимо от остальных;
 - получателю не нужно быть системным процессом;
-- информация о нормальном завершении тоже доходит и обрабатывается.
+- мониторов может быть несколько, и каждый работает независимо от остальных.
 
-Текущий процесс может установить монитор над другим процессом вызовом:
-``` TODO elixir
-Reference = erlang:monitor(process, Pid)
-```
+Текущий процесс может установить монитор над другим процессом вызовом [Process.monitor/1](https://hexdocs.pm/elixir/1.12/Process.html#monitor/1), или вызовом [Kernel.spawn_monitor/3](https://hexdocs.pm/elixir/1.12/Kernel.html#spawn_monitor/3), если нужно, чтобы запуск процесса и установка монитора выполнились атомарно.
 
-В аргументах передаются атом _process_ и Pid процесса, который нужно мониторить.  Возвращается ссылка на установленный монитор. (Первый аргумент предполагает, что мониторить можно что-то еще, кроме процессов. Но подробности смотрите в документации).
-
-Если процесс завершается, то второй процесс получает сообщение:
-``` TODO elixir
-{'DOWN', Reference, process, Pid, Reason}
-```
-
-Где Reference -- это ссылка на монитор, Pid -- завершившийся процесс, Reason -- причина завершения процесса.
-
-Установленный монитор можно снять:
-``` TODO elixir
-erlang:demonitor(Reference, [flush]).
-```
-
-Опция flush удаляет из почтового ящика сообщение вида {'DOWN', Reference, process, Pid, Reason}, если оно есть.
-
-
-## Заключение
-
-Использовать низкоуровневые функции **link/unlink** и создавать свои системные процессы не рекомендуется. Нужен хороший опыт, чтобы грамотно пользоваться этими средствами.  К счастью, это редко бывает нужно, потому что у нас есть высокоуровневое средство -- супервизор.
-
-Супервизор построен поверх **link** и **trap_exit**, построен хорошо и отлажен годами использования в нагруженных проектах.  Вот его и нужно использовать. Это тема следующего урока.
-
-**monitor** используется чаще, когда нам не хватает тех вариантов обработки, которые предлагает супервизор.
-
-
-------------------------------------------------
-
-Kernel.spawn_link/1 and Kernel.spawn_link/3
-Kernel.spawn_monitor/1 and Kernel.spawn_monitor/3
-
-Process.monitor demonitor
-
-
-## Monitor
-
-By contrast, monitoring lets a process spawn another and be notified of its termination, 
-but without the reverse notification — it is one-way only.
-
-You can use spawn_monitor to turn on monitoring when you spawn a process,
-or you can use Process.monitor to monitor an existing process.
-
-The spawn_link and spawn_monitor versions are atomic, so you’ll always catch a failure.
-
-Devin Torres reminded me that every book in the Erlang space must, by law, include a parallel map function.
+Запустим несколько процессов под монитором:
 
 ```
-monitor_ref = Process.monitor(target_pid)
-{:DOWN, monitor_ref, :process, from_pid, exit_reason}
+iex(1)> c "09_04_monitor.exs"
+[Lesson_09.Task_04_Monitor]
+iex(2)> alias Lesson_09.Task_04_Monitor, as: T
+Lesson_09.Task_04_Monitor
+iex(3)> T.run_and_exit(5)
+Process id:1 pid:#PID<0.117.0> started
+Process id:2 pid:#PID<0.118.0> started
+Process id:3 pid:#PID<0.119.0> started
+Process id:4 pid:#PID<0.120.0> started
+Process id:5 pid:#PID<0.121.0> started
+Process id:3 exits
+[
+  {#PID<0.117.0>, #Reference<0.2596432641.4157341700.33111>},
+  {#PID<0.118.0>, #Reference<0.2596432641.4157341700.33112>},
+  {#PID<0.119.0>, #Reference<0.2596432641.4157341700.33113>},
+  {#PID<0.120.0>, #Reference<0.2596432641.4157341700.33114>},
+  {#PID<0.121.0>, #Reference<0.2596432641.4157341700.33115>}
+] 
+Process id:4 pid:#PID<0.120.0> stopped
+Process id:1 pid:#PID<0.117.0> stopped
+Process id:5 pid:#PID<0.121.0> stopped
+Process id:2 pid:#PID<0.118.0> stopped
 ```
 
-GenServer.call uses temporary monitor.
+Вызов spawn_monitor возвращает пару `{pid, ref}`, где ref -- это уникальная ссылка на монитор. Один процесс может установить несколько мониторов, и на один процесс может быть установлено несколько мониторов, поэтому нельзя различить их по pid, нужен отдельный идентификатор.
+
+Мы видим, что 5 процессов стартовали, 1 завершился аварийно, а 4 завершились успешно.
+
+Посмотрим, какие сообщения мы получили:
+
+```
+iex(4)> flush()
+{:DOWN, #Reference<0.2596432641.4157341700.33113>, :process, #PID<0.119.0>,
+ :some_reason}
+{:DOWN, #Reference<0.2596432641.4157341700.33114>, :process, #PID<0.120.0>,
+ :normal}
+{:DOWN, #Reference<0.2596432641.4157341700.33111>, :process, #PID<0.117.0>,
+ :normal}
+{:DOWN, #Reference<0.2596432641.4157341700.33115>, :process, #PID<0.121.0>,
+ :normal}
+{:DOWN, #Reference<0.2596432641.4157341700.33112>, :process, #PID<0.118.0>,
+ :normal}
+:ok
+```
+
+Если процесс под монитором завершился, то процесс, установивший монитор, получает сообщение `{:DOWN, ref, :process, pid, reason}`. То есть, кортеж из 5 элементов, содержащий Pid, ссылку и причину завершения.
+
+Обычно связь между процессами постоянная (хоть ее и можно снять), а монитор устанавливают временно. 
+
+Монитор снимается вызовом [Process.demonitor/2](https://hexdocs.pm/elixir/1.12/Process.html#demonitor/2).
+
+Связи и системные процессы являются низкоуровневыми механизмами, на которых построен OTP фреймворк. Знать про них полезно, но пользоваться напрямую не рекомендуется. Лучше пользоваться абстракциями, которые дает OTP. И это будет темой следущих уроков.
+
+Зато мониторами пользоваться можно и нужно. Они добавляют гибкости там, где средств OTP не хватает.
 
