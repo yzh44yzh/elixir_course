@@ -39,7 +39,14 @@ erlang:demonitor(Reference, [flush]).
 
 **monitor** используется чаще, когда нам не хватает тех вариантов обработки, которые предлагает супервизор.
 
+
 ------------------------------------------------
+
+Kernel.spawn_link/1 and Kernel.spawn_link/3
+Kernel.spawn_monitor/1 and Kernel.spawn_monitor/3
+
+Process.monitor demonitor
+
 
 ## Monitor
 
