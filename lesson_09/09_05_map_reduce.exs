@@ -1,10 +1,17 @@
 defmodule Lesson_09.Task_05_Map_Reduce do
 
-  alias Lesson_09.Task_05_Map_Reduce.Mapper
-  alias Lesson_09.Task_05_Map_Reduce.Reducer
-
   def start() do
-    processes_tree = 
+    Lesson_09.Task_05_Map_Reduce.Coordinator.start()
+  end
+  
+  
+  defmodule Coordinator do
+    
+    alias Lesson_09.Task_05_Map_Reduce.Mapper
+    alias Lesson_09.Task_05_Map_Reduce.Reducer
+    
+    def start() do
+      processes_tree = 
       {:reducer, :root_reducer, [
           {:reducer, :r1, [
               {:mapper, :w1, "./09_01_processes.md"},
@@ -15,27 +22,29 @@ defmodule Lesson_09.Task_05_Map_Reduce do
               {:mapper, :w4, "./09_04_monitor.md"}
             ]}
         ]}
-    
-    start(self(), processes_tree)
+      
+      start(self(), processes_tree)
 
-    receive do
-      {:result, :root_reducer, result} ->
-        {:ok, result}
-      msg ->
-        {:error, :unknown_msg, msg}
-    after 5000 ->
-        {:error, :timeout}
+      receive do
+        {:result, :root_reducer, result} ->
+          {:ok, result}
+        msg ->
+          {:error, :unknown_msg, msg}
+      after 5000 ->
+          {:error, :timeout}
+      end
     end
-  end
 
-  defp start(parent, {:reducer, id, childs}) do
-    child_ids = Enum.map(childs, fn({_, id, _}) -> id end)
-    pid = spawn(Reducer, :start, [parent, id, child_ids])
-    for child <- childs, do: start(pid, child)
-  end
-  
-  defp start(parent, {:mapper, id, file}) do
-    spawn(Mapper, :start, [parent, id, file])
+    defp start(parent, {:reducer, id, childs}) do
+      child_ids = Enum.map(childs, fn({_, id, _}) -> id end)
+      pid = spawn(Reducer, :start, [parent, id, child_ids])
+      for child <- childs, do: start(pid, child)
+    end
+    
+    defp start(parent, {:mapper, id, file}) do
+      spawn(Mapper, :start, [parent, id, file])
+    end
+    
   end
 
   
