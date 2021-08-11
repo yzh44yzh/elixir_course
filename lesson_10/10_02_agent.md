@@ -5,7 +5,7 @@ https://elixir-lang.org/getting-started/mix-otp/agent.html
 
 - придумать пример
 
-# Agents
+# Agent
 
 An agent is a background process that maintains state.
 
