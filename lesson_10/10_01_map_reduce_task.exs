@@ -8,7 +8,8 @@ defmodule Lesson_10.Task_01_Map_Reduce do
             {:mapper, "./10_02_agent.md"}
           ]},
         {:reducer, [
-            {:mapper, "./10_01_map_reduce_task.exs"}
+            {:mapper, "./10_03_create_gen_server.md"},
+            {:mapper, "./10_04_gen_server_module.md"}
           ]}
       ]}
     start(processes_tree)
