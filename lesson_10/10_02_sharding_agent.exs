@@ -15,6 +15,20 @@ defmodule Lesson_10.Task_02_Sharding do
     Agent.get(:sharding_info, fn(state) -> find_node(state, shard_num) end)
   end
 
+  def reshard(nodes, num_shards) do
+    num_nodes = length(nodes)
+    shards_per_node = div(num_shards, num_nodes)
+    {_, new_state} =
+      Enum.reduce(nodes, {0, []},
+        fn (node, {from_shard, acc}) ->
+          to_shard = from_shard + shards_per_node
+          to_shard = if to_shard > num_shards, do: num_shards, else: to_shard
+          {to_shard, [{from_shard, to_shard - 1, node} | acc]}
+        end)
+    Agent.update(:sharding_info, fn(_old_state) -> new_state end)
+    new_state
+  end
+
   # it works inside Agent process
   defp find_node(state, shard_num) do
     Enum.reduce(state, {:error, :not_found},
