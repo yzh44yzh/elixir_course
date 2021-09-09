@@ -33,7 +33,7 @@ If init/1 returns :ignore, client will receive :ignore.
 The first is an error situation, the second is a normal situation.
 
 
-## 1-й этап, простейший цикл.
+## 1-й шаг, простейший цикл.
 
 Нам нужен поток, который никогда не завершается. Используем для этого
 бесконечную рекурсию.
@@ -64,7 +64,7 @@ Server #PID<0.140.0> enters loop
 
 ```
 
-## 2-й этап, stop
+## 2-й шаг, stop
 
 Предусмотрим нормальное завершение потока. Для этого добавим обработку
 сообщения **stop**, получив которое, поток не будет вызывать **loop**.
@@ -99,7 +99,7 @@ false
 ```
 
 
-## 3-й этап, цикл c состоянием.
+## 3-й шаг, цикл c состоянием.
 
 Добавим хранимое состояние. Теперь функция **loop** получает
 аргумент. Это состояние потока. После **spawn** он имеет некое
@@ -162,9 +162,51 @@ Server #PID<0.202.0> stops now
 :stop
 ```
 
-## N-й этап, горячее обновление кода.
+## 4-й шаг, горячее обновление кода.
 
-src/gs3.erl
+TODO: показать, как одновременно работают две версии кода:
+```
+iex(3)> alias Lesson_10.GS_4, as: S 
+Lesson_10.GS_4
+iex(4)> pid = S.start
+start Server
+Server #PID<0.119.0> enters loop
+#PID<0.119.0>
+iex(5)> send(pid, :show)
+current state is []
+:show
+Server #PID<0.119.0> enters loop
+
+iex(6)> r S
+warning: redefining module Lesson_10.GS_4 (current version defined in memory)
+  create_gen_server/gs4.exs:1
+
+{:reloaded, Lesson_10.GS_4, [Lesson_10.GS_4]}
+iex(7)> send(pid, :show)
+current state is []
+Server #PID<0.119.0> enters loop
+:show
+iex(8)> pid2 = S.start
+start Server 4
+Server 4 #PID<0.129.0> enters loop
+#PID<0.129.0>
+iex(9)> send(pid, :show)
+current state is []
+Server #PID<0.119.0> enters loop
+:show
+iex(10)> send(pid2, :show)
+current state is []
+:show
+Server 4 #PID<0.129.0> enters loop
+
+iex(12)> send(pid2, :stop)
+Server 4 #PID<0.129.0> stops now
+:stop
+iex(13)> send(pid, :stop) 
+Server #PID<0.119.0> stops now
+:stop
+
+```
 
 Здесь мы заменили вызовы **loop(State)** на **?MODULE:loop(State)**.
 Тем самым мы заменили локальный вызов функции (только по ее имени),
@@ -179,20 +221,84 @@ src/gs3.erl
 версию 2.
 
 На следующих этапах мы уже не будем останавливать поток, а будем
-пользоваться горячим обновлением кода.
+пользоваться горячим обновлением кода без потери состояния сервера.
 
+TODO: убрать лишнее, сделать понятную сессию
+```
+iex(14)> r S
+warning: redefining module Lesson_10.GS_4 (current version defined in memory)
+  create_gen_server/gs4.exs:1
 
-## N-й этап, публичный АПИ модуля.
+{:reloaded, Lesson_10.GS_4, [Lesson_10.GS_4]}
+iex(15)> pid1 = S.start
+start Server 4
+Server 4 #PID<0.142.0> enters loop
+#PID<0.142.0>
+iex(16)> send(pid1, :show)
+current state is []
+:show
+Server 4 #PID<0.142.0> enters loop
+iex(17)> r S
+warning: redefining module Lesson_10.GS_4 (current version defined in memory)
+  create_gen_server/gs4.exs:1
 
-src/gs4.erl
+{:reloaded, Lesson_10.GS_4, [Lesson_10.GS_4]}
+iex(18)> send(pid1, :show)
+current state is []
+:show
+<Server 4> #PID<0.142.0> enters loop
+iex(19)> send(pid1, {:add, 42})
+<Server 4> #PID<0.142.0> enters loop
+{:add, 42}
+iex(20)> r S
+warning: redefining module Lesson_10.GS_4 (current version defined in memory)
+  create_gen_server/gs4.exs:1
+
+{:reloaded, Lesson_10.GS_4, [Lesson_10.GS_4]}
+iex(21)> send(pid1, :show)     
+current state is '*'
+[Server 4] #PID<0.142.0> enters loop
+:show
+iex(22)> send(pid1, {:add, 142})
+[Server 4] #PID<0.142.0> enters loop
+{:add, 142}
+iex(23)> send(pid1, :show)      
+current state is [142, 42]
+:show
+[Server 4] #PID<0.142.0> enters loop
+```
+
+## 5-й шаг, публичный АПИ модуля.
 
 Дальше взаимодействие с сервером будет усложняться, поэтому спрячем
 отправку сообщений внутри функций.
 
+```
+iex(25)> c "create_gen_server/gs5.exs"
+[Lesson_10.GS_5]
+iex(26)> alias Lesson_10.GS_5, as: S5
+Lesson_10.GS_5
+iex(27)> pid = S5.start()
+start Server
+[Server 5] #PID<0.171.0> enters loop
+#PID<0.171.0>
+iex(28)> S5.add(pid, "Hello")
+[Server 5] #PID<0.171.0> enters loop
+{:add, "Hello"}
+iex(29)> S5.add(pid, "Bob")  
+[Server 5] #PID<0.171.0> enters loop
+{:add, "Bob"}
+iex(30)> S5.show(pid)
+current state is ["Bob", "Hello"]
+:show
+[Server 5] #PID<0.171.0> enters loop
+iex(31)> S5.stop(pid)
+[Server 5] #PID<0.171.0> stops now
+:stop
+```
 
-## N-й этап, синхронный ответ на сообщение.
 
-src/gs5.erl
+## 6-й шаг, синхронный ответ на сообщение.
 
 Это хорошо, что наш сервер умеет хранить состояние и менять его в
 зависимости от запросов клиентов. Но было бы неплохо, чтобы сервер
@@ -204,8 +310,40 @@ src/gs5.erl
 Теперь для клиента взаимодействие с сервером выглядит как синхронный
 вызовы функции, и получение ответа из нее.
 
+TODO: нужно добавлять не цифры, а что-то другое. А то show показывает не то, что надо.
+```
+iex(33)> c "create_gen_server/gs6.exs"
+[Lesson_10.GS_6]
+iex(34)> alias Lesson_10.GS_6, as: S6
+Lesson_10.GS_6
+iex(35)> pid = S6.start()
+start Server
+[Server 6] #PID<0.195.0> enters loop
+#PID<0.195.0>
+iex(36)> S6.add(pid, 42)
+[Server 6] #PID<0.195.0> enters loop
+:ok
+iex(37)> S6.add(pid, 43)
+[Server 6] #PID<0.195.0> enters loop
+:ok
+iex(39)> S6.check(pid, 43)
+[Server 6] #PID<0.195.0> enters loop
+true
+iex(40)> S6.check(pid, 44)
+[Server 6] #PID<0.195.0> enters loop
+false
+iex(41)> S6.show(pid)     
+[Server 6] #PID<0.195.0> enters loop
+'+*'
+iex(42)> S6.remove(pid, 43)
+[Server 6] #PID<0.195.0> enters loop
+:ok
+iex(43)> S6.show(pid)      
+[Server 6] #PID<0.195.0> enters loop
+'*'
+```
 
-## N-й этап, добавляем таймаут.
+## N-й шаг, добавляем таймаут.
 
 src/gs6.erl
 
@@ -218,17 +356,17 @@ gen_server так и сделано.  Но мы сейчас не будем с�
 а просто добавим 5-ти секундный timeout в функцию receive.
 
 
-## N-й этап, убираем дублирование кода в публичном АПИ.
+## N-й шаг, убираем дублирование кода в публичном АПИ.
 
 src/gs7.erl
 
 
-## N-й этап, также убираем дублирование кода в loop.
+## N-й шаг, также убираем дублирование кода в loop.
 
 src/gs8.erl
 
 
-## N-й этап, матчинг сообщений по Ref.
+## N-й шаг, матчинг сообщений по Ref.
 
 src/gs9.erl
 
@@ -242,7 +380,7 @@ src/gs9.erl
 умеет генерировать уникальные значения такого типа.
 
 
-## N-й этап, монитор, обработка ошибок.
+## N-й шаг, монитор, обработка ошибок.
 
 src/gs10.erl
 
