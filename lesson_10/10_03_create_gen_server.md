@@ -343,30 +343,78 @@ iex(43)> S6.show(pid)
 '*'
 ```
 
-## N-й шаг, добавляем таймаут.
+## 7-й шаг, добавляем таймаут.
 
-src/gs6.erl
+Мы блокируем поток клиента, и это не всегда хорошо. 
+Будет особенно нехорошо заблокировать консоль.
 
-Мы блокируем поток клиента, и это не всегда хорошо. Правильно будет позволить
-клиенту задать timeout, как долго он готов ожидать ответ сервера.
+Правильно будет позволить клиенту задать timeout, как долго он готов ожидать ответ сервера.
 
 timeout можно вынести в аргументы, и предоставить каждую АПИ-функцию в
 двух вариантах, с явным указанием timeout и без указания. В настоящем
 gen_server так и сделано.  Но мы сейчас не будем сильно усложнять код,
-а просто добавим 5-ти секундный timeout в функцию receive.
+а просто добавим 5-ти секундный timeout для receive.
+
+```
+iex(1)> c "create_gen_server/gs7.exs"
+[Lesson_10.GS_7]
+iex(2)> alias Lesson_10.GS_7, as: S7
+Lesson_10.GS_7
+iex(3)> pid = S7.start
+start Server
+[Server 6] #PID<0.117.0> enters loop
+#PID<0.117.0>
+iex(5)> S7.add(pid, 42)
+[Server 6] #PID<0.117.0> enters loop
+:ok
+iex(6)> S7.show(pid)
+:noreply
+[Server 6] #PID<0.117.0> enters loop
+```
+
+## 8-й шаг, убираем дублирование кода в публичном АПИ.
+
+```
+iex(8)> c "create_gen_server/gs8.exs"
+[Lesson_10.GS_8]
+iex(9)> alias Lesson_10.GS_8, as: S8
+iex(21)> pid = S8.start
+start Server
+[Server 6] #PID<0.149.0> enters loop
+#PID<0.149.0>
+iex(22)> S8.add(pid, :one)
+[Server 6] #PID<0.149.0> enters loop
+:ok
+iex(23)> S8.add(pid, :two)
+[Server 6] #PID<0.149.0> enters loop
+:ok
+iex(24)> S8.add(pid, :three)
+[Server 6] #PID<0.149.0> enters loop
+:ok
+iex(25)> S8.show(pid)
+[Server 6] #PID<0.149.0> enters loop
+[:three, :two, :one]
+iex(26)> S8.check(pid, :one)
+[Server 6] #PID<0.149.0> enters loop
+true
+iex(27)> S8.check(pid, :four)
+[Server 6] #PID<0.149.0> enters loop
+false
+iex(28)> S8.remove(pid, :two)
+[Server 6] #PID<0.149.0> enters loop
+:ok
+iex(29)> S8.show(pid)
+[Server 6] #PID<0.149.0> enters loop
+[:three, :one]
+```
 
 
-## N-й шаг, убираем дублирование кода в публичном АПИ.
-
-src/gs7.erl
-
-
-## N-й шаг, также убираем дублирование кода в loop.
+## 9-й шаг, также убираем дублирование кода в loop.
 
 src/gs8.erl
 
 
-## N-й шаг, матчинг сообщений по Ref.
+## 10-й шаг, матчинг сообщений по Ref.
 
 src/gs9.erl
 
@@ -380,7 +428,7 @@ src/gs9.erl
 умеет генерировать уникальные значения такого типа.
 
 
-## N-й шаг, монитор, обработка ошибок.
+## 11-й шаг, монитор, обработка ошибок.
 
 src/gs10.erl
 
