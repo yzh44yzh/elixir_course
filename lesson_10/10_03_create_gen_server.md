@@ -44,7 +44,7 @@ The first is an error situation, the second is a normal situation.
 в какой-то момент нода упадет из-за нехватки памяти.
 
 ```
-iex(1)> c "create_gen_server/gs1.exs"
+iex(1)> c "create_gen_server/gs01.exs"
 [Lesson_10.GS_1]
 iex(2)> alias Lesson_10.GS_1, as: S
 Lesson_10.GS_1
@@ -73,7 +73,7 @@ Server #PID<0.140.0> enters loop
 Логируем получение неизвестных сообщений.
 
 ```
-iex(22)> c "create_gen_server/gs2.exs"
+iex(22)> c "create_gen_server/gs02.exs"
 [Lesson_10.GS_2]
 iex(23)> alias Lesson_10.GS_2, as: S2
 Lesson_10.GS_2
@@ -116,7 +116,7 @@ false
 некое АПИ: добавление и удаление элементов и вывод их на консоль.
 
 ```
-iex(43)> c "create_gen_server/gs3.exs"
+iex(43)> c "create_gen_server/gs03.exs"
 [Lesson_10.GS_3]
 iex(44)> alias Lesson_10.GS_3, as: S3
 Lesson_10.GS_3
@@ -179,7 +179,7 @@ Server #PID<0.119.0> enters loop
 
 iex(6)> r S
 warning: redefining module Lesson_10.GS_4 (current version defined in memory)
-  create_gen_server/gs4.exs:1
+  create_gen_server/gs04.exs:1
 
 {:reloaded, Lesson_10.GS_4, [Lesson_10.GS_4]}
 iex(7)> send(pid, :show)
@@ -227,7 +227,7 @@ TODO: убрать лишнее, сделать понятную сессию
 ```
 iex(14)> r S
 warning: redefining module Lesson_10.GS_4 (current version defined in memory)
-  create_gen_server/gs4.exs:1
+  create_gen_server/gs04.exs:1
 
 {:reloaded, Lesson_10.GS_4, [Lesson_10.GS_4]}
 iex(15)> pid1 = S.start
@@ -240,7 +240,7 @@ current state is []
 Server 4 #PID<0.142.0> enters loop
 iex(17)> r S
 warning: redefining module Lesson_10.GS_4 (current version defined in memory)
-  create_gen_server/gs4.exs:1
+  create_gen_server/gs04.exs:1
 
 {:reloaded, Lesson_10.GS_4, [Lesson_10.GS_4]}
 iex(18)> send(pid1, :show)
@@ -252,7 +252,7 @@ iex(19)> send(pid1, {:add, 42})
 {:add, 42}
 iex(20)> r S
 warning: redefining module Lesson_10.GS_4 (current version defined in memory)
-  create_gen_server/gs4.exs:1
+  create_gen_server/gs04.exs:1
 
 {:reloaded, Lesson_10.GS_4, [Lesson_10.GS_4]}
 iex(21)> send(pid1, :show)     
@@ -274,7 +274,7 @@ current state is [142, 42]
 отправку сообщений внутри функций.
 
 ```
-iex(25)> c "create_gen_server/gs5.exs"
+iex(25)> c "create_gen_server/gs05.exs"
 [Lesson_10.GS_5]
 iex(26)> alias Lesson_10.GS_5, as: S5
 Lesson_10.GS_5
@@ -312,7 +312,7 @@ iex(31)> S5.stop(pid)
 
 TODO: нужно добавлять не цифры, а что-то другое. А то show показывает не то, что надо.
 ```
-iex(33)> c "create_gen_server/gs6.exs"
+iex(33)> c "create_gen_server/gs06.exs"
 [Lesson_10.GS_6]
 iex(34)> alias Lesson_10.GS_6, as: S6
 Lesson_10.GS_6
@@ -356,7 +356,7 @@ gen_server так и сделано.  Но мы сейчас не будем с�
 а просто добавим 5-ти секундный timeout для receive.
 
 ```
-iex(1)> c "create_gen_server/gs7.exs"
+iex(1)> c "create_gen_server/gs07.exs"
 [Lesson_10.GS_7]
 iex(2)> alias Lesson_10.GS_7, as: S7
 Lesson_10.GS_7
@@ -375,7 +375,7 @@ iex(6)> S7.show(pid)
 ## 8-й шаг, убираем дублирование кода в публичном АПИ.
 
 ```
-iex(8)> c "create_gen_server/gs8.exs"
+iex(8)> c "create_gen_server/gs08.exs"
 [Lesson_10.GS_8]
 iex(9)> alias Lesson_10.GS_8, as: S8
 iex(21)> pid = S8.start
@@ -416,7 +416,7 @@ iex(29)> S8.show(pid)
 Функции call и loop модифицировать теперь не нужно. И разбираться с отправкой сообщений в обе стороны тоже не нужно.
 
 ```
-iex(1)> c "create_gen_server/gs9.exs"
+iex(1)> c "create_gen_server/gs09.exs"
 [Lesson_10.GS_9]
 iex(2)> alias Lesson_10.GS_9, as: S9
 Lesson_10.GS_9
@@ -481,6 +481,33 @@ iex(15)> S10.stop(pid)
 monitor возвращает аналогичную ссылку.
 
 ```
+iex(1)> c "create_gen_server/gs11.exs"
+warning: ...
+[Lesson_10.GS_11]
+iex(2)> alias Lesson_10.GS_11, as: S11
+Lesson_10.GS_11
+iex(3)> pid = S11.start
+start Server
+[Server 6] #PID<0.117.0> enters loop
+#PID<0.117.0>
+iex(4)> S11.check(pid, 42)
+[Server 6] #PID<0.117.0> enters loop
+false
+iex(5)> S11.show(pid)
+{:error,
+ {:badarith,
+  [
+    {Lesson_10.GS_11, :handle_call, 2,
+     [file: 'create_gen_server/gs11.exs', line: 76]},
+    {Lesson_10.GS_11, :loop, 1, [file: 'create_gen_server/gs11.exs', line: 49]}
+  ]}}
+iex(6)> 
+19:23:03.390 [error] Process #PID<0.117.0> raised an exception
+** (ArithmeticError) bad argument in arithmetic expression
+    create_gen_server/gs11.exs:76: Lesson_10.GS_11.handle_call/2
+    create_gen_server/gs11.exs:49: Lesson_10.GS_11.loop/1
+ 
+nil
 ```
 
 ## Итог
