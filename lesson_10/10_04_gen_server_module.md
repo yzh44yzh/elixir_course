@@ -4,6 +4,18 @@ https://elixir-lang.org/getting-started/mix-otp/genserver.html
 
 # Gen Server
 
+GenServer.start works synchronously. It returns only after init/1 callback has finished in server process.
+Client process is blocked until the server process is initialized.
+
+GenServer.call doesn't wait indefinitely for a responce. 5 sec timeout by default.
+
+If server process terminates while client is waiting for resonce, GenServer detects it and raises a corresponding error in the client process. 
+
+If init/1 returns {:stop, reason} client will receive {:error, reason}.
+If init/1 returns :ignore, client will receive :ignore.
+The first is an error situation, the second is a normal situation.
+
+
 It is common to create long-running processes that keep their internal state and can respond to various messages.
 Server process:
 - runs for a long time (or forever);
