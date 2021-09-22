@@ -1,0 +1,38 @@
+digraph GS {
+    rankdir=LR;
+
+    subgraph cluster1 {
+        node [style=filled];
+        api [shape=record, label="{<f0>add|<f1>remove|<f2>check}"];
+        label = "Module API";
+        color = blue;
+    }
+    
+    subgraph cluster2 {
+        node [style=filled, shape=record];
+        label = "Generic Call";
+        call;
+        color = red;
+    }
+    
+    subgraph cluster3 {
+        node [style=filled];
+        label = "Generic Loop";
+        loop;
+        color = red;
+    }
+    
+    subgraph cluster4 {
+        node [style=filled];
+        label = "Module Callbacks";
+        handle [shape=record, label="{<f0>handle_add|<f1>handle_remove|<f2>handle_check}"];
+        color = blue;
+    }
+    
+    api -> call;
+    call -> loop;
+    loop -> handle;
+    handle -> loop;
+    loop -> call;
+    call -> api;
+}
