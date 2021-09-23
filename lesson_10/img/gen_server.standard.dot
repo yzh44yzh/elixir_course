@@ -1,0 +1,50 @@
+digraph GS {
+    rankdir = LR; // not work when second level subgraph appears
+    rank = same; // not work?
+    graph [style=filled];
+    node [shape=box];
+
+    subgraph cluster_my_module {
+        label = "MyModule";
+        rankdir = TB;
+        // graph [color=blue];
+        
+        subgraph cluster_module_api {
+            label = "API";
+
+            api_add [label="add"];
+            api_remove [label="remove"];
+            api_stop [label="stop"];
+        }
+        
+        subgraph cluster_module_handlers {
+            label = "Handlers";
+
+            handler_add [label="hangle(:add)"]
+            handler_remove [label="hangle(:remove)"]
+            handler_stop [label="hangle(:stop)"]
+        }
+    }
+
+    subgraph cluster_otp {
+        label = "OTP";
+        rankdir = TB;
+        // graph [color=red];
+
+        subgraph cluster_otp_call {
+            label = "OTP call"
+            
+            otp_call [label="call"]
+        }
+
+        subgraph cluster_otp_loop {
+            label = "OTP loop"
+            
+            otp_loop [label="loop"]
+        }
+    }
+
+    api_add -> otp_call;
+    otp_call -> otp_loop;
+    otp_loop -> handler_add;
+}
