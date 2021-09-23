@@ -1,81 +1,63 @@
 digraph GS {
 
-   /*
+    /*
     TODO:
-    - layout nodes
-    - label nodes with 3 rows
+    + layout nodes
+    + label nodes with 3 rows
     - put nodes into clusters as I need cluster labels
     - hide hidden edges
     - apply styles to all elements
     - also apply font 'ubuntu mono'
     */
 
-
-    // graph [style=filled];
+    graph [style=filled color=blue];
     node [shape=box];
 
-    edge [weight=1 style=dashed color=blue]
-    a -> b -> c -> d
+    subgraph cluster_my_module {
+        label = "MyModule";
 
-    edge [weight=1 style=dashed color=red]
-    d -> c -> b -> a
+        a [label=<
+           <table border="0">
+           <tr><td>start</td></tr>
+           <tr><td>add</td></tr>
+           <tr><td>stop</td></tr>
+           </table>
+           >];
 
-    // hidden edges
-    edge [weight=1000 style=dashed color=grey]
-    a -> d
-    b -> c
-    rank=same {a -> b}
-    rank=same {d -> c}
-
+        d [label=<
+           <table border="0">
+           <tr><td>handle_call</td></tr>
+           <tr><td>handle_cast</td></tr>
+           </table>
+           >];
     
-    // subgraph cluster_my_module {
-    //     label = "MyModule";
-    //     rankdir = TB;
-    //     // graph [color=blue];
+    };
+    
+    subgraph cluster_otp {
+        label = "OTP";
         
-    //     subgraph cluster_module_api {
-    //         label = "API";
-    //         rankdir = TB;
-
-    //         api_add [label="add"];
-    //         api_remove [label="remove"];
-    //         api_stop [label="stop"];
-    //     }
+        b [label=<
+           <table border="0">
+           <tr><td>call</td></tr>
+           <tr><td>cast</td></tr>
+           </table>
+           >];
         
-    //     subgraph cluster_module_handlers {
-    //         label = "Handlers";
-    //         rankdir = TB;
+        c [label="loop"];
 
-    //         handler_add [label="hangle(:add)"]
-    //         handler_remove [label="hangle(:remove)"]
-    //         handler_stop [label="hangle(:stop)"]
-    //     }
-    // }
+    };
 
-    // subgraph cluster_otp {
-    //     label = "OTP";
-    //     rankdir = TB;
-    //     // graph [color=red];
+    edge [weight=1 style=dashed color=red];
+    d -> c -> b -> a;
 
-    //     subgraph cluster_otp_call {
-    //         label = "OTP call"
-    //         rankdir = TB;
-            
-    //         otp_call [label="call (send & receive)"]
-    //     }
+    edge [weight=1 style=dashed color=blue];
+    a -> b -> c -> d;
 
-    //     subgraph cluster_otp_loop {
-    //         label = "OTP loop"
-    //         rankdir = TB;
-            
-    //         otp_loop [label="loop (receive & send)"]
-    //     }
-    // }
-
-    // api_add -> otp_call;
-    // otp_call -> otp_loop;
-    // otp_loop -> handler_add;
-
-    // add invisible edges for correct ranking.
+    // hidden edges to make proper layout
+    edge [weight=1000 style=dashed color=grey];
+    a -> d;
+    b -> c;
+    rank=same {a -> b};
+    rank=same {d -> c};
 
 }
