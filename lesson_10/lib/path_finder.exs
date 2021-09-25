@@ -34,5 +34,25 @@ defmodule PathFinder do
     end
     graph
   end
+
+  def get_dist(graph, path) do
+    [first | rest] = path
+    Enum.reduce(
+      rest,
+      {first, 0},
+      fn (city, {prev_city, dist}) ->
+        city_dist = get_dist(graph, prev_city, city)
+        {city, dist + city_dist}
+      end)
+    |> elem(1)
+  end
+  
+  def get_dist(graph, city1, city2) do
+    edges1 = :digraph.edges(graph, city1)
+    edges2 = :digraph.edges(graph, city2)
+    [edge | _] = edges1 -- edges2
+    {_, _, _, dist} = :digraph.edge(graph, edge)
+    dist
+  end
   
 end
