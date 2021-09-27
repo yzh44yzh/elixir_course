@@ -1,7 +1,47 @@
 defmodule PathFinder do
 
+  use GenServer
+
+  @type city :: String.t
+  @type distance :: integer
+  @type route :: {[city], distance}
+
+  @server_name __MODULE__
   @cities_file "./data/cities.csv"
 
+  # Module API
+  
+  def start() do
+    GenServer.start(__MODULE__, :no_args, [name: @server_name])
+  end
+
+
+  @spec get_route(city, city) :: route
+  def get_route(from_city, to_city) do
+    GenServer.call(@server_name, {:get_route, from_city, to_city})
+  end
+
+
+  # GenServer callbacks
+
+  @impl true
+  def init(:no_args) do
+    graph = :digraph.new([:cyclic])
+    load_data() |> Enum.reduce(graph, &add_item/2)
+    state = %{graph: graph}
+    {:ok, state}
+  end
+
+  @impl true
+  def handle_call({:get_route, from_city, to_city}, _from, %{:graph => graph} = state) do
+    route = :digraph.get_short_path(graph, from_city, to_city)
+    dist = get_dist(graph, route)
+    reply = {route, dist}
+    {:reply, reply, state}
+  end
+
+
+  # Inner functions
   def load_data() do
     load_data(@cities_file)
   end
@@ -17,12 +57,7 @@ defmodule PathFinder do
     {dist, _} = Integer.parse(dist)
     {city1, city2, dist}
   end
-
-  def init_graph(data) do
-    graph = :digraph.new([:cyclic])
-    Enum.reduce(data, graph, &add_item/2)
-  end
-
+  
   defp add_item({city1, city2, dist} = item, graph) do
     v1 = :digraph.add_vertex(graph, city1) # non-functional, (mutates ETS) 
     v2 = :digraph.add_vertex(graph, city2)
@@ -35,7 +70,8 @@ defmodule PathFinder do
     graph
   end
 
-  def get_dist(graph, path) do
+  defp get_dist(_graph, []), do: 0
+  defp get_dist(graph, path) do
     [first | rest] = path
     Enum.reduce(
       rest,
@@ -47,12 +83,15 @@ defmodule PathFinder do
     |> elem(1)
   end
   
-  def get_dist(graph, city1, city2) do
+  defp get_dist(graph, city1, city2) do
     edges1 = :digraph.edges(graph, city1)
     edges2 = :digraph.edges(graph, city2)
-    [edge | _] = edges1 -- edges2
-    {_, _, _, dist} = :digraph.edge(graph, edge)
-    dist
+    case edges1 -- edges2 do
+      [edge | _] -> 
+        {_, _, _, dist} = :digraph.edge(graph, edge)
+        dist
+      [] -> 0
+    end
   end
   
 end
