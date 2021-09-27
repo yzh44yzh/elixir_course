@@ -8,6 +8,7 @@ defmodule PathFinder do
 
   @server_name __MODULE__
   @cities_file "./data/cities.csv"
+  
 
   # Module API
   
@@ -16,7 +17,7 @@ defmodule PathFinder do
   end
 
 
-  @spec get_route(city, city) :: route
+  @spec get_route(city, city) :: {:ok, route} | {:error, term}
   def get_route(from_city, to_city) do
     GenServer.call(@server_name, {:get_route, from_city, to_city})
   end
@@ -27,26 +28,34 @@ defmodule PathFinder do
   @impl true
   def init(:no_args) do
     graph = :digraph.new([:cyclic])
-    load_data() |> Enum.reduce(graph, &add_item/2)
-    state = %{graph: graph}
+    data = load_data()
+    Enum.reduce(data, graph, &add_item/2)
+    distancies = make_distancies_map(data)
+    state = %{graph: graph, distancies: distancies}
     {:ok, state}
   end
 
   @impl true
-  def handle_call({:get_route, from_city, to_city}, _from, %{:graph => graph} = state) do
-    route = :digraph.get_short_path(graph, from_city, to_city)
-    dist = get_dist(graph, route)
-    reply = {route, dist}
+  def handle_call({:get_route, from_city, to_city}, _from, state) do
+    %{graph: graph, distancies: distancies} = state
+    reply =
+      case :digraph.get_short_path(graph, from_city, to_city) do
+        false -> {:error, :no_route} 
+        route ->
+          distance = get_distance(distancies, route)
+          {:ok, route, distance}
+      end
     {:reply, reply, state}
   end
 
 
   # Inner functions
-  def load_data() do
+  
+  defp load_data() do
     load_data(@cities_file)
   end
 
-  def load_data(path) do
+  defp load_data(path) do
     File.read!(path)
     |> String.split()
     |> Enum.map(&parse_line/1)
@@ -56,6 +65,18 @@ defmodule PathFinder do
     [city1, city2, dist] = String.split(line, ",")
     {dist, _} = Integer.parse(dist)
     {city1, city2, dist}
+  end
+
+  defp make_distancies_map(data) do
+    Enum.reduce(data, %{},
+      fn ({city1, city2, dist}, acc) ->
+        key = make_key(city1, city2)
+        Map.put(acc, key, dist)
+      end)
+  end
+
+  defp make_key(city1, city2) do
+    Enum.sort([city1, city2]) |> :erlang.list_to_tuple()
   end
   
   defp add_item({city1, city2, dist} = item, graph) do
@@ -70,28 +91,16 @@ defmodule PathFinder do
     graph
   end
 
-  defp get_dist(_graph, []), do: 0
-  defp get_dist(graph, path) do
+  defp get_distance(distancies, path) do
     [first | rest] = path
     Enum.reduce(
       rest,
       {first, 0},
       fn (city, {prev_city, dist}) ->
-        city_dist = get_dist(graph, prev_city, city)
-        {city, dist + city_dist}
+        key = make_key(city, prev_city)
+        {city, dist + Map.fetch!(distancies, key)}
       end)
     |> elem(1)
-  end
-  
-  defp get_dist(graph, city1, city2) do
-    edges1 = :digraph.edges(graph, city1)
-    edges2 = :digraph.edges(graph, city2)
-    case edges1 -- edges2 do
-      [edge | _] -> 
-        {_, _, _, dist} = :digraph.edge(graph, edge)
-        dist
-      [] -> 0
-    end
   end
   
 end
