@@ -1,20 +1,42 @@
 # GenServer
-TODO хорошее название темы
 
 Давайте еще раз посмотрим на сервер, который мы написали.
 
-TODO картинка, 4 кластера в линию: api, call, loop, handle.
+![Custom GenServer](./img/gen_server.custom.png)
 
-TODO описание по картинке:
+У нас есть публичный АПИ модуля, абстрактный (generic) call, абстрактный loop и обработчики запросов.
 
-внешнее АПИ: start, add, remove, check, show, stop;
-api и call в процессе клиента, loop и handle в процессе сервера.
-call и loop -- абстрактный код (generic, поэтому gen server) который можно вынести в отдельную библиотеку.
-В стандартном GenServer так и сделано.
+АПИ и call работают в потоке клиента, loop и обработчики работают в потоке сервера.
 
-TODO read
-https://hexdocs.pm/elixir/1.12/GenServer.html
+АПИ и обработчики реализуют специфичное поведение сервера, а call и loop являются одинаковыми для любых серверов. Поэтому их лучше вынести из модуля в отдельную библиотеку, чтобы переиспользовать в других модулях. 
 
+Стандартный GenServer устроен точно так же:
+
+![Standard GenServer](./img/gen_server.standard.png)
+
+Те же 4 части (АПИ, call, loop и обработчики) я расположил квадратом.
+
+Два верхних блока (АПИ и call) работают в потоке клиента. Два нижних блока (обработчики и loop) работают в потоке сервера.
+
+Два левых блока (АПИ и обработчики) -- это специфичный код нашего модуля. Два правых блока (call и loop) реализованы внутри фреймворка OTP.
+
+
+## PathFinder
+
+TODO описание задачи.
+
+TODO работа с графом
+TODO: и дать ссылку на эликсировскую библиотеку для работы с графами
+https://pragprog.com/titles/thgraphs/exploring-graphs-with-elixir/
+
+Посмотрим еще раз на реализацию PathFinder как GenServer:
+![PathFinder/GenServer](./img/gen_server.standard.png)
+
+TODO описание реализации:
+- инициализация: start - init, 
+- обработка запроса: get_route - handle_call.
+
+Демонстрация работы:
 
 ```
 iex(1)> c "lib/path_finder.exs"
@@ -35,45 +57,11 @@ iex(6)> PathFinder.start()
 {["Екатеринбург", "Астрахань", "Тюмень", "Брянск", "Махачкала"], 9408}
 ```
 
-TODO картинка про стандартный GenServer на основе того, что было сделано выше.
-4 кластера квадратом. Помимо того, что было на предыдущей картинке, появляется еще вертикальное деление:
-наш модуль, и код OTP.
 
-TODO и описание по этой картинке
+## GenServer behaviour
 
-
-TODO: и дать ссылку на эликсировскую библиотеку для работы с графами
-https://pragprog.com/titles/thgraphs/exploring-graphs-with-elixir/
-
-АПИ и call выполняются в потоке клиента, loop и handle_call выполняются в потоке сервера.
-
-Настоящий gen\_server устроен сложнее. Код также делится на общую
-(generic) часть, и кастомную (custom) часть. Общая часть реализована в
-нескольких модулях OTP фреймворка (gen\_server, gen,
-proc\_lib). Кастомную часть мы должны реализовать в своем модуле.
-
-![gen_server](./img/gen_server.png) # TODO перерисовать для Elixir
-
-На картинке два левых квадрата (верхний и нижний), соответствуют
-нашему модулю.  Два правых квадрата соответствуют коду OTP. Два
-верхних квадрата выполняются в потоке клиента, два нижних квадрата
-выполняются в потоке сервера.
-
-Левый верхний квадрат -- это публичное АПИ нашего модуля. Отсюда мы
-обращаемся к OTP фреймворку. В кастомной реализации, которую мы делали
-на прошлом уроке, этот квадрат соответствует функциям start,
-add\_item, remove\_item, show\_items.
-
-Правый верхний квадрат -- это часть OTP, generic код, выполняющийся
-в потоке клиента. Соответствует функции call в нашей кастомной реализации.
-
-Правый нижний квадрат -- это часть OTP, выполняющаяся в потоке сервера.
-Соответствует функции loop в нашей реализации. Только там нет кастомной
-обработки сообщений. А вместо этого OTP вызывает функции обратного вызова
-(callback) нашего модуля.
-
-Левый нижний квадрат -- функции обратного вызова, принадлежащие нашему модулю,
-и работающие в потоке сервера.
+TODO read
+https://hexdocs.pm/elixir/1.12/GenServer.html
 
 **behaviour** в эрланг -- это аналог интерфейсов в джава. Он
 описывает, какие callback-функции должны быть определены, их имена и
@@ -82,103 +70,34 @@ add\_item, remove\_item, show\_items.
 **behaviour(gen_server)** требует, чтобы наш модуль определил функции
 init/1, handle\_call/3, handle\_cast/2, handle\_info/2, terminate/2 и code\_change/3.
 
-TODO придумать пример, реализовать на GenServer
+TODO описание всех callback, их аргументов и возвращаемых значений
 
-Дальше мы разберем, как взаимодействуют наш модуль и gen\_server.
-на примере модуля
-[wg\_push\_sender](https://github.com/wgnet/wg_push/blob/master/src/wg_push_sender.erl),
-из
-[библиотеки wg_push](https://github.com/wgnet/wg_push/).
-Это библиотека для отправки сообщений на iOS устройства через
-Apple Push Notification Service.
+OTP works by assuming that your module defines a number of callback functions 
+(six, in the case of a GenServer). 
 
+If you were writing a GenServer in Erlang, your code would have to contain implementations of all six.
 
-## инициализация
-
-Все начинается с функции **start\_link/0**:
-
-```
-start_link() ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
-```
-
-Здесь мы просим gen\_server запустить новый поток.
-
-Макрос **?MODULE** разворачивается в имя текущего модуля.
-Можно было написать:
-```
-gen_server:start_link({local, wg_push_sender}, wg_push_sender, [], []).
-```
-получится тоже самое.
-
-Первый аргумент **{local, ?MODULE}** -- это имя, под которым нужно
-зарегистрировать поток. Это если мы хотим обращаться к нашему серверу
-по имени. Иначе вызываем gen\_server:start\_link/3, и созданный поток
-не будет регистрироваться.
-
-Второй аргумент **?MODULE** -- это имя модуля, callback-функции
-которого будет вызывать gen\_server.
-
-Третий аргумент -- это набор параметров, которые нужны при
-инициализации.  В нашем случае никакие не нужны.
-
-Четвертый аргумент -- настройки поведения gen\_server. Они довольно
-специфичны, и необходимость что-то в них менять не возникает. Но
-загляните в документацию, это полезно :)
-
-Дальше происходит некая магия в правом верхнем квадрате, в результате
-которой создается серверный поток. Этому потоку нужно получить свое
-начальное состояние.  Для этого вызывается первый callback **init/1**.
-
-```
-init([]) ->
-    {ok, #state{
-            apns_host = application:get_env(wg_push, apns_host, "gateway.sandbox.push.apple.com"),
-            apns_port = application:get_env(wg_push, apns_port, 2196)
-           }}.
-```
-
-Аргумент init, это данные, которые мы передавали третьим аргументом в
-gen\_server:start\_link.  Здесь нужно создать структуру данных,
-которая будет хранить состояние сервера.
-
-Часто для этого описывают record с именем **state**.
-
-```
--record(state, {
-        apns_host :: string(),
-        apns_port :: integer(),
-        connections = orddict:new() :: orddict:orddict(file:name_all(), port())
-         }).
-```
-
-После того, как функция init возвращает #state{}, сервер готов к работе.
+When you add the line ‘use GenServer‘ to a module, 
+Elixir creates default implementations of these six callback functions.
+All we have to do is override the ones where we add our own application-specific behavior.
 
 
-## gen_server:call
+### init
 
-Теперь посмотрим, как делается запрос от клиента к серверу, на примере
-API-функции send_messages.
+GenServer.start works synchronously. It returns only after init/1 callback has finished in server process.
+Client process is blocked until the server process is initialized.
 
-```
-send_messages(Messages, SSL_Options) ->
-    gen_server:call(?MODULE, {send_messages, Messages, SSL_Options}).
-```
+If init/1 returns {:stop, reason} client will receive {:error, reason}.
+If init/1 returns :ignore, client will receive :ignore.
+The first is an error situation, the second is a normal situation.
 
-Здесь мы вызываем gen_server:call с двумя аргументами. Первый аргумент
--- pid сервера или имя, под которым он зарегистрирован. Второй
-аргумент -- сообщение, которое посылается серверу.
 
-В недрах OPT вызов проходит через call и loop, и затем вызывается
-callback-функция handle_call. Ей передаются три аргумента: сообщение
-от клиента, кортеж {pid клиента, reference} и состояние сервера.
-Второй аргумент обычно не используется.
+### call
 
-```
-handle_call({send_messages, Messages, SSL_Options}, _From, State) ->
-    {Reply, State3} = send_messages(Messages, SSL_Options, State),
-    {reply, Reply, State3};
-```
+GenServer.call doesn't wait indefinitely for a responce. 5 sec timeout by default.
+If server process terminates while client is waiting for resonce, GenServer detects it and raises a corresponding error in the client process. 
+
+loop isn't CPU-intensive. Waiting for a message puts process in a suspended state and doesn't waste CPU cycles.
 
 handle_call должен обработать сообщение, сформировать ответ для клиента и
 новое состояние для сервера.
@@ -208,9 +127,7 @@ handle_call({msg3, A, B, C}, _From, State) ->
 Поэтому внутри handle\_call много кода лучше не писать, а выносить его в отдельные функции.
 
 
-## другие callback-функции
-
-### gen_server:cast/handle_cast
+### cast
 
 Вызов gen_server:call блокирует клиента, пока сервер не обработает его запрос и не вернет ответ.
 Бывают случаи, когда клиенту ответ сервера не нужен. Тогда лучше использовать gen\_server:cast.
@@ -231,7 +148,7 @@ handle_cast({do_something, A, B}, State) ->
 handle_cast должен вернуть измененное состояние.
 
 
-### message/handle_info
+### info
 
 Любой поток из любого места в коде может отправить серверу сообщение
 оператором **!**.  Так делать не рекомендуется, потому что это вызовы
@@ -311,171 +228,6 @@ gen_server:call(Pid2, some_message).
 Похожесть есть, но есть и нюансы. Для ООП объекта вполне нормально
 вызывать свои собственные методы. А с gen\_server можно попасть в
 коварную ловушку :)
-
-
-# Gen Server
-
-GenServer.start works synchronously. It returns only after init/1 callback has finished in server process.
-Client process is blocked until the server process is initialized.
-
-GenServer.call doesn't wait indefinitely for a responce. 5 sec timeout by default.
-
-If server process terminates while client is waiting for resonce, GenServer detects it and raises a corresponding error in the client process. 
-
-If init/1 returns {:stop, reason} client will receive {:error, reason}.
-If init/1 returns :ignore, client will receive :ignore.
-The first is an error situation, the second is a normal situation.
-
-
-It is common to create long-running processes that keep their internal state and can respond to various messages.
-Server process:
-- runs for a long time (or forever);
-- can handle various requests (messages).
-
-loop isn't CPU-intensive. Waiting for a message puts process in a suspended state and doesn't waste CPU cycles.
-
-Interface functions (client process)
-Implementation functions (server process)
-
-В книге Sasa Jiric есть идея иметь отдельную interface function для получения ответа.
-```
-run_async(query)
-get_result()
-```
-Получается что-то типа Agent. Только не хватает индетификатора запроса, чтобы матчить с ответом.
-
-When we write an OTP server, we write a module containing one or more callback functions with standard names. 
-OTP will invoke the appropriate callback to handle a particular situation. 
-
-For example, when someone sends a request to our server, 
-OTP will call our handle_call function, passing in the request, the caller, and the current server state. 
-Our function responds by returning a tuple containing 
-an action to take, the return value for the request, and an updated state.
-
-Servers use recursion to loop, handling one request on each call. 
-So they can also pass state to themselves as a parameter in this recursive call. 
-And that’s one of the things OTP manages for us.
-
-
-## Sequence.Server
-
-_можно использовать как упражнение_
-Let’s write what is possibly the simplest OTP server. 
-You pass it a number when you start it up, and that becomes the current state of the server. 
-When you call it with a :next_number request, 
-it returns that current state to the caller,
-and at the same time increments the state, ready for the next call. 
-Basically, each time you call it you get an updated sequence number.
-
-```
-defmodule Sequence.Server do
-  use GenServer
-  def init(initial_number) do
-    { :ok, initial_number }
-  end
-  def handle_call(:next_number, _from, current_number) do
-    {:reply, current_number, current_number + 1}
-  end
-end
-```
-
-```
-use GenServer
-``` 
-line effectively adds the OTP GenServer behavior to our module. 
-This is what lets it handle all the callbacks.
-It also means we don’t have to define every callback in our module — 
-the behavior defines defaults for all but one of them.
-
-```
-$ iex -S mix
-iex> { :ok, pid } = GenServer.start_link(Sequence.Server, 100)
-{:ok,#PID<0.71.0>}
-iex> GenServer.call(pid, :next_number)
-100
-iex> GenServer.call(pid, :next_number)
-101
-iex> GenServer.call(pid, :next_number)
-102
-```
-
-GenServer.start_link function asks GenServer to start a new process and link to us. 
-We pass in 
-- the module to run as a server: 
-- the initial state (100 in this case). 
-We could also pass GenServer options as a third parameter, but the defaults work fine here.
-We get back a status ( :ok ) and the server’s PID.
-
-A server can support multiple actions by implementing multiple handle_call functions with different first parameters.
-
-Erlang:
-```
-gen_server:
-start_link(Module, Args, Options) -> Result
-start_link(ServerName, Module, Args, Options) -> Result
-```
-
-
-## Cast
-
-```
-def handle_cast({:increment_number, delta}, current_number) do
-  { :noreply, current_number + delta}
-end
-```
-
-```
-iex> r Sequence.Server
-.../sequence/lib/sequence/server.ex:2: redefining module Sequence.Server
-{Sequence.Server,[Sequence.Server]]
-```
-Even though we’ve recompiled the code, the old version is still running. 
-The VM doesn’t hot-swap code until you explicitly access it by module name.
-
-
-## Callbacks
-
-OTP works by assuming that your module defines a number of callback functions 
-(six, in the case of a GenServer). 
-
-If you were writing a GenServer in Erlang, your code would have to contain implementations of all six.
-
-When you add the line ‘use GenServer‘ to a module, 
-Elixir creates default implementations of these six callback functions.
-All we have to do is override the ones where we add our own application-specific behavior.
-
-init(start_arguments)
-The default GenServer implementation sets the server state to the argument you pass.
-
-handle_call(request, from, state)
-The default implementation stops the server with a :bad_call error.
-
-handle_cast(request, state)
-The default implementation stops the server with a :bad_cast error.
-
-handle_info(info, state)
-
-terminate(reason, state)
-Once we add supervision to our servers, we don’t have to worry about this.
-
-code_change(from_version, state, extra)
-
-format_status(reason, [pdict, state])
-The conventional response is [data: [{'State', state_info}]].
-
-If hibernate is returned, the server state is removed from memory 
-but is recovered on the next request. 
-This saves memory at the expense of some CPU.
-
-The timeout option can be the atom :infinite (which is the default) or a number. 
-If the latter, a :timeout message is sent if the server is idle for the specified number of milliseconds.
-
-_TODO надо попробовать_
-Try various ways of terminating your server.
-- exception
-- System.halt(n)
-
-
 
 
 ## Agents and Tasks, or GenServer?
