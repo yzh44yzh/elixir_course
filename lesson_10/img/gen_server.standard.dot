@@ -1,48 +1,40 @@
 digraph GS {
 
-    /*
-    TODO: style
-    - more space between nodes
-    - font 'ubuntu mono'
-    - better arrows
-    */
-
-    node [shape=box];
+    graph [pad=0.2, nodesep=0.6]
+    node [shape=box, style=filled, fontname="UbuntuMono", fontsize=20]
 
     a [label=<
        <table border="0" width="170" height="100" cellpadding="3">
-       <tr><td width="170" align="center"><b>MyModule/API</b></td></tr>
+       <tr><td width="170" align="center"><b>PathFinder/API</b></td></tr>
        <tr><td align="center">start</td></tr>
-       <tr><td align="center">add</td></tr>
-       <tr><td align="center">stop</td></tr>
+       <tr><td align="center">get_route</td></tr>
        </table>
        >];
 
     d [label=<
        <table border="0" width="170" height="100" cellpadding="3">
-       <tr><td width="170" align="center"><b>MyModule/handlers</b></td></tr>
+       <tr><td width="170" align="center"><b>PathFinder/handlers</b></td></tr>
+       <tr><td align="center">init</td></tr>
        <tr><td align="center">handle_call</td></tr>
-       <tr><td align="center">handle_cast</td></tr>
        </table>
        >];
     
     b [label=<
        <table border="0" width="170" height="100" cellpadding="3">
        <tr ><td width="170" align="center"><b>OTP/client</b></td></tr>
-       <tr><td align="center">call</td></tr>
-       <tr><td align="center">cast</td></tr>
+       <tr><td align="center">GenServer.call</td></tr>
        </table>
        >];
     
     c [label=<
        <table border="0" width="170" height="100" cellpadding="3">
        <tr><td width="170" align="center"><b>OTP/server</b></td></tr>
-       <tr><td align="center">loop</td></tr>
+       <tr><td align="center">:gen_server.loop</td></tr>
        </table>
        >];
 
 
-    edge [weight=1 color=red];
+    edge [weight=1 color=red, arrowsize=1.6];
     d -> c -> b -> a;
 
     edge [weight=1 color=blue];
