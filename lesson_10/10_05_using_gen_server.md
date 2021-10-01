@@ -1,4 +1,47 @@
-  - подводные камни GenServer (не пихать сюда много, или вообще перенести эту тему в middle курс)
+# Использование GenServer
+
+## Сравнение с ООП
+
+Вы могли заметить некоторое сходство с ООП. Есть объект с внутренним
+состоянием, публичным АПИ и скрытой реализацией. Таких объектов
+(потоков) на базе одного класса (модуля) можно создать много. У всех у
+них будет одинаковое по структуре, но разное по содержанию
+состояние. Объекты могут взаимодействовать друг с другом, обмениваясь
+сообщениями.
+
+Если серверный поток регистрируется под определенным именем, то это
+"одиночка" (singleton). Он такой один, и к нему можно обращаться по
+имени:
+
+```
+gen_server:call(some_name, some_message)
+```
+
+Если поток не регистрируется, то таких объектов может быть много, и нужно
+обращаться к ним по Pid:
+
+```
+gen_server:call(Pid1, some_message).
+gen_server:call(Pid2, some_message).
+```
+
+Похожесть есть, но есть и нюансы. Для ООП объекта вполне нормально
+вызывать свои собственные методы. А с gen\_server можно попасть в
+коварную ловушку :)
+
+
+## Agents and Tasks, or GenServer?
+
+When do you use agents and tasks, and when do you use a GenServer?
+The answer is to use the simplest approach that works. Agents and tasks are
+great when you’re dealing with very specific background activities, whereas
+GenServers (as their name suggests) are more general.
+
+You can eliminate the need to make a decision by wrapping your agents and
+tasks in modules, as we did in our anagram example. That way you can always
+switch from the agent or task implementation to the full-blown GenServer
+without affecting the rest of the code base.
+
 
 ## Отложенная инициализация
 

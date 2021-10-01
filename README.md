@@ -140,13 +140,15 @@
 
 ## Урок №10. Абстракции над процессами: Task, Agent, GenServer.
 
-GenServer
+10.01 Task
 
-Task
+10.02 Agent
 
-Agent
+10.03 Создаем GenServer
 
-Registry?
+10.04 GenServer Module
+
+10.05 Использование GenServer
 
 
 ## Урок №11. OTP фреймворк.
