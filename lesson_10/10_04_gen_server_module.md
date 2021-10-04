@@ -195,10 +195,38 @@ use GenServer
 
 
 TODO read
-https://hexdocs.pm/elixir/1.12/GenServer.html
++ https://hexdocs.pm/elixir/1.12/GenServer.html
+- https://erlang.org/doc/design_principles/gen_server_concepts.html
+- https://erlang.org/doc/man/gen_server.html
+
+Я упустил еще 2 callbacks:
+
+format_status(reason, pdict_and_state)
+Invoked in some cases to retrieve a formatted version of the GenServer status.
+https://erlang.org/doc/man/gen_server.html#Module:format_status-2
+
+handle_continue(continue, state)
+Invoked to handle continue instructions.
+непонятно, что это
+https://erlang.org/doc/man/gen_server.html#Module:handle_continue-2
+It is useful for performing work after initialization or for splitting the work in a callback in multiple steps, updating the process state along the way.
 
 
 ### init
+
+init(init_arg)
+Invoked when the server is started. start_link/3 or start/3 will block until it returns.
+
+init(init_arg :: term()) ::
+  {:ok, state}
+  | {:ok, state, timeout() | :hibernate | {:continue, term()}}
+  | :ignore
+  | {:stop, reason :: any()}
+when state: any()
+
+Returning :ignore will cause start_link/3 to return :ignore and the process will exit normally without entering the loop or calling terminate/2. 
+
+Returning {:stop, reason} will cause start_link/3 to return {:error, reason} and the process to exit with reason reason without entering the loop or calling terminate/2.
 
 GenServer.start works synchronously. It returns only after init/1 callback has finished in server process.
 Client process is blocked until the server process is initialized.
@@ -209,6 +237,18 @@ The first is an error situation, the second is a normal situation.
 
 
 ### handle_call
+
+handle_call(request, from, state)
+Invoked to handle synchronous call/3 messages. call/3 will block until a reply is received (unless the call times out or nodes are disconnected).
+
+handle_call(request :: term(), from(), state :: term()) ::
+  {:reply, reply, new_state}
+  | {:reply, reply, new_state, timeout() | :hibernate | {:continue, term()}}
+  | {:noreply, new_state}
+  | {:noreply, new_state, timeout() | :hibernate | {:continue, term()}}
+  | {:stop, reason, reply, new_state}
+  | {:stop, reason, new_state}
+when reply: term(), new_state: term(), reason: term()
 
 GenServer.call doesn't wait indefinitely for a responce. 5 sec timeout by default.
 If server process terminates while client is waiting for resonce, GenServer detects it and raises a corresponding error in the client process. 
@@ -245,6 +285,15 @@ handle_call({msg3, A, B, C}, _From, State) ->
 
 ### handle_cast
 
+handle_cast(request, state)
+Invoked to handle asynchronous cast/2 messages.
+
+handle_cast(request :: term(), state :: term()) ::
+  {:noreply, new_state}
+  | {:noreply, new_state, timeout() | :hibernate | {:continue, term()}}
+  | {:stop, reason :: term(), new_state}
+when new_state: term()
+
 Вызов gen_server:call блокирует клиента, пока сервер не обработает его запрос и не вернет ответ.
 Бывают случаи, когда клиенту ответ сервера не нужен. Тогда лучше использовать gen\_server:cast.
 Клиент не блокируется и не ждет ответ сервера. Но сервер получает и обрабатывает сообщение.
@@ -265,6 +314,15 @@ handle_cast должен вернуть измененное состояние.
 
 
 ### handle_info
+
+handle_info(msg, state)
+Invoked to handle all other messages.
+
+handle_info(msg :: :timeout | term(), state :: term()) ::
+  {:noreply, new_state}
+  | {:noreply, new_state, timeout() | :hibernate | {:continue, term()}}
+  | {:stop, reason :: term(), new_state}
+when new_state: term()
 
 Любой поток из любого места в коде может отправить серверу сообщение
 оператором **!**.  Так делать не рекомендуется, потому что это вызовы
@@ -288,6 +346,20 @@ The monitoring :DOWN messages are an example of this.
 
 ### terminate
 
+terminate(reason, state)
+Invoked when the server is about to exit. It should do any cleanup required.
+
+terminate/2 is called if the GenServer traps exits (using Process.flag/2) and the parent process sends an exit signal
+or a callback (except init/1) does one of the following:
+- returns a :stop tuple
+- raises (via Kernel.raise/2) or exits (via Kernel.exit/1)
+- returns an invalid value
+TODO please read the "Shutdown values (:shutdown)" section in the Supervisor module.
+TODO надо бы проверить все эти варианты
+Note that a process does NOT trap exits by default
+
+Therefore it is not guaranteed that terminate/2 is called when a GenServer exits. For such reasons, we usually recommend important clean-up rules to happen in separated processes either by use of monitoring or by links themselves. There is no cleanup needed when the GenServer controls a port (for example, :gen_tcp.socket) or File.io_device/0, because these will be closed on receiving a GenServer's exit signal and do not need to be closed manually in terminate/2.
+
 Этот callback вызывается, когда gen_server останавливается.  Если
 поток в процессе своей работы занимал какие-то ресурсы (соединение с
 базой данных, сокеты, файлы и т.д.), то по правилам OTP предлагается
@@ -301,6 +373,9 @@ The monitoring :DOWN messages are an example of this.
 
 
 ### code_change
+
+code_change(old_vsn, state, extra)
+Invoked to change the state of the GenServer when a different version of a module is loaded (hot code swapping) and the state's term structure should be changed.
 
 Этот callback вызывается при горячем обновлении кода. Такое обновление
 тесно связано с релизами, и мы не рассматриваем его в рамках курса.
