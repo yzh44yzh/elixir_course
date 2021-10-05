@@ -105,7 +105,7 @@ GenServer -- это модуль стандартной библиотеки, к
 
 Чтобы отправить запрос серверу мы вызываем:
 ```
-GenServer.call(ServerNameOrPid, Request)
+GenServer.call(server_name_or_pid, request)
 ```
 В нашем случае это:
 ```
@@ -171,13 +171,12 @@ iex(6)> PathFinder.start()
 
 Чтобы OTP мог взаимодействовать с кастомным модулем, должен быть описан способ взаимодействия. Это описание реализовано с помощью **behaviour**. Behaviour очень похож на **интерфейс** в языке Java и некоторых других языках. 
 
-Behaviour указывает, какие функции обратного вызова (callback) должны быть реализованы в модуле, чтобы модуль был совместим с ним. Например, GenServer behaviour указывает, что модуль должен реализовать 6 функций:
-- init
-- handle_call
-- handle_cast
-- handle_info
-- code_change
-- terminate
+Behaviour указывает, какие функции обратного вызова (callback) должны быть реализованы в модуле, чтобы модуль был совместим с ним. Например, GenServer behaviour указывает, что модуль должен реализовать 8 функций:
+- init,
+- handle_call,
+- handle_cast,
+- handle_info,
+- и другие.
 
 Behaviour описывает, какие аргументы будут получать эти функции, и что они должны возвращать. 
 
@@ -185,7 +184,7 @@ Behaviour описывает, какие аргументы будут полу�
 ```
 use GenServer
 ```
-мы вызываем сложный макрос, который вставляет в наш модуль некоторую реализацию по-умолчанию для всех этих функций. Благодаря этому, нам не обязательно явно реализовывать все 6 этих функций (как это приходится делать в Эрланг), а достаточно реализовать только те, который нам нужны.
+мы вызываем сложный макрос, который вставляет в наш модуль некоторую реализацию по-умолчанию для этих функций. Благодаря этому, нам не обязательно явно реализовывать все 8 функций, а достаточно реализовать только те, которые нам нужны.
 
 Функции, реализующие behaviour, мы помечаем:
 ```
@@ -193,155 +192,64 @@ use GenServer
 ```
 Это позволяет компилятору проверить, что они все реализованы и имеют правильную сигнатуру.
 
-
-TODO read
-+ https://hexdocs.pm/elixir/1.12/GenServer.html
-- https://erlang.org/doc/design_principles/gen_server_concepts.html
-- https://erlang.org/doc/man/gen_server.html
-
-Я упустил еще 2 callbacks:
-
-format_status(reason, pdict_and_state)
-Invoked in some cases to retrieve a formatted version of the GenServer status.
-https://erlang.org/doc/man/gen_server.html#Module:format_status-2
-
-handle_continue(continue, state)
-Invoked to handle continue instructions.
-непонятно, что это
-https://erlang.org/doc/man/gen_server.html#Module:handle_continue-2
-It is useful for performing work after initialization or for splitting the work in a callback in multiple steps, updating the process state along the way.
-
-
-### init
-
-init(init_arg)
-Invoked when the server is started. start_link/3 or start/3 will block until it returns.
-
-init(init_arg :: term()) ::
-  {:ok, state}
-  | {:ok, state, timeout() | :hibernate | {:continue, term()}}
-  | :ignore
-  | {:stop, reason :: any()}
-when state: any()
-
-Returning :ignore will cause start_link/3 to return :ignore and the process will exit normally without entering the loop or calling terminate/2. 
-
-Returning {:stop, reason} will cause start_link/3 to return {:error, reason} and the process to exit with reason reason without entering the loop or calling terminate/2.
-
-GenServer.start works synchronously. It returns only after init/1 callback has finished in server process.
-Client process is blocked until the server process is initialized.
-
-If init/1 returns {:stop, reason} client will receive {:error, reason}.
-If init/1 returns :ignore, client will receive :ignore.
-The first is an error situation, the second is a normal situation.
-
-
-### handle_call
-
-handle_call(request, from, state)
-Invoked to handle synchronous call/3 messages. call/3 will block until a reply is received (unless the call times out or nodes are disconnected).
-
-handle_call(request :: term(), from(), state :: term()) ::
-  {:reply, reply, new_state}
-  | {:reply, reply, new_state, timeout() | :hibernate | {:continue, term()}}
-  | {:noreply, new_state}
-  | {:noreply, new_state, timeout() | :hibernate | {:continue, term()}}
-  | {:stop, reason, reply, new_state}
-  | {:stop, reason, new_state}
-when reply: term(), new_state: term(), reason: term()
-
-GenServer.call doesn't wait indefinitely for a responce. 5 sec timeout by default.
-If server process terminates while client is waiting for resonce, GenServer detects it and raises a corresponding error in the client process. 
-
-loop isn't CPU-intensive. Waiting for a message puts process in a suspended state and doesn't waste CPU cycles.
-
-handle_call должен обработать сообщение, сформировать ответ для клиента и
-новое состояние для сервера.
-
-Есть несколько вариантов возвращаемого значения. Но мы не будем рассматривать
-все возможные случаи. Чаще всего мы отвечаем {reply, Reply, NewState}.
-
-Обычно каждой АПИ функции модуля соответствует отдельное сообщение, а
-каждому сообщению отдельная ветка handle\_call. Если АПИ большое, то и
-веток handle\_call много.
-
-```
-my_api_1(A) ->
-    gen_server:call(?MODULE, {msg1, A}).
-my_api_2(A, B) ->
-    gen_server:call(?MODULE, {msg2, A, B}).
-my_api_3(A, B, C) ->
-    gen_server:call(?MODULE, {msg3, A, B, C}).
-...
-handle_call({msg1, A}, _From, State) ->
-...
-handle_call({msg2, A, B}, _From, State) ->
-...
-handle_call({msg3, A, B, C}, _From, State) ->
-```
-
-Поэтому внутри handle\_call много кода лучше не писать, а выносить его в отдельные функции.
+Мы уже использовали `init` и `handle_call`. Рассмотрим ещё некоторые из функций обратного вызова, которые необходимы для GenServer behaviour.
 
 
 ### handle_cast
 
+Клиенту не всегда нужен ответ сервера. Или клиент не хочет блокироваться и ждать ответа, а готов получить ответ позже. Для такого асинхронного взаимодействия можно использовать вызов:
+```
+GenServer.cast(server_name_or_pid, request)
+```
+и обработчик:
+```
 handle_cast(request, state)
-Invoked to handle asynchronous cast/2 messages.
-
-handle_cast(request :: term(), state :: term()) ::
-  {:noreply, new_state}
-  | {:noreply, new_state, timeout() | :hibernate | {:continue, term()}}
-  | {:stop, reason :: term(), new_state}
-when new_state: term()
-
-Вызов gen_server:call блокирует клиента, пока сервер не обработает его запрос и не вернет ответ.
-Бывают случаи, когда клиенту ответ сервера не нужен. Тогда лучше использовать gen\_server:cast.
-Клиент не блокируется и не ждет ответ сервера. Но сервер получает и обрабатывает сообщение.
-
-Для этого вызывается callback-функция handle_cast:
-
-```
-do_something(A, B) ->
-    gen_server:cast(?MODULE, {do_something, A, B}),
-    ok.
-...
-handle_cast({do_something, A, B}, State) ->
-    NewState = ...
-    {noreply, NewState};
 ```
 
-handle_cast должен вернуть измененное состояние.
+Например, для PathFinder можно добавить АПИ, позволяющее перечитать данные из файла и перестроить граф. Это будет выглядеть так:
+```
+def reload() do
+  GenServer.cast(@server_name, :reload)
+end
+
+def handle_cast(:reload, state) do
+  %{graph: graph, distancies: distancies} = state
+  :digraph.delete(graph)
+  graph = :digraph.new([:cyclic])
+  data = load_data()
+  Enum.reduce(data, graph, &add_item/2)
+  distancies = make_distancies_map(data)
+  state = %{graph: graph, distancies: distancies}
+  {:noreply, state}
+end
+```
+TODO: протестировать
 
 
 ### handle_info
 
-handle_info(msg, state)
-Invoked to handle all other messages.
-
-handle_info(msg :: :timeout | term(), state :: term()) ::
-  {:noreply, new_state}
-  | {:noreply, new_state, timeout() | :hibernate | {:continue, term()}}
-  | {:stop, reason :: term(), new_state}
-when new_state: term()
-
-Любой поток из любого места в коде может отправить серверу сообщение
-оператором **!**.  Так делать не рекомендуется, потому что это вызовы
-в обход API сервера.  Но иногда так делают.
-
-Если сообщения в функции loop сервера приходят не из gen\_server:call/cast,
-то они обрабатываются в callback-функции handle\_info.
+OTP скрывает отправку сообщений внутри call и cast. Но никто не запрещает отправить сообщение напрямую по имени или pid процесса. В этом случае сообщение попадёт в обработчик handle_info.
 
 ```
-handle_info({some_message, A, B}, State) ->
-    NewState = ...
-    {noreply, NewState};
+def handle_info(msg, state) do
+  IO.puts("got message #{inspect msg}")
+  {:noreply, state}
+end
+
+send(PathFinder, :hello)
 ```
+TODO: протестировать.
 
-The monitoring :DOWN messages are an example of this.
+Такой способ не принято использовать для реализации АПИ, но можно использовать для внутренних задач. 
 
-Сервер и сам может отправлять себе сообщения таким образом. Например,
-для отложенной инициализации (это мы рассмотрим ниже), или для
-выполнения повторяющихся операций через интервалы времени.
+Например, сервер может установить мониторинг на какой-то другой процесс и через handle_info обрабатывать сообщения `:DOWN`. 
+
+Или сервер может с помощью таймера отправить отложенное сообщение самому себе, и выполнить отложенную работу. На этом строятся задачи типа "очистить кэш если к нему не было обращений в течение 5 минут", или "каждые 30 минут делать http-запрос куда-то".
+
+
+### Catch All
+
+TODO stopped here
 
 
 ### terminate
@@ -360,34 +268,13 @@ Note that a process does NOT trap exits by default
 
 Therefore it is not guaranteed that terminate/2 is called when a GenServer exits. For such reasons, we usually recommend important clean-up rules to happen in separated processes either by use of monitoring or by links themselves. There is no cleanup needed when the GenServer controls a port (for example, :gen_tcp.socket) or File.io_device/0, because these will be closed on receiving a GenServer's exit signal and do not need to be closed manually in terminate/2.
 
-Этот callback вызывается, когда gen_server останавливается.  Если
-поток в процессе своей работы занимал какие-то ресурсы (соединение с
-базой данных, сокеты, файлы и т.д.), то по правилам OTP предлагается
-освобождать их здесь.
-
-Или если поток накопил какие-то данные, которые нужно куда-то
-сохранить, то можно делать это здесь. Хотя надежнее сохранять данные
-периодически, через регулярные интервалы времени. Это минимизирует
-потери в случае аварийного завершения потока. terminate тогда не
-вызывается.
+В штатных условиях не срабатывает. И обычно не нужен.
 
 
-### code_change
+### Прочие обработчики
 
-code_change(old_vsn, state, extra)
-Invoked to change the state of the GenServer when a different version of a module is loaded (hot code swapping) and the state's term structure should be changed.
+handle_continue/2
 
-Этот callback вызывается при горячем обновлении кода. Такое обновление
-тесно связано с релизами, и мы не рассматриваем его в рамках курса.
-Но для полноты изложения callback упомянем.
+code_change/3
 
-В новой версии кода возможно изменилось состояние процесса. В #state{}
-могло появиться что-то новое, или что-то было убрано, или вообще
-состояние стало храниться в совсем другой структуре данных.
-
-code_change принимает на входе старый #state{}, и должен его
-преобразовать и вернуть новый #state{}.
-
-TODO это в некоторой степени похоже на миграцию БД.
-
-
+format_status/2
