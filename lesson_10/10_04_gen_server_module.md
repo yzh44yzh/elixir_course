@@ -206,14 +206,15 @@ GenServer.cast(server_name_or_pid, request)
 handle_cast(request, state)
 ```
 
-Например, для PathFinder можно добавить АПИ, позволяющее перечитать данные из файла и перестроить граф. Это будет выглядеть так:
+Например, для PathFinder можно добавить АПИ, позволяющее перечитать данные из файла и перестроить граф:
 ```
-def reload() do
-  GenServer.cast(@server_name, :reload)
+def reload_data() do
+  GenServer.cast(@server_name, :reload_data)
 end
 
-def handle_cast(:reload, state) do
-  %{graph: graph, distancies: distancies} = state
+@impl true
+def handle_cast(:reload_data, state) do
+  %{graph: graph} = state
   :digraph.delete(graph)
   graph = :digraph.new([:cyclic])
   data = load_data()
@@ -223,22 +224,32 @@ def handle_cast(:reload, state) do
   {:noreply, state}
 end
 ```
-TODO: протестировать
 
 
 ### handle_info
 
 OTP скрывает отправку сообщений внутри call и cast. Но никто не запрещает отправить сообщение напрямую по имени или pid процесса. В этом случае сообщение попадёт в обработчик handle_info.
 
+Если мы не определили свой обработчик, то действует реализация по умолчанию, которая подставляется макросом:
+```
+iex(4)> send(PathFinder, :hello)
+:hello
+iex(5)> 
+18:21:01.198 [error] PathFinder PathFinder received unexpected message in handle_info/2: :hello
+```
+
+Но если мы добавим свою реализацию, то будет работать она:
 ```
 def handle_info(msg, state) do
   IO.puts("got message #{inspect msg}")
   {:noreply, state}
 end
 
-send(PathFinder, :hello)
+iex(9)> r PathFinder
+iex(10)> send(PathFinder, :hello)
+got message :hello
+:hello
 ```
-TODO: протестировать.
 
 Такой способ не принято использовать для реализации АПИ, но можно использовать для внутренних задач. 
 
@@ -249,7 +260,35 @@ TODO: протестировать.
 
 ### Catch All
 
-TODO stopped here
+Обработчики `handle_call`, `handle_cast` и `handle_info` определяют отдельное тело функции (clause) для каждого сообщения, которое они обрабатывают. 
+
+При этом, если отправить сообщение, для которого не предусмотрена обработка, то это вызовет аварийное завершение процесса:
+```
+iex(14)> GenServer.call(PathFinder, :hello)
+
+18:28:22.783 [error] GenServer PathFinder terminating
+** (FunctionClauseError) no function clause matching in PathFinder.handle_call/3
+    lib/path_finder.exs:43: PathFinder.handle_call(:hello, {#PID<0.107.0>, #Reference<0.406531561.3370123269.6706>}, %{distancies:
+    ...
+```
+
+Хорошей практикой является добавление "Catch All" тела (clause) которое перехватывает любые сообщение. 
+
+```
+def handle_call(unknown_msg, _from, state) do
+  IO.puts("got unknown msg in handle_call: #{inspect unknown_msg}")
+  {:reply, {:error, :invalid_call}, state}
+end
+
+iex(23)> GenServer.call(PathFinder, :hello)
+got unknown msg in handle_call: :hello
+{:error, :invalid_call}
+
+```
+
+Здесь мы логируем информацию о полученом сообщении и продолжаем работу. Мы уже видели на примере `handle_info`, что реализация по умолчанию так и работает. Но если мы добавили свою реализацию, то и "Catch All" нужно тоже добавить самим.
+
+В большой системе часто бывает сложно найти, откуда же приходят невалидные сообщения. С `handle_call` и `handle_cast` такое обычно не случается, так как их вызовы обернуты в АПИ модуля. А с `handle_info` это случается. И тогда приходится искать источник.
 
 
 ### terminate

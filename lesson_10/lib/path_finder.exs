@@ -22,6 +22,10 @@ defmodule PathFinder do
     GenServer.call(@server_name, {:get_route, from_city, to_city})
   end
 
+  def reload_data() do
+    GenServer.cast(@server_name, :reload_data)
+  end
+  
 
   # GenServer callbacks
 
@@ -48,6 +52,29 @@ defmodule PathFinder do
     {:reply, reply, state}
   end
 
+  def handle_call(unknown_msg, _from, state) do
+    IO.puts("got unknown msg in handle_call: #{inspect unknown_msg}")
+    {:reply, {:error, :invalid_call}, state}
+  end
+  
+  @impl true
+  def handle_cast(:reload_data, state) do
+    %{graph: graph} = state
+    :digraph.delete(graph)
+    graph = :digraph.new([:cyclic])
+    data = load_data()
+    Enum.reduce(data, graph, &add_item/2)
+    distancies = make_distancies_map(data)
+    state = %{graph: graph, distancies: distancies}
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_info(msg, state) do
+    IO.puts("got message #{inspect msg}")
+    {:noreply, state}
+  end
+  
 
   # Inner functions
   
