@@ -293,27 +293,21 @@ got unknown msg in handle_call: :hello
 
 ### terminate
 
-terminate(reason, state)
-Invoked when the server is about to exit. It should do any cleanup required.
+Рассмотрим еще обработчик `terminate`. Как не трудно догадаться, он срабатывает при завершении процесса и выполняет работу противоположную `init` -- освобождает какие-то ресурсы, если это необходимо.
 
-terminate/2 is called if the GenServer traps exits (using Process.flag/2) and the parent process sends an exit signal
-or a callback (except init/1) does one of the following:
-- returns a :stop tuple
-- raises (via Kernel.raise/2) or exits (via Kernel.exit/1)
-- returns an invalid value
-TODO please read the "Shutdown values (:shutdown)" section in the Supervisor module.
-TODO надо бы проверить все эти варианты
-Note that a process does NOT trap exits by default
+Нюанс в том, что этот обработчик используется очень редко. И он даже не вызывается, если не предпринять дополнительных усилий. Чтобы terminate срабатывал, серверный процесс должен установить флаг `:trap_exit` (мы упоминали этот флаг на предыдущем уроке). 
+```
+Process.flag(:trap_exit, true)
+```
 
-Therefore it is not guaranteed that terminate/2 is called when a GenServer exits. For such reasons, we usually recommend important clean-up rules to happen in separated processes either by use of monitoring or by links themselves. There is no cleanup needed when the GenServer controls a port (for example, :gen_tcp.socket) or File.io_device/0, because these will be closed on receiving a GenServer's exit signal and do not need to be closed manually in terminate/2.
+И даже после этого terminate вызывается только при штатном завершении процесса, и не вызвается при аварийном завершении.
 
-В штатных условиях не срабатывает. И обычно не нужен.
+Большинство серверных процессов не имеют ресурсов, которые нужно специально освобождать. Кроме своей собственной памяти процесс еще может владеть:
+- TCP или UDP соединением;
+- ETS таблицей;
+- Файловым дескриптором.
 
+Все эти ресурсы освобождаются автоматически при завершении процесса, и штатном и аварийном.
 
-### Прочие обработчики
+terminate можно использовать для каких-то специфических задач. Например, для сохранения состояния процесса в персистентное хранилище. Но в большинстве проектов вы его не увидите.
 
-handle_continue/2
-
-code_change/3
-
-format_status/2
