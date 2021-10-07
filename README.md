@@ -161,6 +161,8 @@ Application
 
 Модель акторов
 
+Сходство с ООП
+
 Let It Crash (again)
 
 Observer

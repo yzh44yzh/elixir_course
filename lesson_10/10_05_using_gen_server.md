@@ -1,87 +1,49 @@
 # Использование GenServer
 
-## Сравнение с ООП
-
-Вы могли заметить некоторое сходство с ООП. Есть объект с внутренним
-состоянием, публичным АПИ и скрытой реализацией. Таких объектов
-(потоков) на базе одного класса (модуля) можно создать много. У всех у
-них будет одинаковое по структуре, но разное по содержанию
-состояние. Объекты могут взаимодействовать друг с другом, обмениваясь
-сообщениями.
-
-Если серверный поток регистрируется под определенным именем, то это
-"одиночка" (singleton). Он такой один, и к нему можно обращаться по
-имени:
-
-```
-gen_server:call(some_name, some_message)
-```
-
-Если поток не регистрируется, то таких объектов может быть много, и нужно
-обращаться к ним по Pid:
-
-```
-gen_server:call(Pid1, some_message).
-gen_server:call(Pid2, some_message).
-```
-
-Похожесть есть, но есть и нюансы. Для ООП объекта вполне нормально
-вызывать свои собственные методы. А с gen\_server можно попасть в
-коварную ловушку :)
-
-
-## Agents and Tasks, or GenServer?
-
-When do you use agents and tasks, and when do you use a GenServer?
-The answer is to use the simplest approach that works. Agents and tasks are
-great when you’re dealing with very specific background activities, whereas
-GenServers (as their name suggests) are more general.
-
-You can eliminate the need to make a decision by wrapping your agents and
-tasks in modules, as we did in our anagram example. That way you can always
-switch from the agent or task implementation to the full-blown GenServer
-without affecting the rest of the code base.
+В работе с GenServer есть много интересных нюансов. Рассмотрим те, которые важно знать с самого начала:
+- отложенная инициализация;
+- блокировка на GenServer.call;
+- переполнение почтового ящика.
 
 
 ## Отложенная инициализация
 
-Вызов init блокирует родительский поток. А с ним и старт приложения.
-А с ним и старт всей ноды. То есть, нода не начнет работу, пока все
-init всех gen_server модулей не отработают.  Поэтому желательно
-оставлять init легковесным и возвращаться из него как можно быстрее.
+Вызов `GenServer.start` блокирует родительский процесс пока не завершится `init` в дочернем процессе. Это может быть нежелательным, если запускается много процессов (что и происходит на старте узла BEAM). 
 
-Если инициализация сервера требует долгих действий, то такие вещи
-лучше делать отложено.  Например, устанавливать соединение с базой
-данных, запрашивать какие-то данные из внешнего источника, создавать
-большие объекты в памяти -- все это стоит делать отложено.
+Если инициализация занимает долгое время, например, нужно получить какие-то данные из базы или из стороннего сервера, то это лучше сделать не сразу в init, а позже.
 
-Есть разные способы реализовать отложенную инициализацию. Мы
-рассмотрим самый простой.
-
-Здесь в init частично инициализируется State, и
-поток отправляет сообщение самому себе.
+Для этого есть обработчик `handle_continue`.
 
 ```
-init(Args) ->
-    State = some_light_state,
-    self() ! heavy_init,
-    {ok, State}.
+  @impl true
+  def init(:no_args) do
+    state = %{}
+    {:ok, state, {:continue, :delayed_init}}
+  end
+
+  @impl true
+  def handle_continue(:delayed_init, state) do
+    ...
+    state = %{graph: graph, distancies: distancies}
+    {:noreply, state}
+  end
+  
+  @impl true
+  def handle_cast(:reload_data, state) do
+    %{graph: graph} = state
+    :digraph.delete(graph)
+    state = %{}
+    {:noreply, state, {:continue, :delayed_init}}
+  end
 ```
 
-Это сообщение первым ляжет в почтовый ящик, и первым будет обработано
-в handle_info.
+TODO: описать
 
-```
-handle_info(heavy_init, State) ->
-    NewState = heavy_state,
-    {noreply, NewState};
-```
+Заодно исчезло дублирование кода для reload_data.
 
-После этого сервер готов обслуживать запросы клиентов.
-
-Происходящее в handle_info не блокирует ничего, кроме потока
-сервера. И поэтому вся нода в целом может стартовать быстрее, и другие
-потоки быстрее начинают выполнять свою работу.
+Здесь исключена ситуация, когда сервер получает запрос раньше, чем успевает инициализироваться. 
+Потому что так работает loop -- сервер не возьмет запрос из почтового ящика, пока не завершит выполнение текущего обработчика.
+А в данном случае двух обработчиков -- init и handle_continue.
 
 
 ## Deadlock на gen_server:call
@@ -113,11 +75,10 @@ gen\_server:call по дефолту имеет таймаут в 5 секунд
 - помните про такой deadlock;
 - хорошо продумывайте таймауты.
 
+рекомендуемая практика -- отправлять сообщения самому себе
 
 
-## GenServer problem
-
-### Mailbox
+## Переполнение почтового ящика
 
 Theoretically, a process mailbox has an unlimited size. In practice, the mailbox size is limited by available memory.
 If messages arrive faster than the process can handle them, the mailbox will constantly grow and increasingly consume memory. Ultimately, a single process may cause an entire system to crash by consuming all the available memory. 
@@ -133,16 +94,3 @@ Having many processes frequently send big messages may affect system performance
 A special case where deep-copying doesn't take place involves binaries larger than 64 bytes. 
 (TODO kbytes?)
 These are maintained on a special shared binary heap. 
-
-### Long init
-
-delayed init, different implementations
-
-
-### call timeout
-
-When request times out, it isn't removed from the mailbox. 
-A timeout means you give up waiting on the response, but the message is still in mailbox and will be processed at some point.
-
-
-### Deadlock 
