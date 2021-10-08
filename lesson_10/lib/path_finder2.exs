@@ -37,6 +37,10 @@ defmodule PathFinder2 do
 
   @impl true
   def handle_continue(:delayed_init, state) do
+    case state do
+      %{} -> :ok
+      %{graph: graph} -> :digraph.delete(graph)
+    end
     graph = :digraph.new([:cyclic])
     data = load_data()
     Enum.reduce(data, graph, &add_item/2)
@@ -65,9 +69,6 @@ defmodule PathFinder2 do
   
   @impl true
   def handle_cast(:reload_data, state) do
-    %{graph: graph} = state
-    :digraph.delete(graph)
-    state = %{}
     {:noreply, state, {:continue, :delayed_init}}
   end
 
