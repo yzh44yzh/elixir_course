@@ -111,17 +111,19 @@ end
 
 ## Переполнение почтового ящика
 
-Theoretically, a process mailbox has an unlimited size. In practice, the mailbox size is limited by available memory.
-If messages arrive faster than the process can handle them, the mailbox will constantly grow and increasingly consume memory. Ultimately, a single process may cause an entire system to crash by consuming all the available memory. 
-Solution: Optimize message handling and/or split server into multiple processes.
+Важная особенность BEAM в том, что нет никакого лимита на количество сообщений в почтовом ящике процесса. Это значит, что очередь сообщений может расти до тех пор, пока не исчерпает всю свободную память. И тогда операционная система (Out-Of-Memory Killer) аварийно завершает весь узел BEAM. Это одно из немногих слабых мест в BEAM, где ошибка в одном процессе может обрушить всю систему.
 
-In addition, large mailbox cause performance slowdowns. 
-When a new message arrives, receive iterates through all existed messages before processing the new one.
-Solution: catch-all receive clause that deal with unexpected kinds of messages.
+Есть две причины для роста очереди:
+- нет catch-all шаблона в receive, и процесс забирает не все сообщения;
+- сообщения поступают быстрее, чем процесс успевает их обрабатывать.
 
-Deep-copying is an in-memory operation, so it should be reasonably fast. 
-Having many processes frequently send big messages may affect system performance.
+Выявить такие ситуации при тестировании сложно. Тем более, что рост очередей может быть очень медленным. Бывает, проходят многие часы, дни и недели прежде, чем проблема становится заметной.
 
-A special case where deep-copying doesn't take place involves binaries larger than 64 bytes. 
-(TODO kbytes?)
-These are maintained on a special shared binary heap. 
+Основные способы борьбы с этой проблемой:
+- сбор метрик и мониторинг:
+- нагрузочное тестирование.
+
+Однако это большие и сложные темы, и я не буду их разбирать в рамках данного курса.
+
+Существуют библиотеки, реализующие очередь сообщений с лимитом. Например, библиотека [PO Box](https://github.com/ferd/pobox).
+
