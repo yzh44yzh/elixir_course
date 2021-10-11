@@ -153,11 +153,11 @@
 
 ## Урок №11. OTP фреймворк.
 
-11.01. OTP
+11.01. Supervisor
 
-11.02. Supervisor
+11.02. Application
 
-11.03. Application
+11.03. OTP
 
 11.04. Модель акторов
 
