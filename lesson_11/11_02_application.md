@@ -1,7 +1,23 @@
 # Application
 
 TODO
-https://elixir-lang.org/getting-started/mix-otp/supervisor-and-application.html
++ https://elixir-lang.org/getting-started/mix-otp/supervisor-and-application.html
+- https://hexdocs.pm/elixir/1.12/Application.html
+
+In a nutshell, an application consists of all of the modules defined in the .app file, including the .app file itself. An application has generally only two directories: ebin, for Elixir artefacts, such as .beam and .app files, and priv, with any other artefact or asset you may need in your application.
+
+Each application in our system can be started and stopped. The rules for starting and stopping an application are also defined in the .app file.
+
+The first step is to tell our application definition (i.e. our .app file) which module is going to implement the application callback. Let’s do so by opening mix.exs and changing def application to the following:
+
+The :mod option specifies the “application callback module”, followed by the arguments to be passed on application start. The application callback module can be any module that implements the Application behaviour.
+
+To implement the Application behaviour, we have to use Application and define a start/2 function. The goal of start/2 is to start a supervisor, which will then start any child services or execute any other code our application may need. Let’s use this opportunity to start the KV.Supervisor we have implemented earlier in this chapter.
+
+Whenever we invoke iex -S mix, it automatically starts our application by calling Application.start(:kv), which then invokes the application callback. The application callback’s job is to start a supervision tree.
+
+Applications are the entities that are started and stopped as a whole by the runtime. 
+
 
 But in the OTP world an application is a bundle of code that comes with a descriptor. 
 That descriptor tells the runtime:
