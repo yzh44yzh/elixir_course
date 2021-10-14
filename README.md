@@ -140,28 +140,32 @@
 
 ## Урок №10. Абстракции над процессами: Task, Agent, GenServer.
 
-10.01. Task
+10.01. Task.
 
-10.02. Agent
+10.02. Agent.
 
-10.03. Создаем GenServer
+10.03. Создание GenServer.
 
-10.04. Модуль GenServer
+10.04. Модуль GenServer.
 
-10.05. Использование GenServer
+10.05. Использование GenServer.
 
 
 ## Урок №11. OTP фреймворк.
 
-11.01. Supervisor
+11.01. Supervisor.
 
-11.02. Application
+11.02. Использование Supervisor.
 
-11.03. OTP
+11.03. Dynamic Supervisor.
 
-11.04. Модель акторов
+11.04. Application.
 
-11.05. Let It Crash
+11.05. OTP.
+
+11.06. Модель акторов.
+
+11.07. Let It Crash.
 
 
 ## Урок №12. Erlang Term Storage.
