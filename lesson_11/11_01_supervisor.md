@@ -2,114 +2,89 @@
 
 ## Зачем нужен супервизор
 
-Links, trap exits and monitors make it possible to detect errors in concurrent system.
-You can introduce a process whose only responsibility is to receive links and monitor notifications,
-and do something when a process crashed.
-Such processes, called Supervisors, are the primary tools of error recovery in concurrent systems.
+Мы знаем, что одни процессы могут отслеживать падение других процессов через механизмы link и monitor. Логичный шаг -- поручить части процессов в системе заниматься именно этим. 
 
-Think in terms of Lifecycles, not in terms of Supervision.
-start, stop, restart -- it is a lifecycle.
+И таким образом все процессы поделятся на две категории:
+- worker -- процесс, выполняющий всю полезную работу;
+- supervisor -- процесс обрабатывающий падение worker.
 
-A supervisor is a generic process that manages the lifecycle of other processes.
-- starts other processes (which are then considered to be its children);
-- detects termination of any child;
-- restart it if needed.
-
-A supervisor is a process which supervises other processes, which we refer to as child processes. Supervisors are used to build a hierarchical process structure called a supervision tree
-
-The act of supervising a process includes three distinct responsibilities. 
-
-The first one is to start child processes. 
-
-Once a child process is running, the supervisor may restart a child process, either because it terminated abnormally or because a certain condition was reached. For example, a supervisor may restart all children if any child dies. 
-
-Finally, a supervisor is also responsible for shutting down the child processes when the system is shutting down.
+На самом деле супервизор не просто занимается падениями процессов, а обеспечивает их полный жизненный цикл:
+- Start -- запуск;
+- Restart -- перезапуск;
+- Shutdown -- завершение, штатное и аварийное.
 
 
-## Запуск
+## Start
 
-After the supervisor retrieves all child specifications, it proceeds to start its children one by one, in the order they were defined, using the information in the :start key in the child specification.
-
-When the supervisor starts, it traverses all child specifications and then starts each child in the order they are defined. This is done by calling the function defined under the :start key in the child specification and typically defaults to start_link/1.
-
-The start_link/1 (or a custom) is then called for each child process. The start_link/1 function must return {:ok, pid} where pid is the process identifier of a new process that is linked to the supervisor. The child process usually starts its work by executing the init/1 callback. Generally speaking, the init callback is where we initialize and configure the child process.
-
-Children are started synchronously, in the order specified. The next child is started only after the init/1 for the current child is finished. That's why init/1 shouldn't run for a long time.
-
-
-## Child Specification
-
-The child specification describes how the supervisor starts, shuts down, and restarts child processes.
-
-:id - any term used to identify the child specification internally by the supervisor; defaults to the given module. In the case of conflicting :id values, the supervisor will refuse to initialize and require explicit IDs. This key is required.
-
-:start - a tuple with the module-function-args to be invoked to start the child process. This key is required.
-
-:restart - an atom that defines when a terminated child process should be restarted (see the "Restart values" section below). This key is optional and defaults to :permanent.
-
-:shutdown - an integer or atom that defines how a child process should be terminated (see the "Shutdown values" section below). This key is optional and defaults to 5_000 if the type is :worker or :infinity if the type is :supervisor.
-
-:type - specifies that the child process is a :worker or a :supervisor. This key is optional and defaults to :worker.
-
+Супервизор при запуске получает **child specification**. Это структура данных, которая декларативно описывает, какие дочерние процессы должны быть запущены и каким именно образом. Выглядит она так:
 
 ```
-child_spec() :: %{
-  :id => atom() | term(),
-  :start => {module(), atom(), [term()]},
-  optional(:restart) => :permanent | :transient | :temporary,
-  optional(:shutdown) => timeout() | :brutal_kill,
-  optional(:type) => :worker | :supervisor,
-  optional(:modules) => [module()] | :dynamic
-}
+[
+  %{
+    id: "child_1",
+    start: {PathFinder, start_link, []},
+    restart: :permanent,
+    shutdown: 5000,
+    type: :worker
+  },
+  %{
+    id: "child_2",
+    start: {Lesson_10.Task_01_Map_Reduce, start, [processes_tree]}
+  },
+  %{
+    id: "child_3",
+    start: {Lesson_10.Task_02_Sharding, start, []}
+  }
+]
 ```
 
-### Worker Restart Options
+Здесь мы указываем 3 дочерних процесса и описываем их в виде Map с определенным набором ключей:
 
-The conditions when a worker should be restarted are dictated by its restart: option:
-- :permanent - always restart
-- :temporary - never restart
-- :transient - restart if failed
+**:id** -- идентификатор процесса. Мы привыкли идентифицировать процессы по pid, но в данном случае это не подходит, потому что процесс может несколько раз запускаться и завершаться, при этом pid будет меняться. Поэтому супервизор использует отдельный идентификатор, который в каждый конкретный момент времени указывает на один конкретный процесс, но в разное время это могут быть разные процессы.
 
-:transient - the child process is restarted only if it terminates abnormally, i.e., with an exit reason other than :normal, :shutdown, or {:shutdown, term}.
+**:start** -- кортеж `{Module, function, args}`, который описывает, как запустить процесс. (Такой кортеж обычно называют MFA).
 
-Есть смысл запускать воркера под супервизором даже если он :temporary, и его не нужно рестартовать.
-В этом случае воркер не зависнет в системе при крашах и рестартах, а гарантировано завершится.
-И краш в этом воркере будет правильно логирован.
+**:restart** -- стратегия рестарта (будет описана ниже).
 
+**:shutdown** -- стратегия завершения процесса (будет описана ниже).
 
-## Остановка
+**:type** -- тип дочернего процесса: `:worker` или `:supervisor`.
 
-When a supervisor shuts down, it terminates all children in the opposite order they are listed. The termination happens by sending a shutdown exit signal, via Process.exit(child_pid, :shutdown), to the child process and then awaiting for a time interval for the child process to terminate. 
-defaults to 5000 milliseconds.
-If the child process does not terminate in this interval, the supervisor abruptly terminates the child with reason :kill.
+Первые два ключа обязательны, для остальных супервизор подставит значения по-умолчанию, если они не будут указаны явно.
 
-If the child process is not trapping exits, it will shutdown immediately when it receives the first exit signal. If the child process is trapping exits, then the terminate callback is invoked, and the child process must terminate in a reasonable time interval before being abruptly terminated by the supervisor.
-
-In other words, if it is important that a process cleans after itself when your application or the supervision tree is shutting down, then this process must trap exits and its child specification should specify the proper :shutdown value, ensuring it terminates within a reasonable interval.
-
-Note that the supervisor that reaches maximum restart intensity will exit with :shutdown reason.
-
-Exit Reason:
-
-:normal - in such cases, the exit won't be logged, there is no restart in transient mode, and linked processes do not exit
-
-:shutdown or {:shutdown, term} - in such cases, the exit won't be logged, there is no restart in transient mode, and linked processes exit with the same reason unless they're trapping exits
-
-any other term - in such cases, the exit will be logged, there are restarts in transient mode, and linked processes exit with the same reason unless they're trapping exits
-
-
-### Shutdown values (:shutdown)
-
-The following shutdown values are supported in the :shutdown option:
-
-:brutal_kill - the child process is unconditionally and immediately terminated using Process.exit(child, :kill).
-
-any integer >= 0 - the amount of time in milliseconds that the supervisor will wait for its children to terminate after emitting a Process.exit(child, :shutdown) signal. If the child process is not trapping exits, the initial :shutdown signal will terminate the child process immediately. If the child process is trapping exits, it has the given amount of time to terminate. If it doesn't terminate within the specified time, the child process is unconditionally terminated by the supervisor via Process.exit(child, :kill).
-
-:infinity - works as an integer except the supervisor will wait indefinitely for the child to terminate. If the child process is a supervisor, the recommended value is :infinity to give the supervisor and its children enough time to shut down. This option can be used with regular workers but doing so is discouraged and requires extreme care. If not used carefully, the child process will never terminate, preventing your application from terminating as well.
+Получив child specification, супервизор запускает дочерние процессы по очереди. Для каждого элемента списка супервизор вызвает MFA и блокируется, пока не получит ответ, затем переходит к следущему элементу. В случае с GenServer супервизор блокируется, пока не завершится init. Поэтому важно, чтобы init не выполнялся слишком долго.
 
 
 ## Restart
+
+Есть две настройки, которые определяют, как супервизор рестартует процессы. Это ключ `:restart` в child specification и ключ `:strategy` в настройках самого супервизора.
+
+**:restart** относится к дочернему процессу и имеет 3 варианта:
+- :permanent - процесс нужно перезапускать всегда;
+- :temporary - процесс не нужно перезапускать;
+- :transient - процесс нужно перезапустить, если он завершился аварийно, и не нужно перезапускать, если он завершился в штатном режиме.
+
+Тут важно разобраться, что такое штатное и аварийное завершение.
+
+Как мы помним, когда процесс завершается по любой причине, отправляется сигнал `exit` всем другим процессам, связанным link. Разумеется, супервизор связывается со своими дочерними процессами, и устанавливает у себя флаг trap_exit:
+```
+Process.flag(:trap_exit, true)
+```
+так что эти сигналы попадают к нему в почтовый ящик в виде сообщений:
+```
+{:EXIT, #PID<0.122.0>, reason}
+```
+
+reason -- это причина завершения процесса и здесь может быть любая структура данных. 
+
+Супервизор считает, что процесс завершился штатно, если reason:
+- :normal
+- :shutdown
+- {:shutdown, any}
+
+Любые другие значения считаются не штатным (аварийным) завершением процесса.
+
+
 
 Restarting boils down to starting another process in place of the old one. 
 The new process has a different pid and doesn't share any state with the old one.
@@ -143,8 +118,45 @@ RestartStrategy описывает политику перезапуска до�
 Тогда супервизор завершается сам, а проблему пытается решить его
 родитель -- супервизор уровнем выше.
 
+Есть смысл запускать воркера под супервизором даже если он :temporary, и его не нужно рестартовать.
+В этом случае воркер не зависнет в системе при крашах и рестартах, а гарантировано завершится.
+И краш в этом воркере будет правильно логирован.
 
-### Supervision tree 
+
+## Shutdown
+
+When a supervisor shuts down, it terminates all children in the opposite order they are listed. The termination happens by sending a shutdown exit signal, via Process.exit(child_pid, :shutdown), to the child process and then awaiting for a time interval for the child process to terminate. 
+defaults to 5000 milliseconds.
+If the child process does not terminate in this interval, the supervisor abruptly terminates the child with reason :kill.
+
+If the child process is not trapping exits, it will shutdown immediately when it receives the first exit signal. If the child process is trapping exits, then the terminate callback is invoked, and the child process must terminate in a reasonable time interval before being abruptly terminated by the supervisor.
+
+In other words, if it is important that a process cleans after itself when your application or the supervision tree is shutting down, then this process must trap exits and its child specification should specify the proper :shutdown value, ensuring it terminates within a reasonable interval.
+
+Note that the supervisor that reaches maximum restart intensity will exit with :shutdown reason.
+
+
+
+Exit Reason:
+
+:normal - in such cases, the exit won't be logged, there is no restart in transient mode, and linked processes do not exit
+
+:shutdown or {:shutdown, term} - in such cases, the exit won't be logged, there is no restart in transient mode, and linked processes exit with the same reason unless they're trapping exits
+
+any other term - in such cases, the exit will be logged, there are restarts in transient mode, and linked processes exit with the same reason unless they're trapping exits
+
+The following shutdown values are supported in the :shutdown option:
+
+:brutal_kill - the child process is unconditionally and immediately terminated using Process.exit(child, :kill).
+
+any integer >= 0 - the amount of time in milliseconds that the supervisor will wait for its children to terminate after emitting a Process.exit(child, :shutdown) signal. If the child process is not trapping exits, the initial :shutdown signal will terminate the child process immediately. If the child process is trapping exits, it has the given amount of time to terminate. If it doesn't terminate within the specified time, the child process is unconditionally terminated by the supervisor via Process.exit(child, :kill).
+
+:infinity - works as an integer except the supervisor will wait indefinitely for the child to terminate. If the child process is a supervisor, the recommended value is :infinity to give the supervisor and its children enough time to shut down. This option can be used with regular workers but doing so is discouraged and requires extreme care. If not used carefully, the child process will never terminate, preventing your application from terminating as well.
+
+defaults to 5_000 if the type is :worker or :infinity if the type is :supervisor.
+
+
+## Дерево супервизоров (Supervision Tree)
 
 ![supervision_tree](http://yzh44yzh.github.io/img/practical_erlang/supervision_tree.png)
 
