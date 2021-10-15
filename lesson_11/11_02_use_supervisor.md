@@ -2,8 +2,52 @@
 
 ## Запускаем Agent под супервизором
 
-Запуск процессов не под супервизором является антипаттерном.
-Либо напрямую под супервизором, либо процесс должен быть слинкован с другим, находящимся под супервизором.
+Запуск одного агента с child_spec по умолчанию.
+
+TODO описать, как это работает
+
+```
+iex(1)> c "lib/agent_with_sup.exs"
+
+iex(7)> Lesson_11.ShardingAgent.child_spec(:no_args)
+%{
+  id: Lesson_11.ShardingAgent,
+  restart: :permanent,
+  start: {Lesson_11.ShardingAgent, :start_link, [:no_args]}
+}
+
+iex(9)> Lesson_11.start()
+{:ok, #PID<0.167.0>}
+
+iex(10)> Lesson_11.ShardingAgent.find_node(:agent_1, 0)
+{:ok, "Node-1"}
+iex(12)> Lesson_11.ShardingAgent.find_node(:agent_1, 10)
+{:ok, "Node-1"}
+iex(13)> Lesson_11.ShardingAgent.find_node(:agent_1, 15) 
+{:ok, "Node-2"}
+iex(14)> Lesson_11.ShardingAgent.find_node(:agent_1, 40)
+{:ok, "Node-4"}
+iex(15)> Lesson_11.ShardingAgent.find_node(:agent_1, 60)
+{:error, :not_found}
+```
+
+Запуск двух агентов с явным child_spec.
+
+TODO описать, как это работает
+
+```
+iex(6)> Lesson_11.start_2_agents()
+{:ok, #PID<0.125.0>}
+iex(7)> Lesson_11.ShardingAgent.find_node(:agent_a, 5)
+{:ok, "Node-2"}
+iex(8)> Lesson_11.ShardingAgent.find_node(:agent_b, 5)
+{:ok, "Node-1"}
+iex(9)> Lesson_11.ShardingAgent.find_node(:agent_a, 10)
+{:error, :not_found}
+iex(10)> Lesson_11.ShardingAgent.find_node(:agent_b, 10)
+{:ok, "Node-2"}
+```
+
 
 
 ## Запускаем Task под супервизором
