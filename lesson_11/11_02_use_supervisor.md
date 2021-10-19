@@ -2,20 +2,77 @@
 
 ## Запускаем Agent под супервизором
 
-Запуск одного агента с child_spec по умолчанию.
+Возьмем ShardingAgent из прошлого урока. Его нужно будет немного доработать. 
 
-TODO описать, как это работает
+Во-первых, функцию для запуска процесса общепринято называть `start_link`, и она должна принимать один аргумент. Можно назвать функцию иначе, и аргументов сделать больше, но тогда в супервизоре придется переопределять настройки по-умолчанию, что не всегда удобно.
 
+Во-вторых, мы передадим в эту функцию имя агента и его начальное состояние. Так мы сможем запустить несколько агентов с разными именами и состояниями. А поскольку наша функция принимает один аргумент, то придется передать кортеж:
 ```
-iex(1)> c "lib/agent_with_sup.exs"
+def start_link({agent_name, state}) do
+  Agent.start(fn () -> state end, [name: agent_name])
+end
+```
 
-iex(7)> Lesson_11.ShardingAgent.child_spec(:no_args)
+Функцию `find_node` тоже добработам, чтобы можно было указать имя агента:
+```
+def find_node(agent_name, shard_num) do
+  Agent.get(agent_name, fn(state) -> do_find_node(state, shard_num) end)
+end
+```
+
+Запустим одного агента, и будем использовать child specification по-умолчанию:
+```
+def start() do
+  state = [
+    { 0, 11, "Node-1"},
+    {12, 23, "Node-2"},
+    {24, 35, "Node-3"},
+    {36, 47, "Node-4"}
+  ]
+  child_spec = [
+    {ShardingAgent, {:agent_1, state}}
+  ]
+  Supervisor.start_link(child_spec, strategy: :one_for_all)
+end
+```
+
+Здесь child specification выглядит предельно просто:
+```
+{ShardingAgent, {:agent_1, state}}
+```
+Это модуль агента, и аргументы для start_link. Этого достаточно, потому что в модуле агента мы применяем магию:
+```
+use Agent
+```
+Это специальный макрос, который неявно добавляет в модуль функцию `child_spec/1`. Супервизор вызывает эту функцию и получает child specification непосредственно от модуля, который он собирается запускать.
+```
+> c "lib/agent_with_sup.exs"
+
+> Lesson_11.ShardingAgent.child_spec(:no_args)
+%{
+  id: Lesson_11.ShardingAgent,
+  start: {Lesson_11.ShardingAgent, :start_link, [:no_args]}
+}
+```
+В Эликсире (в отличие от Эрланга) принято соглашение, что каждый модуль сам определяет child specification, необходимый для его запуска. Для Agent, Task и GenServer это генерируется неявно со значениями по умолчанию.
+
+Если мы захотим что-то переопределить, что достаточно передать нужные ключи в макрос:
+```
+use Agent, restart: :permanent
+```
+и макрос сгенерирует нужную реализацию:
+```
+> Lesson_11.ShardingAgent.child_spec(:no_args)
 %{
   id: Lesson_11.ShardingAgent,
   restart: :permanent,
   start: {Lesson_11.ShardingAgent, :start_link, [:no_args]}
 }
+```
 
+Запускаем и смотрим, как это работает:
+
+```
 iex(9)> Lesson_11.start()
 {:ok, #PID<0.167.0>}
 
@@ -31,9 +88,40 @@ iex(15)> Lesson_11.ShardingAgent.find_node(:agent_1, 60)
 {:error, :not_found}
 ```
 
-Запуск двух агентов с явным child_spec.
+## Запускаем двух агентов
 
-TODO описать, как это работает
+Если мы хотим запустить двух агентов, то понадобятся разные `id` в child specification. Реализация по-умолчанию подставляет в качестве id имя модуля (что является общепринятой практикой). 
+
+Но мы не можем запустить двух агентов с одинаковым id, поэтому придется явно указать child specification:
+
+```
+def start_2_agents() do
+  state_1 = [
+      {0, 4, "Node-1"},
+      {5, 9, "Node-2"}
+  ]
+  state_2 = [
+      { 0,  9, "Node-1"},
+      {10, 19, "Node-2"},
+      {20, 29, "Node-3"}
+  ]
+
+  child_spec = [
+    %{
+      id: :agent_a,
+      start: {ShardingAgent, :start_link, [{:agent_a, state_1}]}
+    },
+    %{
+      id: :agent_b,
+      start: {ShardingAgent, :start_link, [{:agent_b, state_2}]}
+    }
+  ]
+  Supervisor.start_link(child_spec, strategy: :one_for_all)
+end
+
+```
+
+Смотрим, как это работает:
 
 ```
 iex(6)> Lesson_11.start_2_agents()
@@ -48,6 +136,7 @@ iex(10)> Lesson_11.ShardingAgent.find_node(:agent_b, 10)
 {:ok, "Node-2"}
 ```
 
+(В Эрланг такого рода макросов нет, и все child specification всегда нужно явно прописывать. Впрочем, многие считают это преимуществом исходя из принципа "явное лучше неявного").
 
 
 ## Запускаем Task под супервизором
