@@ -54,7 +54,7 @@ use Agent
   start: {Lesson_11.ShardingAgent, :start_link, [:no_args]}
 }
 ```
-В Эликсире (в отличие от Эрланга) принято соглашение, что каждый модуль сам определяет child specification, необходимый для его запуска. Для Agent, Task и GenServer это генерируется неявно со значениями по умолчанию.
+В Эликсире (в отличие от Эрланга) принято соглашение, что каждый модуль сам определяет child specification, необходимый для его запуска. Для Task, Agent и GenServer это генерируется неявно со значениями по умолчанию.
 
 Если мы захотим что-то переопределить, что достаточно передать нужные ключи в макрос:
 ```
@@ -140,6 +140,43 @@ iex(10)> Lesson_11.ShardingAgent.find_node(:agent_b, 10)
 
 
 ## Запускаем Task под супервизором
+
+Модуль
+[Task.Supervisor](https://hexdocs.pm/elixir/1.12/Task.Supervisor.html)
+предоставляет аналогичное АПИ как и модуль 
+[Task](https://hexdocs.pm/elixir/1.12/Task.html)
+
+Так что нам достаточно вместо:
+```
+Task.async(__MODULE__, :find_elixir_sources, [path])
+```
+сделать
+```
+{:ok, sup_pid} = Task.Supervisor.start_link()
+Task.Supervisor.async(sup_pid, __MODULE__, :find_elixir_sources, [path])
+```
+
+и все работает:
+```
+iex(1)> c "lib/task_with_sup.exs"
+[Lesson_11, Lesson_11.FindSourcesTask]
+iex(2)> task = Lesson_11.FindSourcesTask.start("lib")
+iex(3)> Lesson_11.FindSourcesTask.get_result(task)
+["lib/task_with_sup.exs", "lib/agent_with_sup.exs"]
+iex(4)> task = Lesson_11.FindSourcesTask.start("../lesson_10/lib")
+iex(5)> Lesson_11.FindSourcesTask.get_result(task)
+["../lesson_10/lib/path_finder2.exs", "../lesson_10/lib/path_finder.exs"]
+```
+
+Task можно запустить под обычным супервизором так же, как мы выше запускали Agent:
+```
+child_spec = [
+  {MyTaskModule, args}
+]
+Supervisor.start_link(child_spec, strategy: :one_for_all)
+```
+Но в этом случае нет способа получить результат работы Task. Это подходит для каких нибудь фоновых задач, как, например, прогрев кэшей.
+
 
 ## Запускаем GenServer под супервизором
 
