@@ -180,39 +180,54 @@ Supervisor.start_link(child_spec, strategy: :one_for_all)
 
 ## Запускаем GenServer под супервизором
 
+Запустим PathFinder из прошлого урока. Поскольку там есть `use GenServer`, то и функция `child_spec/1` тоже есть:
 
-### Child Specification для GenServer
-
-Elixir allows you to pass a tuple with the module name and the start_link argument instead of the specification:
-The supervisor will then invoke Stack.child_spec([:hello]) to retrieve a child specification. Now the Stack module is responsible for building its own specification
-
-Luckily for us, use GenServer already defines a Stack.child_spec/1 exactly like this:
 ```
-def child_spec(arg) do
-  %{
-    id: Stack,
-    start: {Stack, :start_link, [arg]}
-  }
+iex(1)> c "lib/gen_server_with_sup.exs"
+[Lesson_11, Lesson_11.PathFinder]
+iex(2)> Lesson_11.PathFinder.child_spec(:no_args)
+%{
+  id: Lesson_11.PathFinder,
+  start: {Lesson_11.PathFinder, :start_link, [:no_args]}
+}
+```
+
+Запуск сервера нужно немного поправить, вместо:
+```
+def start() do
+  GenServer.start(__MODULE__, :no_args, [name: @server_name])
 end
 ```
-
-If you need to customize the GenServer, you can pass the options directly to use GenServer:
+сделаем:
 ```
-use GenServer, restart: :transient
+def start_link(_) do
+  GenServer.start_link(__MODULE__, :no_args, [name: @server_name])
+end
 ```
+чтобы соответствовать child spec, чтобы дочерний процесс линковался с супервизором.
 
-You can specify a worker by giving its module name (or a tuple containing the module and the initial arguments). 
-In this case, the supervisor assumes you’ve implemented a child_spec function in that module,
-and calls that function to get the specification.
-
-When you add the line ```use GenServer``` to a server module,
-Elixir will define a default child_spec function in that module.
-
-This function by default returns a map that tells the supervisor that 
-the start function will be start_link 
-and that the restart strategy will be :permanent. 
-You can override these defaults with the options you give use GenServer.
-
+Поправим путь к данным: 
+```
+@cities_file "../lesson_10/data/cities.csv"
+```
+Добавим запуск через супервизор:
+```
+def start() do
+  children = [
+    {__MODULE__, [:no_args]}
+  ]
+  Supervisor.start_link(children, strategy: :one_for_all)
+end
+```
+Запускаем и проверяем:
+```
+iex(6)> Lesson_11.PathFinder.start()
+{:ok, #PID<0.163.0>}
+iex(7)> Lesson_11.PathFinder.get_route("Москва", "Владивосток")
+{:error, :no_route}
+iex(9)> Lesson_11.PathFinder.get_route("Москва", "Астрахань")
+{:ok, ["Москва", "Мурманск", "Астрахань"], 5469}
+```
 
 ## Супервизор как отдельный модуль
 
