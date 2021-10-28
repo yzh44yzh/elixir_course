@@ -231,11 +231,44 @@ iex(9)> Lesson_11.PathFinder.get_route("Москва", "Астрахань")
 
 ## Супервизор как отдельный модуль
 
-Нужно включить правильную версию erl, чтобы работал observer:
+Нам еще нужно научиться запускать супервизор под супервизором. Для этого дочерний супервизор должен быть представлен модулем. 
+
+Как и для GenServer, существует Supervisor behaviour, который нужно реализовать в этом модуле. behaviour требует наличия только одной функции -- init/1.
+
+Запуск supervisor похож на запуск gen_server.
+
+Вот картинка, аналогичная той, что мы видели в 10-м уроке:
+![supervision_tree](http://yzh44yzh.github.io/img/practical_erlang/supervisor_init.png)
+TODO переделать картинку для эликсир
+
+Напомню, что два левых квадрата (верхний и нижний), соответствуют нашему модулю.  Два правых квадрата соответствуют коду OTP. Два верхних квадрата выполняются в процессе родителя, два нижних квадрата выполняются в дочернем процессе.
+
+Начинаем с функции `start_link/0`:
+
 ```
-source /home/y_zhloba/dev/erl-24.0.1/activate
+def start_link(args) do
+  Supervisor.start_link(__MODULE__, args, name: __MODULE__)
+end
 ```
-Но без Application это дерево все равно не видно.
+
+Здесь мы просим supervisor запустить новый процесс для дочернего супервизора. Новый процесс входит в `loop` и вызывает callback `init/1`.
+
+```
+@impl true
+def init(_args) do
+  children = [
+    {Lesson_11.AgentSup, [:no_args]},
+    {Lesson_11.PathFinder, [:no_args]}
+  ]
+  Supervisor.init(children, strategy: :one_for_all) 
+end
+```
+
+Внутри init декларируются дочерние процессы и вызывается `Supervisor.init`. Это отличается от того, что мы делали раньше -- вызывали Supervisor.start_link.
+
+Мы реализуем модуль AgentSup, который будет супервизором для двух агентов, и модуль RootSup, который будет супервизором для PathFinder и для AgentSup. 
+
+Подключим макрос `use Supervisor`, что даст реализацию `child_spec` по умолчанию.
 
 ```
 c "lib/agent_with_sup.exs"
@@ -263,55 +296,12 @@ Lesson_11.PathFinder.get_route("Москва", "Владивосток")
 Lesson_11.PathFinder.get_route("Москва", "Астрахань")
 ```
 
-A supervisor may be started directly with a list of children via start_link/2 
-or you may define a module-based supervisor that implements the required callbacks.
-
-You can write supervisors as separate modules, but the Elixir style is to include them inline.
-
-
-use Supervisor also defines a child_spec/1 function which allows us to run MyApp.Supervisor as a child of another supervisor or at the top of your supervision tree as:
-
-A general guideline is to use the supervisor without a callback module only at the top of your supervision tree, generally in the Application.start/2 callback. 
-
-Запуск supervisor похож на запуск gen_server.
-start_link -> init
- Instead of calling Supervisor.start_link/2 with a list of children that are automatically initialized, we manually initialized the children by calling Supervisor.init/2 inside its init/1 callback.
-
-Вот картинка, аналогичная той, что мы видели в 10-м уроке:
-![supervision_tree](http://yzh44yzh.github.io/img/practical_erlang/supervisor_init.png)
-TODO переделать картинку для эликсир
-
-Напомню, что два левых квадрата (верхний и нижний), соответствуют
-нашему модулю.  Два правых квадрата соответствуют коду OTP. Два
-верхних квадрата выполняются в потоке родителя, два нижних квадрата
-выполняются в потоке потомка.
-
-
-Начинаем с функции **start\_link/0**:
-
-```
-start_link() ->
-    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
-```
-
-Здесь мы просим supervisor запустить новый поток.
-
-Первый аргумент, **{local, ?MODULE}** -- это имя, под которым нужно
-зарегистрировать поток. Есть вариант supervisor:start\_link/2 на случай,
-если мы не хотим регистрировать поток.
-
-Второй аргумент, **?MODULE** -- это имя модуля, callback-функции
-которого будет вызывать supervisor.
-
-Третий аргумент -- это набор параметров, которые нужны при
-инициализации.
-
-Дальше происходит некая магия в недрах OTP, в результате
-которой создается дочерний поток, и вызывается callback **init/1**.
-
-Из **init/1** нужно вернуть структуру данных, содержащую всю
-необходимую информацию для работы супервизора.
-
-TODO: модуль все равно есть, только он генерируется неявно. Так?
-
-
+Таким образом у нас получилось дерево процессов:
+- iex shell
+  - RootSup
+    - PathFinder
+    - AgentSup
+      - agent_1
+      - agent_2
+      
+TODO картинка

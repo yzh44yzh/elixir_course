@@ -6,7 +6,7 @@ defmodule Lesson_11 do
       children = [
         Lesson_11.RootSup
       ]
-      Supervisor.start_link(children, strategy: :one_for_one) # TODO more options
+      Supervisor.start_link(children, strategy: :one_for_one) 
     end
     
   end
@@ -24,7 +24,7 @@ defmodule Lesson_11 do
         {Lesson_11.AgentSup, [:no_args]},
         {Lesson_11.PathFinder, [:no_args]}
       ]
-      Supervisor.init(children, strategy: :one_for_all) # TODO more options
+      Supervisor.init(children, strategy: :one_for_all) 
     end
     
   end
@@ -38,7 +38,6 @@ defmodule Lesson_11 do
 
     @impl true
     def init(_args) do
-      # TODO get num agents from args
       state_1 = [
         {0, 4, "Node-1"},
         {5, 9, "Node-2"}

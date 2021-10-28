@@ -43,6 +43,8 @@ Every process in the supervision tree can perform some final cleanup.
 
 Library app doesn't have a sup tree.
 
+A general guideline is to use the supervisor without a callback module only at the top of your supervision tree, generally in the Application.start/2 callback. 
+
 
 ## application specification
 
