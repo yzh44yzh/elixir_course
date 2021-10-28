@@ -235,11 +235,8 @@ iex(9)> Lesson_11.PathFinder.get_route("Москва", "Астрахань")
 
 Как и для GenServer, существует Supervisor behaviour, который нужно реализовать в этом модуле. behaviour требует наличия только одной функции -- init/1.
 
-Запуск supervisor похож на запуск gen_server.
-
-Вот картинка, аналогичная той, что мы видели в 10-м уроке:
-![supervision_tree](http://yzh44yzh.github.io/img/practical_erlang/supervisor_init.png)
-TODO переделать картинку для эликсир
+Запуск supervisor похож на запуск gen\_server. Вот картинка, аналогичная той, что мы видели в 10-м уроке:
+![Supervisor Init](./img/supervisor_init.png)
 
 Напомню, что два левых квадрата (верхний и нижний), соответствуют нашему модулю.  Два правых квадрата соответствуют коду OTP. Два верхних квадрата выполняются в процессе родителя, два нижних квадрата выполняются в дочернем процессе.
 
@@ -297,11 +294,5 @@ Lesson_11.PathFinder.get_route("Москва", "Астрахань")
 ```
 
 Таким образом у нас получилось дерево процессов:
-- iex shell
-  - RootSup
-    - PathFinder
-    - AgentSup
-      - agent_1
-      - agent_2
-      
-TODO картинка
+![Supervision Tree](./img/supervision_tree.png)
+

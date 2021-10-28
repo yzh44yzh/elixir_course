@@ -1,0 +1,15 @@
+digraph GS {
+
+    graph [pad=0.2, fontname="UbuntuMono", fontsize=20]
+    node [shape=box, style=filled, fontname="UbuntuMono", fontsize=16]
+
+    RootSup [fillcolor=gold2];
+    AgentSup [fillcolor=gold2];
+    
+    edge [color=blue, arrowsize=1.6];
+    "iex shell" -> RootSup;
+    RootSup -> PathFinder;
+    RootSup -> AgentSup;
+    AgentSup -> agent_1;
+    AgentSup -> agent_2;
+}
