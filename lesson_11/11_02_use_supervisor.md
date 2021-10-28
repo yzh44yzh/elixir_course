@@ -231,32 +231,55 @@ iex(9)> Lesson_11.PathFinder.get_route("Москва", "Астрахань")
 
 ## Супервизор как отдельный модуль
 
-TODO запусить из этого модуля все: agent, task, gen_server, another sup
+Нужно включить правильную версию erl, чтобы работал observer:
+```
+source /home/y_zhloba/dev/erl-24.0.1/activate
+```
+Но без Application это дерево все равно не видно.
+
+```
+c "lib/agent_with_sup.exs"
+c "lib/gen_server_with_sup.exs"
+c "lib/sup.exs"
+
+iex(13)> Lesson_11.RootSup.child_spec(:no_args)
+%{
+  id: Lesson_11.RootSup,
+  start: {Lesson_11.RootSup, :start_link, [:no_args]},
+  type: :supervisor
+}
+iex(14)> Lesson_11.AgentSup.child_spec(:no_args)
+%{
+  id: Lesson_11.AgentSup,
+  start: {Lesson_11.AgentSup, :start_link, [:no_args]},
+  type: :supervisor
+}
+
+Lesson_11.MyApp.start_sup_tree()
+
+Lesson_11.ShardingAgent.find_node(:agent_a, 5)
+Lesson_11.ShardingAgent.find_node(:agent_b, 5)
+Lesson_11.PathFinder.get_route("Москва", "Владивосток")
+Lesson_11.PathFinder.get_route("Москва", "Астрахань")
+```
 
 A supervisor may be started directly with a list of children via start_link/2 
 or you may define a module-based supervisor that implements the required callbacks.
 
 You can write supervisors as separate modules, but the Elixir style is to include them inline.
 
-```
-defmodule Sequence.Application do
-  @moduledoc false
-  use Application
-  
-  def start(_type, _args) do
-    children = [
-      {Sequence.Server, 123},
-    ]
-    opts = [strategy: :one_for_one, name: Sequence.Supervisor]
-    Supervisor.start_link(children, opts)
-  end
-end
-```
+
+use Supervisor also defines a child_spec/1 function which allows us to run MyApp.Supervisor as a child of another supervisor or at the top of your supervision tree as:
+
+A general guideline is to use the supervisor without a callback module only at the top of your supervision tree, generally in the Application.start/2 callback. 
 
 Запуск supervisor похож на запуск gen_server.
-Вот картинка, аналогичная той, что мы видели в 10-м уроке:
+start_link -> init
+ Instead of calling Supervisor.start_link/2 with a list of children that are automatically initialized, we manually initialized the children by calling Supervisor.init/2 inside its init/1 callback.
 
+Вот картинка, аналогичная той, что мы видели в 10-м уроке:
 ![supervision_tree](http://yzh44yzh.github.io/img/practical_erlang/supervisor_init.png)
+TODO переделать картинку для эликсир
 
 Напомню, что два левых квадрата (верхний и нижний), соответствуют
 нашему модулю.  Два правых квадрата соответствуют коду OTP. Два
