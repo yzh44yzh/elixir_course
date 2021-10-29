@@ -13,6 +13,23 @@
 Нет необходимости постоянно держать долгоживущий процесс для такой задачи. Здесь лучше подойдет короткоживущий процесс, который выполнит свою работу и завершится. А при необходимости запустится снова, снова выполнит работу и завершится.
 
 ```
+iex(1)> c "lib/dyn_sup.exs"
+[Lesson_11, Lesson_11.AuthDataLoader, Lesson_11.AuthDataLoaderSup,
+ Lesson_11.MyService]
+iex(2)> Lesson_11.MyService.start()
+{:ok, #PID<0.125.0>}
+iex(3)> Lesson_11.MyService.update_auth_rules()
+worker #PID<0.128.0> started with http://auth_service.some_cluster.data_center/rules
+load data from http://auth_service.some_cluster.data_center/rules
+{:ok, #PID<0.128.0>}
+save data [:rule_1, :rule_2, :rule_3]
+work done
+iex(4)> Lesson_11.MyService.update_auth_rules()
+worker #PID<0.130.0> started with http://auth_service.some_cluster.data_center/rules
+load data from http://auth_service.some_cluster.data_center/rules
+{:ok, #PID<0.130.0>}
+save data [:rule_1, :rule_2, :rule_3]
+work done
 ```
 
 
