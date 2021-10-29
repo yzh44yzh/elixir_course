@@ -13,7 +13,7 @@ def start_link({agent_name, state}) do
 end
 ```
 
-Функцию `find_node` тоже добработам, чтобы можно было указать имя агента:
+Функцию `find_node` тоже добработаем, чтобы можно было указать имя агента:
 ```
 def find_node(agent_name, shard_num) do
   Agent.get(agent_name, fn(state) -> do_find_node(state, shard_num) end)
