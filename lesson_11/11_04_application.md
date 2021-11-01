@@ -1,32 +1,23 @@
 # Application
 
-An application is a component implementing some specific functionality, with a standardized directory structure, configuration, and life cycle. Applications are loaded, started, and stopped. Each application also has its own environment, which provides a unified API for configuring each application.
+Приложение -- сущность специфичная для BEAM, и не имеет прямых аналогов в других языках программирования.
 
-In a nutshell, an application consists of all of the modules defined in the .app file, including the .app file itself. An application has generally only two directories: ebin, for Elixir artefacts, such as .beam and .app files, and priv, with any other artefact or asset you may need in your application.
+С одной стороны application сродни **package**, потому что объединяет несколько модулей. С другой стороны application похож на **pod** в **kubernetes**, потому что объединяет несколько процессов в единую группу с общим жизненным циклом и общей конфигурацией.
 
-На уровне синтаксиса языка код структурируется в функции и модули.
-На уровне потоков код структурируется в дерево супервизоров.
-Эти две структуры существуют независимо друг от друга.
-Но есть **Application**, которое связывает их вместе.
+Приложение это:
+- пакет из нескольких Эликсир (или Эрланг) модулей;
+- группа процессов с общим жизненным циклом, собранных в дерево супервизии;
+- организация модулей и ресурсов в файловой системе стандартным способом;
+- система конфигурации, работающая на этапе компиляции и в рантайме.
 
-Во многих языка мы привыкли, что после функций и модулей, следующим
-уровнем идут пакеты.  В эрланг нет пакетов, но приложение
-(Application) отчасти выполняет эту роль -- группирует несколько
-модулей в одну сущность.
+Библиотеки тоже принято оформлять как приложения. При этом библиотеки могут не иметь всех перечисленных выше компонентов. Не редко они сводятся только к первому пункту -- пакет из нескольких модулей. 
+TODO: примеры.
+Но так же не редко встречаются библиотеки являющиеся полноценные приложениями. 
+TODO: примеры: cowboy и др.
 
-С другой стороны, приложение контролирует часть дерева супервизоров и
-группирует потоки подобно тому, как пакет группирует модули. Эта
-группа (поддерево) может быть запущена и остановлена как единое целое.
+Обычно проект состоит из нескольких приложений:
 
-Ещё конфигурация.
-
-Приложение следует рассматривать как некий компонент,
-предназначенный для повторного использования в разных проектах.
-Причем, для повторного использования предназначены обе структуры: и
-структура кода (функции-модули), и структура потоков (поддерево
-супервизоров).
-
-Проект на эрланг обычно состоит из нескольких приложений:
+TODO stopped here
 
 Во-первых, это приложения, которые пишут разработчики --
 непосредственно код проекта.
@@ -116,6 +107,14 @@ The second element of the tuple is the parameter to pass to start function.
 
 The registered: option lists the names that our application will register. 
 We can use this to ensure each name is unique across all loaded applications in a node or cluster.
+
+In a nutshell, an application consists of all of the modules defined in the .app file, including the .app file itself. An application has generally only two directories: ebin, for Elixir artefacts, such as .beam and .app files, and priv, with any other artefact or asset you may need in your application.
+
+Структура в файловой системе.
+В проекте на машине разработчика:
+lib, test, priv
+В релизе на проде:
+priv, ebin
 
 Mix tells us it has created a sequence.app file, but where is it? 
 You’ll find it tucked away in _build/dev/lib/sequence/ebin.
