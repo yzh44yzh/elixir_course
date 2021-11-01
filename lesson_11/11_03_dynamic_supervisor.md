@@ -12,6 +12,85 @@
 
 Нет необходимости постоянно держать долгоживущий процесс для такой задачи. Здесь лучше подойдет короткоживущий процесс, который выполнит свою работу и завершится. А при необходимости запустится снова, снова выполнит работу и завершится.
 
+Динамический супервизор не запускает ничего в `init`. Вместо этого нужен явный вызов `start_child/2` для каждого дочернего процесса:
+```
+defmodule AuthDataLoaderSup do
+
+  use DynamicSupervisor
+
+  def start_link(args) do
+    DynamicSupervisor.start_link(__MODULE__, args, name: __MODULE__)
+  end
+
+  def start_child() do
+    url = "http://auth_service.some_cluster.data_center/rules"
+    spec = {Lesson_11.AuthDataLoader, [url]}
+    DynamicSupervisor.start_child(__MODULE__, spec)
+  end
+
+  @impl true
+  def init(_args) do
+    DynamicSupervisor.init(strategy: :one_for_one)
+  end
+
+end
+```
+
+Рабочий процесс реализуем как GenServer с отложеной инициализацией:
+```
+defmodule AuthDataLoader do
+
+  use GenServer, restart: :transient
+
+  def start_link(auth_service_url) do
+    GenServer.start_link(__MODULE__, auth_service_url, [])
+  end
+
+  @impl true
+  def init(auth_service_url) do
+    IO.puts("worker #{inspect self()} started")
+    {:ok, auth_service_url, {:continue, :delayed_init}}
+  end
+
+  @impl true
+  def handle_continue(:delayed_init, auth_service_url) do
+    load(auth_service_url) |> save()
+    IO.puts("work done")
+    {:stop, :normal, auth_service_url}
+  end
+
+  defp load(auth_service_url) do
+    IO.puts("load data from #{auth_service_url}")
+    Process.sleep(1000)
+    [:rule_1, :rule_2, :rule_3]
+  end
+
+  defp save(data) do
+    IO.puts("save data #{inspect data}")
+  end
+
+end
+```
+Загрузку и сохранение данных мы просто имитируем.
+
+Запускаем:
+```
+defmodule MyService do
+
+  def start() do
+    children = [
+      Lesson_11.AuthDataLoaderSup,
+    ]
+    Supervisor.start_link(children, strategy: :one_for_one) 
+  end
+
+  def update_auth_rules() do
+    Lesson_11.AuthDataLoaderSup.start_child()
+  end
+
+end
+```
+и смотрим, как это работает:
 ```
 iex(1)> c "lib/dyn_sup.exs"
 [Lesson_11, Lesson_11.AuthDataLoader, Lesson_11.AuthDataLoaderSup,
@@ -32,30 +111,5 @@ save data [:rule_1, :rule_2, :rule_3]
 work done
 ```
 
-
-
-
-A DynamicSupervisor starts with no children. Instead, children are started on demand via start_child/2. When a dynamic supervisor terminates, all children are shut down at the same time, with no guarantee of ordering.
-
-We also chose the :one_for_one strategy, which is currently the only available strategy for dynamic supervisors.
-
-The difference is that the DynamicSupervisor expects the child specification at the moment start_child/2 is called, and no longer on the init callback. 
-
-init options
-:max_children - the maximum amount of children to be running under this supervisor at the same time. When :max_children is exceeded, start_child/2 returns {:error, :max_children}. Defaults to :infinity.
-
-:extra_arguments - arguments that are prepended to the arguments specified in the child spec given to start_child/2. Defaults to an empty list.
-
-
-
-
-
-start_child returns {:ok, pid} or {:error, {:already_started, pid}}
-что является удобным способом получить pid существующего воркера или запустить нового, если нет существующего.
-И это исключает race condition при попытке запустить воркера с одинаковым id из разных мест,
-так как start_child сериализуется в одном процессе.
-С другой стороны, это не очень эффективно, тк супервизор каждый раз делает попытку запуска нового процесса.
-
-This type of supervisor allows you to create an arbitrary number of workers at runtime.
-
+`start_child` возвращает `{:ok, pid}` или `{:error, {:already_started, pid}}`, что является удобным способом получить pid существующего рабочего процесса или запустить новый процесс, если нет существующего. Это исключает race condition при попытке запустить процесс с одинаковым id из разных мест, так как start_child сериализуется в супервизоре.
 
