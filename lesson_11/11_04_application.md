@@ -17,63 +17,48 @@ TODO: примеры: cowboy и др.
 
 Обычно проект состоит из нескольких приложений:
 
-TODO stopped here
+Во-первых, это приложения, непосредственно реализующие проект. То есть, это код, который мы пишем сами.
 
-Во-первых, это приложения, которые пишут разработчики --
-непосредственно код проекта.
+Во-вторых, это используемые библиотеки, прямые и транзитивные зависимости.
 
-Во-вторых, это используемые библиотеки. Обычно каждая библиотека
-оформляется как Application. Например, библиотека для логирования
-[lager](https://github.com/basho/lager), библиотека для сериализации
-JSON [jiffy](https://github.com/davisp/jiffy), драйвер для работы с
-PostgreSQL [epgsql](https://github.com/epgsql/epgsql) и другие.
+В-третьих, это приложения, входящие в состав OTP. Например, приложение для работы с сетью **inets**, приложения, отвечающие за шифрование **crypto** и **ssl**, приложение для модульного тестирования **eunit** и другие.
+TODO: актуальный список приложений, kernel и stdlib.
 
-В-третьих, это приложения, входящие в состав OTP. Например, приложение
-для работы с сетью **inets**, приложения, отвечающие за шифрование
-**crypto** и **ssl**, приложение для модульного тестирования **eunit**
-и другие.
+Если просто запусить iex консоль, то в ней уже запущены 6 приложений:
+```
+iex(1)> Application.started_applications()
+[
+  {:logger, 'logger', '1.11.3'},
+  {:iex, 'iex', '1.11.3'},
+  {:elixir, 'elixir', '1.11.3'},
+  {:compiler, 'ERTS  CXC 138 10', '7.6.3'},
+  {:stdlib, 'ERTS  CXC 138 10', '3.13.2'},
+  {:kernel, 'ERTS  CXC 138 10', '7.1'}
+]
+```
 
-Приложение состоит, как минимум, из главного модуля, реализующего
-**behaviour(application)**, нескольких других модулей и файла
-ресурсов. (Полную структуру мы рассмотрим на следующем уроке).
+Эрланг консоль проще, в ней запущены всего 2 приложения:
+```
+1> application:which_applications().
+[{stdlib,"ERTS  CXC 138 10","3.13.2"},
+ {kernel,"ERTS  CXC 138 10","7.1"}]
+```
 
 
 ## Lifecycle
 
-Applications are loaded, which means that the runtime finds and processes their resource files.
-When an application is loaded, the environment specified in its resource file is merged with any overrides from config files.
-Loading an application does not load its modules.
-In practice, you rarely load applications by hand because that is part of the start process
+Жизненный цикл приложений состоит из трёх этапов:
+- загрузка;
+- запуск;
+- остановка.
 
-Once your application is compiled, running your system is a matter of starting your current application and its dependencies.
-Differently from other languages, Elixir does not have a main procedure that is responsible for starting your system. Instead, you start one or more applications, each with their own initialization and termination logic.
-start/2 callback is invoked. The PID of the top-level supervisor returned by this function is stored by the runtime for later use, and the returned application state is saved too
+На этапе **загрузки** виртуальная машина загружает с диска **файл ресурсов (resource file)**, содержащий всю необходимую информацию о приложении. Затем устанавливает зависимости между приложениями, и загружает их.
 
-Stopping an application with a callback module has three steps:
-- If present, invoke the optional callback prep_stop/1.
-- Terminate the top-level supervisor.
-- Invoke the required callback stop/1.
-step 2 is a blocking one. 
+На этапе **запуска** виртуальная машина загружает байткод модулей приложения и вызывает модуль и функцию, которые указаны в файле ресурсов. Обычно это модуль, реализующий **Application behaviour**. Запускается корневой супервизор, и разворачивается дерево супервизоров. После этого приложение готово к работе.
 
-При остановке приложения завершается его поддерево супервизоров в
-очередности, противоположной запуску.  То есть, сперва завершаются
-рабочие потоки, потом дочерние супервизоры, и последним завершается
-корневой супервизор.
+На этапе **остановки** завершается дерево супервизоров в очередности, противоположной запуску. То есть, сперва завершаются рабочие потоки, потом дочерние супервизоры, и последним завершается корневой супервизор.
 
-Shutting down a live system cleanly can be done by calling System.stop/1. It will shut down every application in the opposite order they had been started.
-
-Generally, build tools like Mix take care of starting an application and all of its dependencies for you
-
-В эрланговской ноде всегда стартуют минимум 2 приложения: kernel и stdlib.
-
-```
-$ erl
-Erlang/OTP 17 [erts-6.3] [source] [64-bit] [smp:4:4] [async-threads:10] [hipe] [kernel-poll:false]
-Eshell V6.3  (abort with ^G)
-1> application:which_applications().
-[{stdlib,"ERTS  CXC 138 10","2.3"},
- {kernel,"ERTS  CXC 138 10","3.1"}]
-```
+Все эти процессы автоматизированы. На машине разработчика их реализует **mix**, а на удаленной машине их реализуют специальные скрипты запуска системы, составляющие **release**. 
 
 
 ## Resource file
@@ -170,7 +155,7 @@ and a list of the apps our app depends on ( kernel , stdlib , and elixir ).
 не входит в данный курс.)_
 
 
-## Callback Module
+## Application Behaviour
 
 To implement the Application behaviour, we have to use Application and define a start/2 function. The goal of start/2 is to start a supervisor, which will then start any child services or execute any other code our application may need. Let’s use this opportunity to start the KV.Supervisor we have implemented earlier in this chapter.
 
@@ -179,6 +164,12 @@ Whenever we invoke iex -S mix, it automatically starts our application by callin
 A general guideline is to use the supervisor without a callback module only at the top of your supervision tree, generally in the Application.start/2 callback. 
 
 To implement the Application behaviour, we have to use Application and define a start/2 function. The goal of start/2 is to start a supervisor, which will then start any child services or execute any other code our application may need.
+
+Stopping an application with a callback module has three steps:
+- If present, invoke the optional callback prep_stop/1.
+- Terminate the top-level supervisor.
+- Invoke the required callback stop/1.
+step 2 is a blocking one. 
 
 
 
