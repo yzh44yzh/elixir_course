@@ -45,7 +45,7 @@ iex(1)> Application.started_applications()
 ```
 
 
-## Lifecycle
+## Жизненный цикл приложения
 
 Жизненный цикл приложений состоит из трёх этапов:
 - загрузка;
@@ -61,7 +61,28 @@ iex(1)> Application.started_applications()
 Все эти процессы автоматизированы. На машине разработчика их реализует **mix**, а на удаленной машине их реализуют специальные скрипты запуска системы, составляющие **release**. 
 
 
-## Resource file
+## Файл ресурсов
+
+Каждое приложение имеет файл ресурсов (resource file), содержащий всю необходимую информацию для загрузки и запуска. 
+
+Давайте создадим пустое приложение и посмотрим, где находится этот файл, и как он выглядит.
+
+```
+$ mix new my_cool_app
+$ cd my_cool_app
+$ mix compile
+$ cat _build/dev/lib/my_cool_app/ebin/my_cool_app.app
+{application,my_cool_app,
+             [{applications,[kernel,stdlib,elixir,logger]},
+              {description,"my_cool_app"},
+              {modules,['Elixir.MyCoolApp']},
+              {registered,[]},
+              {vsn,"0.1.0"}]}.
+```
+
+Файл ресурсов генерируется при сборке. Данные в нем представлены в виде эрланговских (не эликсировских) структур данных.
+
+TODO stopped here
 
 The first step is to tell our application definition (i.e. our .app file) which module is going to implement the application callback. Let’s do so by opening mix.exs and changing def application to the following:
 
