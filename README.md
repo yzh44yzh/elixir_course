@@ -161,6 +161,9 @@
 
 11.04. Application.
 
+
+## Урок №13. Open Telecom Platform
+
 11.05. OTP.
 
 11.06. Модель акторов.
@@ -168,13 +171,13 @@
 11.07. Let It Crash.
 
 
-## Урок №12. Erlang Term Storage.
+## Урок №14. Erlang Term Storage.
 
 ETS
 
 Observer
 
 
-## Урок №13. TCP и UDP сокеты.
+## Урок №15. TCP и UDP сокеты.
 
 ## Курсовой проект №2.
