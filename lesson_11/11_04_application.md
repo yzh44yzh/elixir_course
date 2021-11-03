@@ -10,10 +10,7 @@
 - организация модулей и ресурсов в файловой системе стандартным способом;
 - система конфигурации, работающая на этапе компиляции и в рантайме.
 
-Библиотеки тоже принято оформлять как приложения. При этом библиотеки могут не иметь всех перечисленных выше компонентов. Не редко они сводятся только к первому пункту -- пакет из нескольких модулей. 
-TODO: примеры.
-Но так же не редко встречаются библиотеки являющиеся полноценные приложениями. 
-TODO: примеры: cowboy и др.
+Библиотеки тоже принято оформлять как приложения. При этом библиотеки могут не иметь всех перечисленных выше компонентов. Не редко они сводятся только к первому пункту -- пакет из нескольких модулей. Например, библиотека **jason** для сериализации JSON. Но так же не редко встречаются библиотеки являющиеся полноценными приложениями. Например, веб-сервер **cowboy** или библиотека для логирования **logger**.
 
 Обычно проект состоит из нескольких приложений:
 
@@ -21,8 +18,7 @@ TODO: примеры: cowboy и др.
 
 Во-вторых, это используемые библиотеки, прямые и транзитивные зависимости.
 
-В-третьих, это приложения, входящие в состав OTP. Например, приложение для работы с сетью **inets**, приложения, отвечающие за шифрование **crypto** и **ssl**, приложение для модульного тестирования **eunit** и другие.
-TODO: актуальный список приложений, kernel и stdlib.
+В-третьих, это приложения, входящие в состав OTP. Например, приложение для работы с сетью **inets** или приложения, отвечающие за шифрование **crypto** и **ssl**.
 
 Если просто запусить iex консоль, то в ней уже запущены 6 приложений:
 ```
@@ -174,10 +170,11 @@ end
 ```
 defmodule MyCoolApp do
   use Application
-
+  
   @impl true
-  def start(_start_type, start_args) do
-    {:ok, self()}
+  def start(_start_type, _args) do
+    children = []
+    Supervisor.start_link(children, strategy: :one_for_one) 
   end
 end
 ```
@@ -220,33 +217,40 @@ iex(3)> Application.started_applications()
 
 ### start/2
 
-TODO start_callback -- объяснить аргументы
-TODO запустить корневой супервизор в MyCoolApp
+Обработчик `start/2` принимает 2 аргумента: тип запуска приложения и произвольные данные из mix.exs, если они есть:
+```
+my_cool_app.ex:
+  def start(_start_type, some_args) do
+  ...
+  end
 
-To implement the Application behaviour, we have to use Application and define a start/2 function. The goal of start/2 is to start a supervisor, which will then start any child services or execute any other code our application may need.
+mix:exs:
+  def application do
+    [
+      mod: {MyCoolApp, [some_args]},
+      ...
+    ]
+  end
+```
 
-When an application starts, developers may configure a callback module that executes custom code. Developers use this callback to start the application supervision tree.
+Тип запуска касается распределенных приложений, которые запускаются на нескольких узлах в кластере. Мы сейчас не будем рассматривать эту тему.
 
-The start/2 callback has to spawn and link a supervisor and return {:ok, pid} or {:ok, pid, state}, where pid is the PID of the supervisor, and state is an optional application state. args is the second element of the tuple given to the :mod option.
-
-The type argument passed to start/2 is usually :normal unless in a distributed setup where application takeovers and failovers are configured. Distributed applications are beyond the scope of this documentation.
+Обработчик должен запустить дерево супервизоров и вернуть pid корневого супервизора.
+```
+  def start(_start_type, _args) do
+    children = []
+    Supervisor.start_link(children, strategy: :one_for_one) 
+  end
+```
 
 
 ### stop/1
 
-TODO
+Обработчик `stop/1` используется редко. Реализация по умолчанию ничего не делает, а просто возвращает `:ok`. 
 
-When an application is shutting down, its stop/1 callback is called after the supervision tree has been stopped by the runtime. This callback allows the application to do any final cleanup. The argument is the state returned by start/2, if it did, or [] otherwise. The return value of stop/1 is ignored.
+Идея обработчика в том, что если в `start` выполнялись какие-то действия по инициализации, которые нужно отменить, то их нужно отменять в `stop`.
 
-By using Application, modules get a default implementation of stop/1 that ignores its argument and returns :ok, but it can be overridden.
-
-Application callback modules may also implement the optional callback prep_stop/1. If present, prep_stop/1 is invoked before the supervision tree is terminated. Its argument is the state returned by start/2, if it did, or [] otherwise, and its return value is passed to stop/1.
-
-Stopping an application with a callback module has three steps:
-- If present, invoke the optional callback prep_stop/1.
-- Terminate the top-level supervisor.
-- Invoke the required callback stop/1.
-step 2 is a blocking one. 
+Есть еще обработчик `pre_stop/1`, который вызывается до остановки дерева супервизоров, в отличие от `stop`, который вызывается после остановки.
 
 
 
