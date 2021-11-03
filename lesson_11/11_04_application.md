@@ -147,13 +147,100 @@ end
 
 ## Application Behaviour
 
-To implement the Application behaviour, we have to use Application and define a start/2 function. The goal of start/2 is to start a supervisor, which will then start any child services or execute any other code our application may need. Let’s use this opportunity to start the KV.Supervisor we have implemented earlier in this chapter.
+По умолчанию mix генерирует точку входа в приложение как модуль с именем, совпадающим с именем приложения:
+```
+defmodule MyCoolApp do
+  @moduledoc """
+  Documentation for `MyCoolApp`.
+  """
 
-Whenever we invoke iex -S mix, it automatically starts our application by calling Application.start(:kv), which then invokes the application callback. The application callback’s job is to start a supervision tree.
+  @doc """
+  Hello world.
 
-A general guideline is to use the supervisor without a callback module only at the top of your supervision tree, generally in the Application.start/2 callback. 
+  ## Examples
+
+      iex> MyCoolApp.hello()
+      :world
+
+  """
+  def hello do
+    :world
+  end
+end
+```
+
+Однако этот модуль должен реализовать `application behaviour`, который включает один обязательный обработчик: `start/2` и несколько необязательных (`pre_stop/1`, `stop/1` и др).
+
+```
+defmodule MyCoolApp do
+  use Application
+
+  @impl true
+  def start(_start_type, start_args) do
+    {:ok, self()}
+  end
+end
+```
+
+mix запускает приложение сразу на старте:
+
+```
+$ mix compile
+$ iex -S mix
+iex(1)> Application.started_applications()
+[
+  {:my_cool_app, 'my_cool_app', '0.1.0'},
+  ...
+]
+```
+
+При желании приложение можно запустить явно:
+
+```
+$ iex -S mix run --no-start
+iex(1)> Application.started_applications()
+[
+  {:mix, 'mix', '1.11.3'},
+  {:logger, 'logger', '1.11.3'},
+  {:iex, 'iex', '1.11.3'},
+  {:elixir, 'elixir', '1.11.3'},
+  {:compiler, 'ERTS  CXC 138 10', '7.6.3'},
+  {:stdlib, 'ERTS  CXC 138 10', '3.13.2'},
+  {:kernel, 'ERTS  CXC 138 10', '7.1'}
+]
+iex(2)> Application.start(:my_cool_app)
+:ok
+iex(3)> Application.started_applications()
+[
+  {:my_cool_app, 'my_cool_app', '0.1.0'},
+  ...
+]
+```
+
+
+### start/2
+
+TODO start_callback -- объяснить аргументы
+TODO запустить корневой супервизор в MyCoolApp
 
 To implement the Application behaviour, we have to use Application and define a start/2 function. The goal of start/2 is to start a supervisor, which will then start any child services or execute any other code our application may need.
+
+When an application starts, developers may configure a callback module that executes custom code. Developers use this callback to start the application supervision tree.
+
+The start/2 callback has to spawn and link a supervisor and return {:ok, pid} or {:ok, pid, state}, where pid is the PID of the supervisor, and state is an optional application state. args is the second element of the tuple given to the :mod option.
+
+The type argument passed to start/2 is usually :normal unless in a distributed setup where application takeovers and failovers are configured. Distributed applications are beyond the scope of this documentation.
+
+
+### stop/1
+
+TODO
+
+When an application is shutting down, its stop/1 callback is called after the supervision tree has been stopped by the runtime. This callback allows the application to do any final cleanup. The argument is the state returned by start/2, if it did, or [] otherwise. The return value of stop/1 is ignored.
+
+By using Application, modules get a default implementation of stop/1 that ignores its argument and returns :ok, but it can be overridden.
+
+Application callback modules may also implement the optional callback prep_stop/1. If present, prep_stop/1 is invoked before the supervision tree is terminated. Its argument is the state returned by start/2, if it did, or [] otherwise, and its return value is passed to stop/1.
 
 Stopping an application with a callback module has three steps:
 - If present, invoke the optional callback prep_stop/1.
@@ -161,82 +248,5 @@ Stopping an application with a callback module has three steps:
 - Invoke the required callback stop/1.
 step 2 is a blocking one. 
 
-
-
-## Configuration
-
-TODO большая тема, лучше сделать отдельный раздел 11_05_app_configuration.md
-
-By default, the environment of an application is an empty list. In a Mix project's mix.exs file, you can set the :env key in application/0:
-```
-def application do
-  [env: [db_host: "localhost"]]
-end
-```
-Now, in your application, you can read this environment by using functions such as fetch_env!/2 and friends:
-Application.fetch_env!(:my_app, :db_host)
-
-In Mix projects, the environment of the application and its dependencies can be overridden via the config/config.exs file.
-```
-import Config
-config :my_app, :db_host, "db.local"
-```
-if you change the value of the application environment after the code is compiled, the value used at runtime is not going to change!
-
-You can provide values through config script files.
-Config scripts are evaluated before project is compiled and started.
-Generated sys.config are baked into OTP release.
-So build machine makes the same configuration for all prod machines.
-Config scripts can't provide parameters from external sources, such as OS environment, ini-files, etcd, or vault.
-
-
-можно передавать аргументы из mix.ex в app:
-```
-# mix.ex
-def application do
-  [
-    mod: {
-      Sequence.Application, 456
-    },
-    extra_applications: [:logger],
-  ]
-end
-
-defmodule Sequence.Application do
-  use Application
-  def start(_type, initial_number) do
-    ..
-  end
-end
-```
-
-### Diff configuration for test env
-
-config.exs
-```
-use Mix.Config
-config :my_app, param1: "value_default"
-
-import config "#{Mix.env()}.exs"
-```
-
-dev.exs
-```
-use Mix.Config
-config :my_app, param1: "value_dev"
-```
-
-test.exs
-```
-use Mix.Config
-config :my_app, param1: "value_test"
-```
-
-config.exs provides common settings for all env. Other configs may override it.
-
-
-### Кастомизация конфигурации для разных машин
-
-TODO 
 
 

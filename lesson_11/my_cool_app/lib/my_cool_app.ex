@@ -1,18 +1,8 @@
 defmodule MyCoolApp do
-  @moduledoc """
-  Documentation for `MyCoolApp`.
-  """
+  use Application
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> MyCoolApp.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  @impl true
+  def start(_start_type, start_args) do
+    {:ok, self()}
   end
 end
