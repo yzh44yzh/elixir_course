@@ -80,100 +80,69 @@ $ cat _build/dev/lib/my_cool_app/ebin/my_cool_app.app
               {vsn,"0.1.0"}]}.
 ```
 
-Файл ресурсов генерируется при сборке. Данные в нем представлены в виде эрланговских (не эликсировских) структур данных.
+Файл ресурсов не нужно создавать вручную, он генерируется при сборке. Данные в нем представлены в виде эрланговских (не эликсировских) структур.
 
-TODO stopped here
+Здесь мы видим:
+- имя приложения;
+- зависимость от других приложений;
+- человекочитаемое описание приложения;
+- список модулей, входящих в состав приложения;
+- список глобальных имен, под которыми регистрируются процессы;
+- версия приложения.
 
-The first step is to tell our application definition (i.e. our .app file) which module is going to implement the application callback. Let’s do so by opening mix.exs and changing def application to the following:
+Эта информация позволяет скриптам запуска проверить зависимости между приложениями, проверить наличие конфликтов в регистрируемых именах процессов, установить правильный порядок запуска и загрузить нужные модули.
 
-The :mod option specifies the “application callback module”, followed by the arguments to be passed on application start. The application callback module can be any module that implements the Application behaviour.
+Часть этой информации известна при сборке, например, имена модулей. Другая часть должна быть указана в `mix.exs` -- конфигурационном файле для mix.
 
-Although Mix generates and maintains the .app file for us, we can customize its contents by adding new entries to the application/0 function inside the mix.exs project file. 
-
-But in the OTP world an application is a bundle of code that comes with a descriptor. 
-That descriptor tells the runtime:
-- what dependencies the code has, 
-- what global names it registers, 
-- and so on. 
-In fact, an OTP application is more like a dynamic link library 
-or a shared object than a conventional application.
-
-application resource file
-app_name.app file is used to define your application to the runtime environment.
-- name, version, description
-- list of modules
-- list of dependencies
-- application-callback module
-
-Mix creates this file automatically from the information in mix.exs 
-combined with information it gleans from compiling your application.
-
-The mod: option tells OTP the module that is the main entry point for our app.
-The second element of the tuple is the parameter to pass to start function.
-
-The registered: option lists the names that our application will register. 
-We can use this to ensure each name is unique across all loaded applications in a node or cluster.
-
-In a nutshell, an application consists of all of the modules defined in the .app file, including the .app file itself. An application has generally only two directories: ebin, for Elixir artefacts, such as .beam and .app files, and priv, with any other artefact or asset you may need in your application.
-
-Структура в файловой системе.
-В проекте на машине разработчика:
-lib, test, priv
-В релизе на проде:
-priv, ebin
-
-Mix tells us it has created a sequence.app file, but where is it? 
-You’ll find it tucked away in _build/dev/lib/sequence/ebin.
-
-_build/dev/lib/sequence/ebin/sequence.app
+В нашем пустом проекте mix.exs выглядит так:
 ```
-{application,sequence,
+defmodule MyCoolApp.MixProject do
+  use Mix.Project
+
+  def project do
+    [
+      app: :my_cool_app,
+      version: "0.1.0",
+      elixir: "~> 1.11",
+      start_permanent: Mix.env() == :prod,
+      deps: deps()
+    ]
+  end
+
+  def application do
+    [
+      extra_applications: [:logger]
+    ]
+  end
+
+  defp deps do
+    [
+    ]
+  end
+end
+```
+Отсюда берутся имя и версия приложения, а так же список других приложений, от которых зависит наше. Здесь указан только `:logger`. Остальные зависимости, `:elixir`, `:strlib`, `:kernel` подключаются неявно. 
+
+Также mix неявно считает, что точкой запуска приложения является модуль `MyCoolApp`. Это можно переопределить, указав ключ `:mod`:
+```
+def application do
   [
-    {applications,[kernel,stdlib,elixir,logger]},
-    {description,"sequence"},
-    {modules,[
-      'Elixir.Sequence','Elixir.Sequence.Application',
-      'Elixir.Sequence.Server','Elixir.Sequence.Stash'
-    ]},
-    {vsn,"0.1.0"},
-    {mod,{'Elixir.Sequence.Application',456}},
-    {registered,['Elixir.Sequence.Server']},
-    {extra_applications,[logger]}
+    extra_applications: [:logger],
+    mod: {MyMod, [some_args]}
   ]
-}.
-```
-This file contains an Erlang tuple that defines the app. 
-
-Some of the information comes from the project and application section of mix.exs. 
-Mix also automatically added a list of the names of all the compiled modules in our app
-and a list of the apps our app depends on ( kernel , stdlib , and elixir ).
-
-Начнем с файла, описывающего метаинформацию о приложении.
-Он должен называться по имени приложения и иметь расширение **app**.
-Например, **my_cool_component.app**.
-
-Внутри он содержит кортеж из трех элементов:
-
-```
-{application, ApplicationName, Properties}.
+end
 ```
 
-**ApplicationName** -- имя приложения в виде атома. Например, **my_cool_component**.
-
-**Properties** -- свойства приложения в виде proplist, где, обычно, присутствуют такие элементы:
-- **description** -- краткое описание приложения одной строкой;
-- **vsn** -- версия приложения, обычно в формате "major.minor.patch";
-- **modules** -- список всех модулей, входящих в состав приложения;
-- **registered** -- список всех имен под которыми регистрируются потоки;
-- **env** -- настройки приложения в виде вложенного proplist;
-- **applications** -- список других приложений, от которых зависит данное приложение;
-- **mod** -- основной модуль приложения, реализующий behaviour(application).
-
-Все опции считаются необязательными, но лучше указывать их явно.
-Большинство из них важны для сборки релиза.  Инструменты, собирающие
-релиз, проверяют наличие указанных модулей, определяют очередность
-загрузки приложений, выявляют конфликты имен потоков. _(Сборка релизов
-не входит в данный курс.)_
+Так же можно явно указать имена процессов:
+```
+def application do
+  [
+    extra_applications: [:logger],
+    mod: {MyMod, [some_args]},
+    registered: [:agent_1, :agent2, PathFinder]
+  ]
+end
+```
 
 
 ## Application Behaviour
