@@ -37,8 +37,8 @@ defmodule Lesson_11 do
     @impl true
     def handle_continue(:delayed_init, state) do
       case state do
-        %{} -> :ok
         %{graph: graph} -> :digraph.delete(graph)
+        _ -> :ok
       end
       graph = :digraph.new([:cyclic])
       data = load_data(@cities_file)

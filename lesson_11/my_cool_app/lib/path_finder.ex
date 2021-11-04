@@ -1,4 +1,4 @@
-defmodule PathFinder2 do
+defmodule MyCoolApp.PathFinder do
 
   use GenServer
 
@@ -7,31 +7,21 @@ defmodule PathFinder2 do
   @type route :: {[city], distance}
 
   @server_name __MODULE__
-  @cities_file "./data/cities.csv"
-  
 
-  # Module API
-  
-  def start() do
-    GenServer.start(__MODULE__, :no_args, [name: @server_name])
+
+  def start_link(data_file) do
+    GenServer.start_link(__MODULE__, data_file, [name: @server_name])
   end
-
 
   @spec get_route(city, city) :: {:ok, route} | {:error, term}
   def get_route(from_city, to_city) do
     GenServer.call(@server_name, {:get_route, from_city, to_city})
   end
-
-  def reload_data() do
-    GenServer.cast(@server_name, :reload_data)
-  end
   
-
-  # GenServer callbacks
-
   @impl true
-  def init(:no_args) do
-    state = %{}
+  def init(data_file) do
+    state = %{data_file: data_file}
+    IO.puts("init PathFinder #{inspect state}")
     {:ok, state, {:continue, :delayed_init}}
   end
 
@@ -42,7 +32,7 @@ defmodule PathFinder2 do
       _ -> :ok
     end
     graph = :digraph.new([:cyclic])
-    data = load_data()
+    data = load_data(state.data_file)
     Enum.reduce(data, graph, &add_item/2)
     distancies = make_distancies_map(data)
     state = %{graph: graph, distancies: distancies}
@@ -55,9 +45,9 @@ defmodule PathFinder2 do
     reply =
       case :digraph.get_short_path(graph, from_city, to_city) do
         false -> {:error, :no_route} 
-        route ->
-          distance = get_distance(distancies, route)
-          {:ok, route, distance}
+                 route ->
+            distance = get_distance(distancies, route)
+            {:ok, route, distance}
       end
     {:reply, reply, state}
   end
@@ -68,11 +58,6 @@ defmodule PathFinder2 do
   end
   
   @impl true
-  def handle_cast(:reload_data, state) do
-    {:noreply, state, {:continue, :delayed_init}}
-  end
-
-  @impl true
   def handle_info(msg, state) do
     IO.puts("got message #{inspect msg}")
     {:noreply, state}
@@ -80,10 +65,6 @@ defmodule PathFinder2 do
   
 
   # Inner functions
-  
-  defp load_data() do
-    load_data(@cities_file)
-  end
 
   defp load_data(path) do
     File.read!(path)
@@ -130,7 +111,7 @@ defmodule PathFinder2 do
         key = make_key(city, prev_city)
         {city, dist + Map.fetch!(distancies, key)}
       end)
-    |> elem(1)
+      |> elem(1)
   end
   
 end

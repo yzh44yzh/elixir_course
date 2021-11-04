@@ -1,75 +1,72 @@
 # Конфигурация приложения
 
-By default, the environment of an application is an empty list. In a Mix project's mix.exs file, you can set the :env key in application/0:
-```
-def application do
-  [env: [db_host: "localhost"]]
-end
-```
-Now, in your application, you can read this environment by using functions such as fetch_env!/2 and friends:
-Application.fetch_env!(:my_app, :db_host)
+Каждое приложение имеет свои собственные настройки и АПИ для доступа к ним.
 
-In Mix projects, the environment of the application and its dependencies can be overridden via the config/config.exs file.
 ```
-import Config
-config :my_app, :db_host, "db.local"
+$ iex -S mix
+iex(1)> Application.get_all_env(:my_cool_app)
+[]
+iex(2)> Application.put_env(:my_cool_app, :param1, 42)
+:ok
+iex(4)> Application.put_env(:my_cool_app, :param2, :some_val)
+:ok
+iex(5)> Application.get_all_env(:my_cool_app)                
+[param1: 42, param2: :some_val]
+
+iex(7)> Application.get_env(:my_cool_app, :param1)
+42
+iex(8)> Application.fetch_env(:my_cool_app, :param1)
+{:ok, 42}
+iex(9)> Application.fetch_env(:my_cool_app, :param3)
+:error
 ```
-if you change the value of the application environment after the code is compiled, the value used at runtime is not going to change!
 
-You can provide values through config script files.
-Config scripts are evaluated before project is compiled and started.
-Generated sys.config are baked into OTP release.
-So build machine makes the same configuration for all prod machines.
-Config scripts can't provide parameters from external sources, such as OS environment, ini-files, etcd, or vault.
+Настройки хранятся в application environment, это быстрое in-memory key-value хранилище. Оно находится в глобальной области видимости, и к нему можно обращаться из любого места в коде.
 
-
-можно передавать аргументы из mix.ex в app:
+В нашем приложении пока нет настроек, их можно добавить в **mix.exs**:
 ```
-# mix.ex
 def application do
   [
-    mod: {
-      Sequence.Application, 456
-    },
     extra_applications: [:logger],
+    env: [param1: 42, param2: "hello"]
   ]
 end
-
-defmodule Sequence.Application do
-  use Application
-  def start(_type, initial_number) do
-    ..
-  end
-end
 ```
 
-### Diff configuration for test env
-
-config.exs
+И тогда настройки появятся сразу после запуска приложения:
 ```
-use Mix.Config
-config :my_app, param1: "value_default"
-
-import config "#{Mix.env()}.exs"
+$ iex -S mix
+iex(1)> Application.get_all_env(:my_cool_app)
+[param1: 42, param2: "hello"]
 ```
 
-dev.exs
+Однако настройки удобнее задавать не в mix.exs, а в отдельных файлах. mix позволяет указать настройки в файле **config/config.exs**:
+
 ```
-use Mix.Config
-config :my_app, param1: "value_dev"
+import Config
+
+config :my_cool_app,
+  param1: 42,
+  param2: "hello",
+  param3: true
 ```
 
-test.exs
+Настройки в этом файле переопределяют настройки в mix.exs:
 ```
-use Mix.Config
-config :my_app, param1: "value_test"
+iex(1)> Application.get_all_env(:my_cool_app)
+[param1: 42, param3: true, param2: "hello"]
 ```
 
-config.exs provides common settings for all env. Other configs may override it.
+Давайте запустим в нашем приложении PathFinder и ShardingAgent, а нужные для них настройки вынесем в config.exs.
 
+TODO описать все сделанное.
 
-### Кастомизация конфигурации для разных машин
-
-TODO 
-
-
+```
+$ iex -S mix
+Compiling 3 files (.ex)
+Generated my_cool_app app
+init PathFinder %{data_file: ["/home/y_zhloba/p/elixir_course_junior/lesson_11/my_cool_app/_build/dev/l
+ib/my_cool_app/priv/cities.csv"]}
+iex(1)> MyCoolApp.PathFinder.get_route("Москва", "Казань")
+{:ok, ["Москва", "Архангельск", "Казань"], 3267}
+```
