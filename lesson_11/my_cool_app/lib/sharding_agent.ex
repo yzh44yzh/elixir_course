@@ -3,6 +3,7 @@ defmodule MyCoolApp.ShardingAgent do
   use Agent, restart: :permanent
 
   def start_link({agent_name, state}) do
+    IO.puts("init ShardingAgent #{agent_name} #{inspect state}")
     Agent.start(fn () -> state end, [name: agent_name])
   end
 
@@ -21,44 +22,6 @@ defmodule MyCoolApp.ShardingAgent do
             res
           end
       end)
-  end
-
-  def start() do
-    state = [
-      { 0, 11, "Node-1"},
-      {12, 23, "Node-2"},
-      {24, 35, "Node-3"},
-      {36, 47, "Node-4"}
-    ]
-    child_spec = [
-      {ShardingAgent, {:agent_1, state}}
-    ]
-    Supervisor.start_link(child_spec, strategy: :one_for_all)
-  end
-
-  
-  def start_2_agents() do
-    state_1 = [
-      {0, 4, "Node-1"},
-      {5, 9, "Node-2"}
-    ]
-    state_2 = [
-      { 0,  9, "Node-1"},
-      {10, 19, "Node-2"},
-      {20, 29, "Node-3"}
-    ]
-
-    child_spec = [
-      %{
-        id: :agent_a,
-        start: {ShardingAgent, :start_link, [{:agent_a, state_1}]}
-      },
-      %{
-        id: :agent_b,
-        start: {ShardingAgent, :start_link, [{:agent_b, state_2}]}
-      }
-    ]
-    Supervisor.start_link(child_spec, strategy: :one_for_all)
   end
   
 end

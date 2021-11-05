@@ -59,14 +59,67 @@ iex(1)> Application.get_all_env(:my_cool_app)
 
 Давайте запустим в нашем приложении PathFinder и ShardingAgent, а нужные для них настройки вынесем в config.exs.
 
-TODO описать все сделанное.
+Настройки:
+```
+config :my_cool_app,
+  data_file: "cities.csv",
+  sharding: %{
+    agent_a: [
+      { 0, 11, "Node-1"},
+      {12, 23, "Node-2"},
+      {24, 35, "Node-3"},
+      {36, 47, "Node-4"}
+    ],
+    agent_b: [
+      { 0,  7, "Node-1"},
+      { 8, 15, "Node-2"},
+      {16, 23, "Node-3"},
+      {24, 31, "Node-4"}
+    ]
+  }
+```
+
+Запуск процессов:
+```
+  @impl true
+  def start(_start_type, _args) do
+    data_file = Application.get_env(:my_cool_app, :data_file)
+    data_file = Application.app_dir(:my_cool_app, "priv") |> Path.join(data_file)
+
+    sharding = Application.get_env(:my_cool_app, :sharding)
+    
+    children = [
+      {MyCoolApp.PathFinder, [data_file]},
+      %{
+        id: :agent_a,
+        start: {MyCoolApp.ShardingAgent, :start_link, [{:agent_a, sharding.agent_a}]}
+      },
+      %{
+        id: :agent_b,
+        start: {MyCoolApp.ShardingAgent, :start_link, [{:agent_b, sharding.agent_b}]}
+      }
+    ]
+    Supervisor.start_link(children, strategy: :one_for_one) 
+  end
+```
+
+Проверяем, как это работает:
 
 ```
 $ iex -S mix
 Compiling 3 files (.ex)
 Generated my_cool_app app
+
 init PathFinder %{data_file: ["/home/y_zhloba/p/elixir_course_junior/lesson_11/my_cool_app/_build/dev/l
-ib/my_cool_app/priv/cities.csv"]}
-iex(1)> MyCoolApp.PathFinder.get_route("Москва", "Казань")
+ib/my_cool_app/priv/cities.csv"]}                                                                     
+init ShardingAgent agent_a [{0, 11, "Node-1"}, {12, 23, "Node-2"}, {24, 35, "Node-3"}, {36, 47, "Node-4
+"}]                                                                                                   
+init ShardingAgent agent_b [{0, 7, "Node-1"}, {8, 15, "Node-2"}, {16, 23, "Node-3"}, {24, 31, "Node-4"}
+]                                                                                                     
+> MyCoolApp.PathFinder.get_route("Москва", "Казань")
 {:ok, ["Москва", "Архангельск", "Казань"], 3267}
+> MyCoolApp.ShardingAgent.find_node(:agent_a, 8)
+{:ok, "Node-1"}
+> MyCoolApp.ShardingAgent.find_node(:agent_b, 8)
+{:ok, "Node-2"}
 ```
