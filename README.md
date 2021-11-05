@@ -161,6 +161,10 @@
 
 11.04. Application.
 
+11.05. Конфигурирование Application.
+
+11.06. Observer.
+
 
 ## Урок №13. Open Telecom Platform
 
@@ -174,8 +178,6 @@
 ## Урок №14. Erlang Term Storage.
 
 ETS
-
-Observer
 
 
 ## Урок №15. TCP и UDP сокеты.
