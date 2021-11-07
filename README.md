@@ -151,7 +151,7 @@
 10.05. Использование GenServer.
 
 
-## Урок №11. OTP фреймворк.
+## Урок №11. Supervisor и Application.
 
 11.01. Supervisor.
 
@@ -166,7 +166,7 @@
 11.06. Observer.
 
 
-## Урок №13. Open Telecom Platform
+## Урок №13. Open Telecom Platform.
 
 11.05. OTP.
 
