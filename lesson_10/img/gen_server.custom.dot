@@ -9,28 +9,28 @@ digraph GS {
         label = "Module API";
         api [shape=record, label="add|remove|check"];
     }
-    
+
     subgraph cluster2 {
         node [shape=record];
         label = "Generic Call";
         call;
     }
-    
+
     subgraph cluster3 {
         label = "Generic Loop";
         loop;
     }
-    
+
     subgraph cluster4 {
         label = "Module Callbacks";
         handle [shape=record, label="handle_add|handle_remove|handle_check"];
     }
-    
+
     edge [color=red, arrowsize=1.6];
     api -> call;
     call -> loop;
     loop -> handle;
-    
+
     edge [color=blue];
     handle -> loop;
     loop -> call;

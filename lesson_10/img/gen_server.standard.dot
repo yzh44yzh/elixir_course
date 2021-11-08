@@ -18,14 +18,14 @@ digraph GS {
        <tr><td align="center">handle_call</td></tr>
        </table>
        >];
-    
+
     b [label=<
        <table border="0" width="170" height="100" cellpadding="3">
        <tr ><td width="170" align="center"><b>OTP/client</b></td></tr>
        <tr><td align="center">GenServer.call</td></tr>
        </table>
        >];
-    
+
     c [label=<
        <table border="0" width="170" height="100" cellpadding="3">
        <tr><td width="170" align="center"><b>OTP/server</b></td></tr>

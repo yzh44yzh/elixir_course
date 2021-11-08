@@ -16,14 +16,14 @@ digraph GS {
        <tr><td align="center">init</td></tr>
        </table>
        >];
-    
+
     b [label=<
        <table border="0" width="170" height="100" cellpadding="3">
        <tr ><td width="170" align="center"><b>OTP/parent sup</b></td></tr>
        <tr><td align="center">spawn_link</td></tr>
        </table>
        >];
-    
+
     c [label=<
        <table border="0" width="170" height="100" cellpadding="3">
        <tr><td width="170" align="center"><b>OTP/child sup</b></td></tr>

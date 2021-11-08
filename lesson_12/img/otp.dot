@@ -1,0 +1,75 @@
+digraph GS {
+
+    graph [pad=0.2, fontname="UbuntuMono", fontsize=20]
+    node [shape=box, style=filled, fontname="UbuntuMono", fontsize=18]
+
+    subgraph clusterEVM {
+        label = <<b>Erlang Virtual Machine</b>>;
+
+        subgraph clusterERTS {
+            label = <<b>Erlang Runtime System</b>>;
+            ERTS [fillcolor=gold2];
+            Планировщик
+            "Упраление памятью"
+            IO
+            Криптография
+            Диск
+            Сеть
+        }
+
+        subgraph clusterApps {
+            label = <<b>Приложения</b>>;
+            Apps [fillcolor=gold2];
+
+            "OTP Apps"
+            kernel
+            stdlib
+            inets
+            crypto
+
+            "User Apps"
+            my_cool_app
+
+            Dependencies
+            elixir
+            logger
+            cowboy
+            plug
+        }
+
+        subgraph clusterBEAM {
+            label = <<b>BEAM</b>>;
+            BEAM [fillcolor=gold2];
+            Компилятор
+            Интерпретатор
+        }
+    }
+
+
+    ERTS -> Планировщик
+    ERTS -> "Упраление памятью"
+    ERTS -> IO
+    ERTS -> Криптография
+
+    IO -> Диск
+    IO -> Сеть
+
+    Apps -> "OTP Apps"
+    Apps -> "User Apps"
+    Apps -> Dependencies
+
+    "OTP Apps" -> kernel
+    "OTP Apps" -> stdlib
+    "OTP Apps" -> inets
+    "OTP Apps" -> crypto
+
+    "User Apps" -> my_cool_app
+
+    Dependencies -> elixir
+    Dependencies -> logger
+    Dependencies -> cowboy
+    Dependencies -> plug
+
+    BEAM -> Компилятор
+    BEAM -> Интерпретатор
+}
