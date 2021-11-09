@@ -10,7 +10,7 @@ iex(2)> Application.put_env(:my_cool_app, :param1, 42)
 :ok
 iex(4)> Application.put_env(:my_cool_app, :param2, :some_val)
 :ok
-iex(5)> Application.get_all_env(:my_cool_app)                
+iex(5)> Application.get_all_env(:my_cool_app)
 [param1: 42, param2: :some_val]
 
 iex(7)> Application.get_env(:my_cool_app, :param1)
@@ -87,7 +87,7 @@ config :my_cool_app,
     data_file = Application.app_dir(:my_cool_app, "priv") |> Path.join(data_file)
 
     sharding = Application.get_env(:my_cool_app, :sharding)
-    
+
     children = [
       {MyCoolApp.PathFinder, [data_file]},
       %{
@@ -99,7 +99,7 @@ config :my_cool_app,
         start: {MyCoolApp.ShardingAgent, :start_link, [{:agent_b, sharding.agent_b}]}
       }
     ]
-    Supervisor.start_link(children, strategy: :one_for_one) 
+    Supervisor.start_link(children, strategy: :one_for_one)
   end
 ```
 
@@ -111,11 +111,11 @@ Compiling 3 files (.ex)
 Generated my_cool_app app
 
 init PathFinder %{data_file: ["/home/y_zhloba/p/elixir_course_junior/lesson_11/my_cool_app/_build/dev/l
-ib/my_cool_app/priv/cities.csv"]}                                                                     
+ib/my_cool_app/priv/cities.csv"]}
 init ShardingAgent agent_a [{0, 11, "Node-1"}, {12, 23, "Node-2"}, {24, 35, "Node-3"}, {36, 47, "Node-4
-"}]                                                                                                   
+"}]
 init ShardingAgent agent_b [{0, 7, "Node-1"}, {8, 15, "Node-2"}, {16, 23, "Node-3"}, {24, 31, "Node-4"}
-]                                                                                                     
+]
 > MyCoolApp.PathFinder.get_route("Москва", "Казань")
 {:ok, ["Москва", "Архангельск", "Казань"], 3267}
 > MyCoolApp.ShardingAgent.find_node(:agent_a, 8)
