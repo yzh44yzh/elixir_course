@@ -1,0 +1,40 @@
+digraph GS {
+
+    graph [pad=0.2, nodesep=0.6 fontname="UbuntuMono", fontsize=20]
+    node [shape=box, style=filled, fontname="UbuntuMono", fontsize=18]
+
+    subgraph clusterBEAM {
+        label = <<b>BEAM Cluster</b>>;
+
+        subgraph clusterHost1 {
+            label = <<b>Host 2</b>>;
+            Node1 [fillcolor=gold2, label="Node B", width=1.5];
+        }
+
+        subgraph clusterHost2 {
+            label = <<b>Host 1</b>>;
+            Node2 [fillcolor=gold2, label="Node A", width=1.5];
+        }
+
+        subgraph clusterHost3 {
+            label = <<b>Host 3</b>>;
+            Database [width=1.5]
+        }
+
+        subgraph clusterHost4 {
+            label = <<b>Host 4</b>>;
+            RabbitMQ [width=1.5]
+        }
+    }
+
+    edge [weight=1 color=blue];
+    Node1 -> Node2
+    Node2 -> Node1
+
+    edge [weight=1 color=black];
+    Node1 -> Database
+    Node1 -> RabbitMQ
+
+    Node2 -> Database
+    Node2 -> RabbitMQ
+}
