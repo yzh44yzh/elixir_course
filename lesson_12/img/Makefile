@@ -1,8 +1,9 @@
 # https://www.graphviz.org/
 
 generate_images:
-	dot -Tpng:cairo -o otp.png otp.dot
+	# dot -Tpng:cairo -o otp.png otp.dot
+	dot -Tpng:cairo -o host.png host.dot
 
 view_images:
-	# eog otp_old.png &
-	eog otp.png &
+	# eog otp.png &
+	eog host.png &
