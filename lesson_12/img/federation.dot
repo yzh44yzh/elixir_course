@@ -1,0 +1,39 @@
+digraph GS {
+
+    graph [pad=0.2, nodesep=0.6 fontname="UbuntuMono", fontsize=20]
+    node [shape=box, style=filled, fontname="UbuntuMono", fontsize=18]
+    rankdir="LR";
+
+    subgraph clusterDC1 {
+        label = <<b>Data Center 1</b>>;
+
+        subgraph clusterBEAM1 {
+            label = <<b>BEAM Cluster 1</b>>;
+
+            Node1 [fillcolor=gold2, label="Node 1"];
+            Node2 [fillcolor=gold2, label="Node 2"];
+            rank="same" {Node1, Node2}
+        }
+    }
+
+    subgraph clusterDC2 {
+        label = <<b>Data Center 2</b>>;
+
+        subgraph clusterBEAM2 {
+            label = <<b>BEAM Cluster 2</b>>;
+
+            Node3 [fillcolor=gold2, label="Node 1"];
+            Node4 [fillcolor=gold2, label="Node 2"];
+            rank="same" {Node3, Node4}
+        }
+    }
+
+    edge [weight=1 color=blue];
+    Node1 -> Node3
+
+    Node1 -> Node2
+    Node2 -> Node1
+
+    Node3 -> Node4
+    Node4 -> Node3
+}
