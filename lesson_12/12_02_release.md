@@ -1,67 +1,41 @@
 # Релиз
 
-is a standalone, compiled, runnable system
-that consist of the minimum set of OTP applications needed by the system.
+Релиз -- это проект, собранный в пакет и готовый для доставки. И это также процесс сборки проекта в пакет.
 
+В состав релиза входит:
+- скомпилированный код (байткод) наших приложений;
+- байткод всех необходимых зависимостей;
+- конфигурация;
+- скрипты для управления системой (для запуска, остановки и тд).
 
-A **release** is a bundle that contains a particular version of your application,
-its dependencies, its configuration,
-and any metadata it requires to get running and stay running.
+Опционально в состав релиза можно включить виртуальную машину. Если мы не включаем виртуальную машину, то она должна быть установлена на тех хостах, куда мы будем доставлять проект. Причем, что важно, в нужной версии.
 
-A **deployment** is a way of getting a release into an environment where it can be used.
+Бывает проще включить виртуальную машину в состав релиза, и тогда не требуется её наличия на хостах.
 
-A **hot upgrade** is a kind of deployment that allows the release of a currently running application
-to be changed while that application continues to run —
-the upgrade happens in place with no user-detectable disruption.
+В обоих случаях доставленая и развёрнутая на хосте система выглядит так:
 
+![Release](./img/release.png)
 
-## что собираем
+Это минимальная система, состоящая из одного узла.
 
-Сначала рассмотрим, что представляет собой система, которую мы хотим собрать.
-
-Figure 1-3 illustrates a typical release of an Erlang node with the virtual machine (VM) dependent on the hardware and operating system, and Erlang applications running on top of the VM interfacing with non-Erlang components that are OS and hardware dependent.
-
-lesson_11/img/otp.png -- сделать свою версию этой картинки
-
-Не одна картинка, а несколько. От малого к большому:
-
-+ Erlang Virtual Machine:
-  - ERTS: планировщик, управление памятью, IO (сеть, диск), криптография
-  - BEAM: компилятор, интерпретатор
-  - OTP Apps: kernel, stdlib, inets, observer, crypto
-  - My Apps: my_cool_app, my_other_app
-  - Dependencies: elixir, iex, mix, logger, cowboy, plug, jason, prometheus.
-
-![Erlang Virtual Machine](./img/otp.png)
-
-+ Host (железный или виртуальный или контейнер):
-  - Erlang VM Node: одна или больше нод (типично сочетать с rabbitmq),
-  - взаимодействие с другими процессами ОС (через порты).
+Не редко система представляет собой кластер из нескольких узлов. Причём этот кластер не самодостаточный, а ему необходимо наличие базы данных, очереди сообщений и взаимодействие с другими системами по сети:
 
 ![Host](./img/host.png)
 
-+ кластер: ноды на разных хостах в одном ДЦ
+В этом варианте все компоненты развернуты на одном хосте. Такое бывает на стейджинг окружениях и на машине разработчика. Но реально использующаяся система (production) разворачивается на нескольких хостах:
 
 ![Cluster](./img/cluster.png)
 
-- федерация: кластеры из разных ДЦ.
+Если пойти еще дальше, то можно построить федерацию -- систему из нескольких кластеров, находящихся в разных датацентрах:
 
 ![Federation](./img/federation.png)
 
 
-## Сходство с kubernetes
-
-TODO нужно глубже познакомиться с k8s.
-
-- application -- pod
-- gen_server -- service
-- message passing -- взаимодействие между сервисами (синхронное -- http, асинхронное -- MQ)
-- декларативное описание сервисов -- supervisor child specification.
-
-Поэтому мало смысла разворачивать BEAM-систему в k8s (хотя некоторые это делают). Ей не нужен k8s, она самодостаточна.
-
-
 ## Инструменты сборки
+
+is a standalone, compiled, runnable system
+that consist of the minimum set of OTP applications needed by the system.
+
 
 Distillery — The Elixir Release Manager
 TODO: read hexdocs.pm/distillery
@@ -196,6 +170,11 @@ default to 65,536. range is 1,024 to 134,217,727.
 +t Num -- maximum number of allowed atoms, set by default to 1,048,576.
 
 
+## Доставка (Deployment)
+
+A **deployment** is a way of getting a release into an environment where it can be used.
+
+
 ## Live upgrade
 
 как это работает
@@ -214,3 +193,6 @@ bin/proj_name upgrade "0.2.0"
 Alternative approach: restart nodes in cluster one by one.
 
 
+A **hot upgrade** is a kind of deployment that allows the release of a currently running application
+to be changed while that application continues to run —
+the upgrade happens in place with no user-detectable disruption.
