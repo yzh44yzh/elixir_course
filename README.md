@@ -168,11 +168,13 @@
 
 ## Урок №13. Open Telecom Platform.
 
-11.05. OTP.
+12.01. OTP.
 
-11.06. Модель акторов.
+12.02. Релиз.
 
-11.07. Let It Crash.
+12.03. Модель акторов.
+
+12.04. Let It Crash.
 
 
 ## Урок №14. Erlang Term Storage.
