@@ -97,7 +97,7 @@ iex(10)> distance(p1, p2)
 
 ```
 elixir lib/lesson_03/task_03_04_atom_tuple.exs
-```    
+```
 
 Реализовать функцию is_point_inside_figure для прямоугольника и круга.
 
@@ -107,5 +107,3 @@ elixir lib/lesson_03/task_03_04_atom_tuple.exs
 Окружность представлена кортежем `{:circle, center, radius}`, где center — это кортеж `:point`.
 
 Прямоугольник представлен кортежем `{:rect, left_top, right_bottom}`, где left_top и right_bottom — это кортежи `:point`.
-
-
