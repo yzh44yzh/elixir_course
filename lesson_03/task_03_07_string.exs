@@ -4,6 +4,7 @@ defmodule Lesson_03.Task_03_07_String do
     max_length = words
     |> Enum.map(&String.length/1)
     |> Enum.max
+    
     Enum.map(words, fn w -> align_word(w, max_length) end)
     |> Enum.join("\n")
   end
