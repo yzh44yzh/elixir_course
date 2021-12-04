@@ -1,13 +1,9 @@
 # https://www.graphviz.org/
 
 generate_images:
-	dot -Tpng:cairo -o release.png release.dot
-	# dot -Tpng:cairo -o host.png host.dot
-	# dot -Tpng:cairo -o cluster.png cluster.dot
-	# dot -Tpng:cairo -o federation.png federation.dot
+	# dot -Tpng:cairo -o supervisor_init.png supervisor_init.dot
+	dot -Tpng:cairo -o supervision_tree.png supervision_tree.dot
 
 view_images:
-	eog release.png &
-	# eog host.png &
-	# eog cluster.png &
-	# eog federation.png &
+	# eog supervisor_init.png &
+	eog supervision_tree.png &
