@@ -85,7 +85,7 @@ iex> Stream.map(1..10_000_000, &(&1+1)) |> Enum.take(5)
 
 Возьмем пример с чтением из файла. Допустим, у нас есть некий словарь, хранящий термины и аббревиатуры в таком виде:
 ```
-$ cat lib/lesson_05/dictionary.txt 
+$ cat data/dictionary.txt 
 ISO 8601: Date and time format
 MIT: Massachusetts Institute of Technology
 OpenGL: Open Graphics Library
@@ -98,7 +98,7 @@ UUID: universally unique identifier
 
 Мы хотим найти в нем самый длинный термин:
 ```
-File.read!("lib/lesson_05/dictionary.txt") |> 
+File.read!("data/dictionary.txt") |> 
 String.split("\n") |> 
 Enum.map(fn(line) -> String.split(line, ":") end) |> 
 Enum.map(fn([term, _definition]) -> String.length(term) end) |>
@@ -108,7 +108,7 @@ Enum.max
 
 Воспользуемся Stream:
 ```
-File.stream!("lib/lesson_05/dictionary.txt") |>
+File.stream!("data/dictionary.txt") |>
 Stream.map(fn(line) -> String.split(line, ":") end) |> 
 Stream.map(fn([term, _definition]) -> String.length(term) end) |>
 Enum.max 
