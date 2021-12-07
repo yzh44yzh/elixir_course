@@ -1,15 +1,15 @@
 defmodule Rect do
 
   def intersect(
-        {:rect, top_left_1, bottom_right_1} = rect1,
-        {:rect, top_left_2, bottom_right_2} = rect2
+        {:rect, left_top_1, right_bottom_1} = rect1,
+        {:rect, left_top_2, right_bottom_2} = rect2
       ) do
     # TODO add your implementation
 
   end
 
 
-  def valid_rect({:rect, top_left, bottom_right}) do
+  def valid_rect({:rect, left_top, right_bottom}) do
     # TODO add your implementation
   end
 
