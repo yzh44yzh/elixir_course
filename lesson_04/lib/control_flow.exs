@@ -1,4 +1,4 @@
-defmodule Lesson_03.Task_03_10_ControlFlow do
+defmodule ControlFlow do
 
   def handle(animal, action) do
     case animal do

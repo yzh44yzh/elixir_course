@@ -1,87 +1,182 @@
-# do-end block
+# Keyword list, синтаксический сахар и макросы
 
-Вы уже заметили, что в Элисир нет фигурных скобок для обозначения границ блоков кода. Вместо них используются ключевые слова **do..end**, как в языке Ruby.
+## Keyword list
 
-Эти ключевые слова являются макросом :)
+Пары ключ-значение можно хранить в виде кортежей в списке:
 
-Вернемся к конструкции **if**:
 ```
-c = if a > b do
-  a
-else
-  b
+iex(1)> kwl = [{"a", 42}, {"b", 500}]
+[{"a", 42}, {"b", 500}]
+```
+
+Это легаси из давних времен, когда в BEAM не было map. С появлением map необходимость в такой структуре пропала. Но по сложившейся традиции она используется до сих пор, обычно для передачи какого-нибудь списка опций.
+
+Как и в случае с map, keyword list поддерживает синтаксический сахар для ключей-атомов:
+```
+iex(2)> kwl = [{:a, 42}, {:b, 500}]
+[a: 42, b: 500]
+```
+
+Возьмем функцию, которая принимает список опций как keyword list:
+
+```
+def fun_with_options(arg1, options) do
+  IO.puts("fun called with arg1:#{arg1} and options:#{inspect options}")
 end
 ```
 
-Это макрос, который разворачивается вот в такой код:
+Такого рода функции не редко встречаются в стандартных библиотеках. Например: `GenServer.start_link(module, init_arg, options \\ [])`.
+
+Вызовем её:
+
+```
+iex(2)> DoEnd.fun_with_options(42, [a: 42, b: 500])
+fun called with arg1:42 and options:[a: 42, b: 500]
+:ok
+```
+
+В этой ситуации можно опустить квадратные скобки для options:
+
+```
+iex(4)> DoEnd.fun_with_options(42, a: 42, b: 500, c: 100)
+fun called with arg1:42 and options:[a: 42, b: 500, c: 100]
+:ok
+```
+
+Более того, во многих случаях при вызове функции можно опускать круглые скобки:
+
+```
+iex(5)> DoEnd.fun_with_options 42, a: 42, b: 500, c: 100
+fun called with arg1:42 and options:[a: 42, b: 500, c: 100]
+```
+
+Раньше это была распространённая практика. Потом оказалось, что трудно реализовать парсер языка так, чтобы это работало везде. Поэтому вызов функции без круглых скобок работает не везде, и его объявили deprecated.
+
+Но это полезно знать, потому что это повсеместно используется для макросов.
+
+
+## Какая магия скрывается за макросом if ?
+
+Определим функцию `if_1` и в ней используем макрос if:
+
+```
+def if_1(condition) do
+  if condition do
+    a = 42
+    {:true_branch, a + a}
+  else
+    b = 50
+    {:false_branch, b * b}
+  end
+end
+```
+
+Вызовем, посмотрим как это работает:
+```
+> DoEnd.if_1(true)
+{:true_branch, 84}
+> DoEnd.if_1(false)
+{:false_branch, 100}
+```
+
+С функцией `DoEnd.fun_with_options` мы постепенно добавляли синтаксический сахар. Теперь пойдем в обратную сторону, и начнем постепенно убирать его:
+
+```
+def if_2(condition) do
+  if condition, do: (
+    a = 42
+    {:true_branch, a + a}
+    ),
+  else: (
+    b = 50
+    {:false_branch, b * 2}
+    )
+end
+
+iex(31)> DoEnd.if_2(false)
+{:false_branch, 100}
+```
+
+Уберем ещё немного сахара:
+
+```
+def if_3(condition) do
+  if(condition, [
+        do: (
+          a = 42; {:true_branch, a + a}
+        ),
+        else: (
+          b = 50; {:false_branch, b * b}
+        )
+  ])
+end
+
+iex(32)> DoEnd.if_3(true)
+{:true_branch, 84}
+```
+
+Продолжим:
+
+```
+def if_4(condition) do
+  code_block_1 = (a = 42; {:true_branch, a + a})
+  code_block_2 = (b = 50; {:false_branch, b * b})
+  if(condition, [{:do, code_block_1}, {:else, code_block_2}])
+end
+
+iex(33)> DoEnd.if_4(true)
+{:true_branch, 84}
+```
+
+И вот мы дошли до полной формы макроса, без сахара:
+
 ```
 if(condition, [{:do, code_block_1}, {:else, code_block_2}])
 ```
 
-Для примера выше получается так:
-```
-iex(11)> c = if((a > b), [{:do, a}, {:else, b}])
-10
-```
+Мы видим, что это тоже самое, что вызов `DoEnd.fun_with_options`.
 
-Макрос принимает два аргумента: предикат, и список из двух кортежей. Первый кортеж содержит ключ **:do** и блок кода, который нужно выполнить, когда предикат возвращает true. Второй кортеж содержит ключ **:else** и второй блок кода.
-
-Так выглядит код в "сыром виде". К нему можно последовательно применить несколько уровней синтаксического сахара.
-
-Во-первых, если ключи являются атомами, то список пар можно писать в таком виде:
-```
-iex(11)> c = if((a > b), [do: a, else: b])
-10
-```
-Во-вторых, когда список пар (keyword list) передается в функцию или в макрос, то квадратные скобки можно убрать:
-```
-iex(13)> c = if(a > b, do: a, else: b)
-10
-```
-Ну и в случае макроса круглые скобки тоже можно убрать:
-```
-iex(14)> c = if a > b, do: a, else: b
-10
-```
+Макрос if принимает 2 аргумента: предикат и keyword list с двумя элементами. Первый элемент имеет ключ `:do`, второй элемент имеет ключ `:else`. А значениями этих ключей являются блоки кода.
 
 
-## do: form
+## Блок do-end
 
-Мы получили конструкцию, которая называется **do: form**. Она может применяться везде, где есть **do..end**, вместо **do..end**.
+Аналогичными макросами являются `defmodule`, `def`, `defp`:
 
-Было:
 ```
-  def gcd(a, b) do
-    case rem(a, b) do
-      0 -> b
-      c -> gcd(b, c)
-    end
-  end
-```
+def some_fun_1(arg1, arg2) do
+  a = 42
+  arg1 + arg2 + a
+end
 
-Стало:
-```
-  def gcd(a, b), do: (
-    case rem(a, b), do: (
-      0 -> b
-      c -> gcd(b, c)
-    )
-  )
+def some_fun_2(arg1, arg2), do: (a = 42; arg1 + arg2 + a)
+
+def( some_fun_3(arg1, arg2), [{:do, (a = 42; arg1 + arg2 + a)}] )
 ```
 
-Но принято применять **do: form** тогда, когда блок кода представлен одной строкой:
-```
-  def sk_not(true), do: false
-  def sk_not(false), do: true
-  def sk_not(nil), do: nil
+Как мы видим, блок do-end является кортежем из 2-х элементов, и может записываться в двух видах:
 
-  def sk_and(false, _), do: false
-  def sk_and(nil, false), do: false
-  def sk_and(nil, _), do: nil
-  def sk_and(true, second_arg), do: second_arg
-
-  def sk_or(true, _), do: true
-  def sk_or(nil, true), do: true
-  def sk_or(nil, _), do: nil
-  def sk_or(false, second_arg), do: second_arg
 ```
+do
+   line1
+   line2
+   line3
+end
+```
+
+или:
+
+```
+do: (line1; line2; line3)
+```
+
+Второй вариант называется **do: form**. Он удобен в случаях, когда в блоке только одна строка кода:
+
+```
+def sk_and(false, _), do: false
+def sk_and(nil, false), do: false
+def sk_and(nil, _), do: nil
+def sk_and(true, second_arg), do: second_arg
+```
+
+И теперь мы понимаем, почему у этой формы именно такой синтаксис.
