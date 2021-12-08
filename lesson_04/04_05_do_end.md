@@ -66,7 +66,7 @@ def if_1(condition) do
     {:true_branch, a + a}
   else
     b = 50
-    {:false_branch, b * b}
+    {:false_branch, b * 2}
   end
 end
 ```
