@@ -1,4 +1,4 @@
-defmodule Lesson_04.Task_04_03_Recursion do
+defmodule Recursion do
 
   def len([]), do: 0
   def len([_head | tail]) do

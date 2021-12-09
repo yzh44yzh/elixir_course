@@ -20,6 +20,7 @@
 В книге Learn Functional Programming with Elixir by Ulisses Almeida описываются две реализации факториала, с хвостовой рекурсией и без нее. И они сравниваются по потреблению памяти, по данным System Monitor для процесса beam.smp.
 
 Обе реализации просты:
+
 ```
 defmodule Factorial do
 
@@ -62,13 +63,15 @@ factorial(100_000) - 1.3G
 Что ж, на практике все оказалось не так все просто.
 
 Нужно смотреть, что за память используется. BEAM предлагает для этого
+
 ```
 :erlang.process_info(self(), :memory)
 ```
 
 Добавим этот вызов на каждый 1000-й шаг рекурсии:
+
 ```
-defmodule Lesson_04.Task_04_04_TailRecursion do
+defmodule TailRecursion do
 
   def factorial(0), do: 1
   def factorial(n) when is_integer(n) and n > 0 do
@@ -86,10 +89,6 @@ defmodule Lesson_04.Task_04_04_TailRecursion do
     factorial_t(n - 1, n * acc)
   end
 
-
-  # http://erlang.org/documentation/doc-5.7.4/erts-5.7.4/doc/html/erlang.html#process_info-1
-  # memory is measured in bytes, but head and stack are measured in machine words
-  # which is 4 bytes for 64 bit arch
   defp report_memory() do
     data = :erlang.process_info(self(), [:memory, :total_heap_size, :stack_size])
     IO.puts("memory #{data[:memory]}, heap #{data[:total_heap_size]}, stack #{data[:stack_size]}")

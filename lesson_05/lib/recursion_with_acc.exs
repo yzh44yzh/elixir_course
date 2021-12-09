@@ -1,4 +1,4 @@
-defmodule Lesson_04.Task_04_05_Accumulator do
+defmodule RecurtionWithAcc do
 
   def test_data() do
     # {:user, id, name, age}
@@ -49,18 +49,6 @@ defmodule Lesson_04.Task_04_05_Accumulator do
     else
       split_teens_and_adults(users, {[user | teens], adults})
     end
-  end
-
-end
-
-ExUnit.start()
-
-defmodule Task_04_05_Test do
-  use ExUnit.Case
-  import Lesson_04.Task_04_05_Accumulator
-
-  test "align word" do
-    # assert " bob " == align_word("bob", 5)
   end
 
 end

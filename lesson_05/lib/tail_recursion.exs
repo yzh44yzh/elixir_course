@@ -1,4 +1,4 @@
-defmodule Lesson_04.Task_04_04_TailRecursion do
+defmodule TailRecursion do
 
   def factorial(0), do: 1
   def factorial(n) when is_integer(n) and n > 0 do

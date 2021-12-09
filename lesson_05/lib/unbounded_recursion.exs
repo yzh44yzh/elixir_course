@@ -1,4 +1,4 @@
-defmodule Lesson_04.Task_04_06_UnboundedRecursion do
+defmodule UnboundedRecursion do
 
   def browse(path) do
     IO.puts(path)
