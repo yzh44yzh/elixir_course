@@ -27,9 +27,4 @@ defmodule UnboundedRecursion do
     String.duplicate("|--", depth) <> str
   end
 
-
-  # TODO: limit depth
-  def tree_l(_path, _depth_limit) do
-  end
-
 end

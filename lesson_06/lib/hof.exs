@@ -1,4 +1,4 @@
-defmodule Lesson_05.Task_05_02_HOF do
+defmodule HOF do
 
   def test_data() do
     # {:user, id, name, age}
