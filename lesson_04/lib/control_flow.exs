@@ -4,37 +4,37 @@ defmodule ControlFlow do
     case animal do
       {:dog, name} ->
         case action do
-          :add -> IO.puts("add dog #{name}")
-          :remove -> IO.puts("remove dog #{name}")
+          :feed -> IO.puts("feed the dog #{name}")
+          :pet -> IO.puts("pet the dog #{name}")
         end
       {:cat, name} ->
         case action do
-          :add -> IO.puts("add cat #{name}")
-          :remove -> IO.puts("remove cat #{name}")
+          :feed -> IO.puts("feed the cat #{name}")
+          :pet -> IO.puts("pet the cat #{name}")
         end
     end
   end
 
   def handle2(animal, action) do
     case {animal, action} do
-      {{:dog, name}, :add} -> IO.puts("add dog #{name}")
-      {{:dog, name}, :remove} -> IO.puts("remove dog #{name}")
-      {{:cat, name}, :add} -> IO.puts("add cat #{name}")
-      {{:cat, name}, :remove} -> IO.puts("remove cat #{name}")
+      {{:dog, name}, :feed} -> IO.puts("feed the dog #{name}")
+      {{:dog, name}, :pet} -> IO.puts("pet the dog #{name}")
+      {{:cat, name}, :feed} -> IO.puts("feed the cat #{name}")
+      {{:cat, name}, :pet} -> IO.puts("pet the cat #{name}")
     end
   end
 
-  def handle3({:dog, name}, :add) do
-    IO.puts("add dog #{name}")
+  def handle3({:dog, name}, :feed) do
+    IO.puts("feed the dog #{name}")
   end
-  def handle3({:dog, name}, :remove) do
-    IO.puts("remove dog #{name}")
+  def handle3({:dog, name}, :pet) do
+    IO.puts("pet the dog #{name}")
   end
-  def handle3({:cat, name}, :add) do
-    IO.puts("add cat #{name}")
+  def handle3({:cat, name}, :feed) do
+    IO.puts("feed the cat #{name}")
   end
-  def handle3({:cat, name}, :remove) do
-    IO.puts("remove cat #{name}")
+  def handle3({:cat, name}, :pet) do
+    IO.puts("pet the cat #{name}")
   end
 
   def handle4(animal) do
@@ -78,16 +78,16 @@ end
 animal1 = {:cat, "Tihon"}
 animal2 = {:dog, "Woof"}
 
-alias Lesson_03.Task_03_10_ControlFlow, as: CF
+alias ControlFlow, as: CF
 
-CF.handle(animal1, :add)
-CF.handle(animal2, :remove)
+CF.handle(animal1, :feed)
+CF.handle(animal2, :pet)
 
-CF.handle2(animal2, :add)
-CF.handle2(animal1, :remove)
+CF.handle2(animal2, :feed)
+CF.handle2(animal1, :pet)
 
-CF.handle3(animal1, :add)
-CF.handle3(animal2, :add)
+CF.handle3(animal1, :feed)
+CF.handle3(animal2, :feed)
 
 CF.handle4({:dog, "Woof", 14})
 CF.handle4({:dog, "Woof", 9})
