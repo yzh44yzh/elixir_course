@@ -20,6 +20,11 @@ defmodule HOF do
   end
 
 
+  def filter_by_age(users, max_age) do
+    Enum.filter(users, fn({:user, _, _, age}) -> age < max_age end)
+  end
+
+
   def split_by_age(users) do
     splitter = fn ({:user, _id, _name, age} = user, {adults, children}) ->
       if age > 16 do
@@ -46,22 +51,61 @@ defmodule HOF do
 
   def get_longest_name_user(users) do
     [first | rest] = users
-    finder = fn(user, longest_name_user) ->
+    reducer = fn(user, longest_name_user) ->
       {:user, _, name, _} = user
       {:user, _, longest_name, _} = longest_name_user
       if String.length(longest_name) < String.length(name), do: user, else: longest_name_user
     end
-    Enum.reduce(rest, first, finder)
+    Enum.reduce(rest, first, reducer)
   end
 
 
   def get_oldest_user(users) do
-    finder = fn(user, oldest_user) ->
+    reducer = fn(user, oldest_user) ->
       {:user, _, _, age} = user
       {:user, _, _, oldest_age} = oldest_user
       if oldest_age < age, do: user, else: oldest_user
     end
-    Enum.reduce(users, finder)
+    Enum.reduce(users, reducer)
+  end
+
+  @spec sort_by(list(), :id | :name | :age) :: list()
+  def sort_by(users, compare_type) do
+    comparator = case compare_type do
+                   :id -> &compare_by_id/2
+                   :name -> &compare_by_name/2
+                   :age -> &compare_by_age/2
+                 end
+    Enum.sort(users, comparator)
+  end
+
+  def compare_by_id(user1, user2) do
+      {:user, id1, _, _} = user1
+      {:user, id2, _, _} = user2
+      id1 < id2
+  end
+
+  def compare_by_name(user1, user2) do
+      {:user, _, name1, _} = user1
+      {:user, _, name2, _} = user2
+      name1 < name2
+  end
+
+  def compare_by_age(user1, user2) do
+      {:user, _, _, age1} = user1
+      {:user, _, _, age2} = user2
+      age1 < age2
+  end
+
+  def group_users(users) do
+    grouper = fn({:user, _, _, age}) ->
+      cond do
+        age <= 14 -> :child
+        age > 14 and age <= 17 -> :teen
+        age > 17 -> :adult
+      end
+    end
+    Enum.group_by(users, grouper)
   end
 
 end
