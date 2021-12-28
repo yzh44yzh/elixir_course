@@ -1,4 +1,4 @@
-defmodule Model.RecordEvent do
+defmodule Model.Record do
 
   require Record
 
@@ -7,13 +7,13 @@ defmodule Model.RecordEvent do
       country: String.t(),
       city: String.t(),
       street: String.t(),
-      house_number: integer
+      building: integer
     )
     Record.defrecord(:address,
       country: "Belarus",
       city: nil,
       street: nil,
-      house_number: nil
+      building: nil
     )
   end
 
@@ -54,12 +54,14 @@ defmodule Model.RecordEvent do
 
   defmodule Topic do
     @type t :: record(:topic,
+      subject: String.t,
       priority: :high | :medium | :low,
-      title: String.t
+      description: String.t
     )
     Record.defrecord(:topic,
+      subject: nil,
       priority: :medium,
-      title: nil
+      description: nil
     )
   end
 

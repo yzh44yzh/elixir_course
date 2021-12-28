@@ -1,58 +1,60 @@
-defmodule Model.Calendar do
+defmodule Model do
 
-  alias Model.CalendarItem
+  defmodule Calendar do
 
-  @type t :: %__MODULE__{
-    items: [CalendarItem.t]
-  }
-  @enforce_keys [:items]
-  defstruct [:items]
+    @type t :: %__MODULE__{
+      items: [CalendarItem.t]
+    }
 
-  @spec new() :: t
-  def new(), do: %__MODULE__{items: []}
+    @enforce_keys [:items]
+    defstruct [:items]
 
-  @spec add_item(t, CalendarItem.t) :: t
-  def add_item(calendar, item) do
-    %__MODULE__{calendar | items: [item | calendar.items]}
+    @spec new() :: t
+    def new() do
+      %__MODULE__{items: []}
+    end
+
+    @spec add_item(t, CalendarItem.t) :: t
+    def add_item(calendar, item) do
+      items = [item | calendar.items]
+      %__MODULE__{calendar | items: items}
+    end
+
+    @spec show(t) :: String.t
+    def show(calendar) do
+      Enum.map(calendar.items,
+        fn(item) ->
+          title = Model.CalendarItem.get_title(item)
+          dt = Model.CalendarItem.get_datetime(item)
+          "#{title} #{inspect dt}"
+        end)
+      |> Enum.join("/n")
+    end
+
   end
 
-  @spec show(t) :: String.t
-  def show(calendar) do
-    Enum.reduce(calendar.items, "",
-      fn(item, acc) ->
-        datetime = CalendarItem.datetime(item)
-        description = CalendarItem.description(item)
-        acc <> "#{datetime}: #{description}\n"
-      end)
+  defprotocol CalendarItem do
+
+    @spec get_title(CalendarItem.t) :: String.t
+    def get_title(item)
+
+    @spec get_datetime(CalendarItem.t) :: DateTime.t
+    def get_datetime(item)
+
   end
 
-end
+  defimpl CalendarItem, for: Map do
 
+    @spec get_title(CalendarItem.t) :: String.t
+    def get_title(item) do
+      Map.get(item, :title, "No Title")
+    end
 
-defprotocol Model.CalendarItem do
+    @spec get_datetime(CalendarItem.t) :: DateTime.t
+    def get_datetime(item) do
+      Map.get(item, :datetime)
+    end
 
-  @spec datetime(any()) :: DateTime.t | nil
-  def datetime(item)
-
-  @spec description(any()) :: String.t | nil
-  def description(item)
-
-end
-
-
-defimpl Model.CalendarItem, for: [Model.Event.Event, Model.TypedEvent.Event] do
-
-  def datetime(event), do: event.datetime
-
-  def description(event), do: event.title
-
-end
-
-
-defimpl Model.CalendarItem, for: Map do
-
-  def datetime(event), do: event[:datetime]
-
-  def description(event), do: event[:title]
+  end
 
 end
