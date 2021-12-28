@@ -14,16 +14,20 @@ defmodule RecordExample do
     location = location(address: address, room: room)
 
     helen = participant(name: "Helen", role: :project_manager)
+    bob = participant(name: "Bob", role: :developer)
+    kate = participant(name: "Kate", role: :developer)
     tihon = participant(name: "Tihon", role: :cate, species: :cat)
 
     agenda = [
-      topic(title: "buying food for cat")
+      topic(title: "release my_cool_service v1.2.3", priority: :high),
+      topic(title: "buying food for cat"),
+      topic(title: "backlog refinement", priority: :low)
     ]
 
     event(title: "Team Meeting",
       datetime: ~U[2021-03-10 19:40:00.000000Z],
       location: location,
-      participants: [helen, tihon],
+      participants: [helen, bob, kate, tihon],
       agenda: agenda
     )
   end
