@@ -34,7 +34,7 @@ lib/model/record_event.ex
 
 В iex консоли мы видим кортежи:
 ```
-iex(1)> RecordExample.create
+iex(1)> my_event = RecordExample.create()
 {:event, "Team Meeting", ~U[2021-03-10 19:40:00.000000Z],
  {:location, {:address, "Belarus", "Minsk", "Partizanskij pr", 178},
   {:room, 6, 610}},
@@ -46,42 +46,38 @@ iex(1)> RecordExample.create
 
 Модуль Record автоматически создает макросы, позволяющие извлекать данные по ключу:
 ```
-> import Model.RecordEvent.Event
-Model.RecordEvent.Event
-> event(ev, :title)
+> alias Model.RecordEvent.Event, as: E
+> require E
+> E.event(ev, :title)
 "Team Meeting"
+> loc = E.event(my_event, :location)
+{:location, {:address, "Belarus", "Minsk", "Partizanskij pr", 178}, {:room, 6, 610}}
 
-> import Model.RecordEvent.Location
-Model.RecordEvent.Location
-> loc = event(ev, :location)
-{:location, {:address, "Belarus", "Minsk", "Partizanskij pr", 178},
- {:room, 6, 610}}
-> location(loc, :room)
+> alias Model.RecordEvent.Location, as: L
+> require L
+> L.location(loc, :room)
 {:room, 6, 610}
 ```
 
 И модифицировать данные по ключу:
 ```
-> ev = event(ev, title: "Food for cat")
+> my_event = E.event(my_event, title: "Food for cat")
 {:event, "Food for cat", ~U[2021-03-10 19:40:00.000000Z],
 
-> import Model.RecordEvent.Room
-Model.RecordEvent.Room
-> rm = location(loc, :room)
+> rm = L.location(loc, :room)
 {:room, 6, 610}
-> rm = room(rm, number: 611)
+> alias Model.RecordEvent.Room, as: R
+> require R
+> rm = R.room(rm, number: 611)
 {:room, 6, 611}
-> loc = location(loc, room: rm)
+> loc = L.location(loc, room: rm)
 {:location, {:address, "Belarus", "Minsk", "Partizanskij pr", 178},
  {:room, 6, 611}}
-> ev = event(ev, location: loc)
+> my_event = E.event(my_event, location: loc)
 {:event, "Food for cat", ~U[2021-03-10 19:40:00.000000Z],
  {:location, {:address, "Belarus", "Minsk", "Partizanskij pr", 178},
   {:room, 6, 611}},
- [
-   {:participant, :human, "Helen", :project_manager},
-   {:participant, :cat, "Tihon", :cate}
- ], [{:topic, :medium, "buying food for cat"}]}
+  ...
 ```
 
 
@@ -101,6 +97,17 @@ Model.RecordEvent.Room
 
 В целом разница между небольшими Map и кортежами не большая. Но она имеет значение, когда мы передаём данные между процессами. В этом случае данные полностью копируются из памяти одного процесса в память другого. А если процессы находятся на разных узлах кластера, то данные еще передаются по сети.
 
+
+```elixir
+> CompareStructRecord.start()
+14272 bytes for %Model.TypedEvent.Event{agenda: [%Model.TypedEvent.Topic{...}, ...], datetime: ~U[2021-03-10 19:40:00.000000Z], ...}
+9472 bytes for {:event, "Team Meeting", ...}
+512 bytes for %{a: 42, b: 1000}
+192 bytes for {42, 1000}
+256 bytes for [42, 1000]
+142400 bytes for [%Model.TypedEvent.Event{agenda: [...], ...}, %Model.TypedEvent.Event{...}, ...]
+137600 bytes for [{:event, ...}, {...}, ...]
+```
 
 ### Недостатки Record
 
