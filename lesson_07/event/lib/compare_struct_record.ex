@@ -13,7 +13,7 @@ defmodule CompareStructRecord do
 
   def show_size(term) do
     str_term = inspect(term, limit: 2, printable_limit: 20)
-    size = :erts_debug.size(term) * 64
+    size = :erts_debug.flat_size(term) * 8
     IO.puts("#{size} bytes for #{str_term}")
   end
 
