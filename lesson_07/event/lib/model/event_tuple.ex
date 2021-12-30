@@ -2,22 +2,8 @@ defmodule Model.Tuple do
 
   defmodule Event do
 
-    alias Model.Tuple.{Participant, Place, Topic}
-
-    def example() do
-      participants = [
-        Participant.new(:human, "Helen", :developer),
-        Participant.new(:human, "Bob", :developer),
-        Participant.new(:human, "Kate", :project_manager),
-        Participant.new(:cat, "Tihon", :cat)
-      ]
-      time = ~U[2021-03-12 15:30:00.000000Z] # Sigil
-      place = Place.new()
-      agenda = [
-        Topic.new("release WGM 2.0", "disscuss release"),
-        Topic.new("buy food for cat", "where to buy")
-      ]
-      {:event, participants, time, place, agenda}
+    def new(title, participants, datetime, place, agenda) do
+      {:event, title, participants, datetime, place, agenda}
     end
 
   end
@@ -32,8 +18,8 @@ defmodule Model.Tuple do
 
   defmodule Place do
 
-    def new() do
-      {:place, "Volna", "610c"}
+    def new(office, room) do
+      {:place, office, room}
     end
 
   end

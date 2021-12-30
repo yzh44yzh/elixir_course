@@ -1,17 +1,78 @@
 defmodule Event do
-  alias Model.TypedStruct, as: T
-  alias Model.Record, as: R
+  
+  alias Model.Tuple, as: T
 
-  alias Model.Record.Participant, as: RP
+  def sample_tuple_event() do
+      participants = [
+        T.Participant.new(:human, "Helen", :developer),
+        T.Participant.new(:human, "Bob", :developer),
+        T.Participant.new(:human, "Kate", :project_manager),
+        T.Participant.new(:cat, "Tihon", :cat)
+      ]
+      datetime = ~U[2021-03-12 15:30:00.000000Z] 
+      place = T.Place.new("Volna", "610c")
+      agenda = [
+        T.Topic.new("Release CoolProject 2.0", "disscuss release"),
+        T.Topic.new("Buy food for cat", "where to buy")
+      ]
+      T.Event.new("Team Meeting", participants, datetime, place, agenda)
+  end
 
-  require R.Event
-  require R.Address
-  require R.Room
-  require R.Location
-  require R.Participant
-  require R.Topic
+  alias Model.Map, as: M
+
+  def sample_map_event() do
+    participants = [
+      M.Participant.new(:human, "Helen", :developer),
+      M.Participant.new(:human, "Bob", :developer),
+      M.Participant.new(:human, "Kate", :project_manager),
+      M.Participant.new(:cat, "Tihon", :cat)
+    ]
+    datetime = ~U[2021-03-12 15:30:00.000000Z] 
+    place = M.Place.new("Volna", "610c")
+    agenda = [
+      M.Topic.new("Release CoolProject 2.0", "disscuss release"),
+      M.Topic.new("Buy food for cat", "where to buy")
+    ]
+    M.Event.new("Team Meeting", participants, datetime, place, agenda)
+  end  
+  
+  alias Model.Struct, as: S
 
   def sample_struct_event() do
+    address = %S.Address{
+      country: "Belarus",
+      city: "Minsk",
+      street: "Partizanskij prt",
+      building: 178
+    }
+    room = %S.Room{floor: 6, number: 610}
+    location = %S.Location{address: address, room: room}
+
+    participants = [
+      %S.Participant{name: "Helen", role: :developer},
+      %S.Participant{name: "Bob", role: :developer},
+      %S.Participant{name: "Kate", role: :developer},
+      %S.Participant{species: :cat, name: "Tihon", role: :cat}
+    ]
+
+    agenda = [
+      %S.Topic{subject: "Release CoolProject 2.0", description: "disscuss release", priority: :high},
+      %S.Topic{subject: "Buy food for cat", priority: :high, description: "where to buy"},
+      %S.Topic{subject: "Backlog Refinement", priority: :low, description: ""}
+    ]
+
+    %S.Event{
+      title: "Team Meeting",
+      datetime: ~U[2021-12-16 16:00:00.000000Z],
+      location: location,
+      participants: participants,
+      agenda: agenda
+    }
+  end
+
+  alias Model.TypedStruct, as: T
+
+  def sample_typed_struct_event() do
     address = %T.Address{
       country: "Belarus",
       city: "Minsk",
@@ -29,9 +90,9 @@ defmodule Event do
     ]
 
     agenda = [
-      %T.Topic{subject: "Release WGM 2.0", description: "", priority: :high},
-      %T.Topic{subject: "Buy food for cat", priority: :high, description: ""},
-      %T.Topic{subject: "Backlog Refinement", priority: :low, description: ""}
+      %T.Topic{subject: "Release WGM 2.0", description: "disscuss release", priority: :high},
+      %T.Topic{subject: "Buy food for cat", priority: :high, description: "where to buy"},
+      %T.Topic{subject: "Backlog Refinement", priority: :low}
     ]
 
     %T.Event{
@@ -41,8 +102,17 @@ defmodule Event do
       participants: participants,
       agenda: agenda
     }
-
   end
+
+  alias Model.Record, as: R
+  alias Model.Record.Participant, as: RP
+
+  require R.Event
+  require R.Address
+  require R.Room
+  require R.Location
+  require R.Participant
+  require R.Topic
 
   def sample_record_event() do
     address = R.Address.address(city: "Minsk", street: "Partizanskij pr", building: 178)

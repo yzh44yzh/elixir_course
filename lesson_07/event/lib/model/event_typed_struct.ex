@@ -93,7 +93,7 @@ defmodule Model.TypedStruct do
     defstruct [
       :subject,
       {:priority, :medium},
-      :description
+      {:description, ""}
     ]
   end
 

@@ -2,25 +2,9 @@ defmodule Model.Map do
 
   defmodule Event do
 
-    alias Model.Map.{Participant, Place, Topic}
-
-    @type t :: %{atom => any}
-
-    def example() do
-      participants = [
-        Participant.new(:human, "Helen", :developer),
-        Participant.new(:human, "Bob", :developer),
-        Participant.new(:human, "Kate", :project_manager),
-        Participant.new(:cat, "Tihon", :cat)
-      ]
-      datetime = ~U[2021-03-12 15:30:00.000000Z] # Sigil
-      place = Place.new()
-      agenda = [
-        Topic.new("release WGM 2.0", "disscuss release"),
-        Topic.new("buy food for cat", "where to buy")
-      ]
+    def new(title, participants, datetime, place, agenda) do
       %{
-        title: "Some Event",
+        title: title,
         type: :event,
         participant: participants,
         datetime: datetime,
@@ -45,11 +29,11 @@ defmodule Model.Map do
 
   defmodule Place do
 
-    def new() do
+    def new(office, room) do
       %{
         type: :place,
-        office: "Volna",
-        room: "610c"
+        office: office,
+        room: room
       }
     end
 
