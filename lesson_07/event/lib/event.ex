@@ -137,23 +137,44 @@ defmodule Event do
       agenda: agenda
     )
   end
-
-  def show_size(term) do
-    size = :erts_debug.flat_size(term) * 8
-    str_term = inspect(term, limit: 2, printable_limit: 20)
-    IO.puts("#{size} bytes for #{str_term}")
-  end
-
-  def modify_event(event) do
+  
+  def modify_event() do
+    event = sample_typed_struct_event()
     # put_in(event.location.room.number, 100)
     update_in(event.location.room.number,
       fn(number) -> number + 100 end)
   end
 
-  def modify_map_event(event) do
+  def modify_map_event() do
+    event = sample_map_event()
     put_in(event, [:place, :room], "100")
     update_in(event, [:place, :room], fn(number) -> number <> "C" end)
   end
+  
+  alias Model.Calendar
 
+  def sample_calendar() do
+    Calendar.new()
+    |> Calendar.add_item(sample_map_event())
+    |> Calendar.add_item(sample_typed_struct_event())
+    # |> Calendar.add_item(sample_struct_event())
+  end
+
+  def compare_size() do
+    show_size(sample_typed_struct_event())
+    show_size(sample_record_event())
+    show_size(%{a: 42, b: 1000})
+    show_size({42, 1000})
+    show_size([42, 1000])
+
+    Enum.map(0..1000, fn(_) -> sample_typed_struct_event() end) |> show_size()
+    Enum.map(0..1000, fn(_) -> sample_record_event() end) |> show_size()
+  end
+  
+  def show_size(term) do
+    size = :erts_debug.flat_size(term) * 8
+    str_term = inspect(term, limit: 2, printable_limit: 20)
+    IO.puts("#{size} bytes for #{str_term}")
+  end
 
 end
