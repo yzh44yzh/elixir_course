@@ -63,25 +63,23 @@ end
 Итак, у нас есть три класса исключений, и два способа их перехватывать. Давайте посмотрим, как это работает всё вместе:
 
 ```
-> c "07_02_exception_types.exs"
-[Lesson_07.Task_02_ExceptionTypes]
-> alias Lesson_07.Task_02_ExceptionTypes, as: L
-Lesson_07.Task_02_ExceptionTypes
-
+> c "lib/exception_types.exs"
+[Lesson_08.ExceptionTypes]
+> alias Lesson_08.ExceptionTypes, as: L
 > L.try_resque(:raise)
 rescue from %RuntimeError{message: "something went wrong"}
 :ok
 > L.try_resque(:throw)
 ** (throw) :something_went_wrong
-    07_01_exception.exs:20: Lesson_07.Task_01_Exception.generate_exception/1
-    07_01_exception.exs:5: Lesson_07.Task_01_Exception.try_resque/1
+    lib/exception.exs:20: Lesson_08.Exception.generate_exception/1
+    lib/exception.exs:5: Lesson_08.Exception.try_resque/1
 > L.try_resque(:error)
 rescue from %ErlangError{original: :something_went_wrong}
 :ok
 > L.try_resque(:exit) 
 ** (exit) :something_went_wrong
-    07_01_exception.exs:22: Lesson_07.Task_01_Exception.generate_exception/1
-    07_01_exception.exs:5: Lesson_07.Task_01_Exception.try_resque/1
+    lib/exception.exs:22: Lesson_08.Exception.generate_exception/1
+    lib/exception.exs:5: Lesson_08.Exception.try_resque/1
 
 > L.try_catch(:raise)
 catch error %RuntimeError{message: "something went wrong"}
@@ -109,8 +107,8 @@ catch exit :something_went_wrong
 Речь идет о синхронном взаимодействии между двумя потоками, где один поток выполняет роль клиента, и отправляет запрос, а другой поток выполняет роль сервера, и отвечает на этот запрос. Если обработка запроса длится слишком долго (по умолчанию лимит составляет 5 секунд), то генерируется исключение класса :exit. 
 
 ```
-> c "07_02_gen_server_timeout.exs"
-> alias Lesson_07.Task_02_GenServerTimeout, as: L
+> c "lib/gen_server_timeout.exs"
+> alias Lesson_08.GenServerTimeout, as: L
 > L.start_server()
 
 > L.normal_request()
@@ -120,7 +118,7 @@ catch exit :something_went_wrong
 ** (exit) exited in: GenServer.call(MyServer, :long_request, 5000)
     ** (EXIT) time out
     (elixir 1.11.3) lib/gen_server.ex:1027: GenServer.call/3
-    07_02_gen_server_timeout.exs:13: Lesson_07.Task_02_GenServerTimeout.long_request_with_resque/0
+    lib/gen_server_timeout.exs:13: Lesson_08.GenServerTimeout.long_request_with_resque/0
 
 > L.long_request_with_catch() 
 Got error exit {:timeout, {GenServer, :call, [MyServer, :long_request, 5000]}}

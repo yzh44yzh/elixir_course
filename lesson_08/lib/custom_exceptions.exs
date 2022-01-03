@@ -1,4 +1,4 @@
-defmodule Lesson_07.Task_03_CustomException do
+defmodule Lesson_08.CustomException do
 
   def handle(request) do
     try do

@@ -1,4 +1,4 @@
-defmodule Lesson_07.Task_01_Exception do
+defmodule Lesson_08.Exception do
 
   def try_rescue() do
     try do
@@ -12,7 +12,7 @@ defmodule Lesson_07.Task_01_Exception do
       error in [RuntimeError] ->
         IO.puts("This is RuntimeError: #{inspect error}")
       error ->
-        IO.puts("uknown error: #{inspect error}")
+        IO.puts("unknown error: #{inspect error}")
     after
       IO.puts("after clause is always called")
     end

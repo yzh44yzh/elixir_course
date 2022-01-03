@@ -20,7 +20,7 @@
 > some_fun()
 ** (CompileError) iex:1: undefined function some_fun/0
 
-> apply(SameModule, :some_fun, [])          
+> apply(SameModule, :some_fun, [])
 ** (UndefinedFunctionError) function SameModule.some_fun/0 is undefined (module SameModule is not available)
     SameModule.some_fun()
 ```
@@ -52,12 +52,10 @@ RuntimeError -- этот тип исключения используется п
 Для перехвата исключения используется конструкция **try..rescue**. Она позволяет по-разному обрабатывать исключения разных типов:
 
 ```
-iex(5)> c("07_01_exception.exs")
+iex(5)> c("lib/exception.exs")
 warning: ...
-[Lesson_07.Task_01_Exception]
-iex(6)> alias Lesson_07.Task_01_Exception, as: LE
-Lesson_07.Task_01_Exception
-
+[Lesson_08.Exception]
+iex(6)> alias Lesson_08.Exception, as: LE
 iex(7)> LE.try_rescue()
 This is MatchError or ArithmeticError: %MatchError{term: :b}
 after clause is always called
@@ -77,7 +75,7 @@ after clause is always called
 
 iex(12)> r LE
 iex(13)> LE.try_rescue()
-uknown error: %UndefinedFunctionError{arity: 0, function: :some_fun, message: nil, module: SameModule, reason: nil}
+unknown error: %UndefinedFunctionError{arity: 0, function: :some_fun, message: nil, module: SameModule, reason: nil}
 after clause is always called
 :ok
 ```
@@ -108,11 +106,11 @@ after clause is always called
 ```
 > File.read("./README.md")
 {:ok, "..."}
-> File.read("./somefile") 
+> File.read("./somefile")
 {:error, :enoent}
 > File.read!("./README.md")
 "..."
-> File.read!("./somefile") 
+> File.read!("./somefile")
 ** (File.Error) could not read file "./somefile": no such file or directory
     (elixir 1.11.3) lib/file.ex:355: File.read!/1
 ```
@@ -122,13 +120,12 @@ after clause is always called
 
 ## Использование исключений для управления потоком выполнения
 
-Использование исключений для управления потоком выполнения (control flow) -- спорная практика. Многие рекомендуют этого избегать, другие считают это приемлемым и удобным. 
+Использование исключений для управления потоком выполнения (control flow) -- спорная практика. Многие рекомендуют этого избегать, другие считают это приемлемым и удобным.
 
-Некоторые языки программирования, например Python, применяют такой подход даже в стандартных библиотеках, так что разработчик при всем желании не может этого избежать. Некоторые другие языки программирования, например Rust, вообще не имеют исключений. В Rust вместо исключений используется panic, который нельзя перехватить, и который всегда приводит к завершению процесса. 
+Некоторые языки программирования, например Python, применяют такой подход даже в стандартных библиотеках, так что разработчик при всем желании не может этого избежать. Некоторые другие языки программирования, например Rust, вообще не имеют исключений. В Rust вместо исключений используется panic, который нельзя перехватить, и который всегда приводит к завершению процесса.
 
-Обычная ситуация, где используются исключения для управления потоком выполения -- это длинная цепочка действий, в которой на каждом шаге может быть условие, прерывающее выполнение всей цепочки. 
+Обычная ситуация, где используются исключения для управления потоком выполения -- это длинная цепочка действий, в которой на каждом шаге может быть условие, прерывающее выполнение всей цепочки.
 
 Например, это может быть обработка http запроса, проходящая через десятки функций принадлежащих разным модулям, и даже разным подсистемам. В этой ситуации исключения позволяют прервать обработку запроса на любом уровне и сразу вернуть ответ клиенту.
 
 Однако, для таких ситуаций в Эликсир имеются другие средства. Поэтому применение исключений считается плохим тоном. Позже мы рассмотрим конкретные примеры.
-

@@ -1,4 +1,4 @@
-defmodule Lesson_07.Task_02_GenServerTimeout do
+defmodule Lesson_08.GenServerTimeout do
 
   def start_server() do
     {:ok, _} = GenServer.start_link(MyServer, [], name: MyServer)

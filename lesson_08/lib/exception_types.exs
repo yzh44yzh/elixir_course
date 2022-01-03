@@ -1,4 +1,4 @@
-defmodule Lesson_07.Task_02_ExceptionTypes do
+defmodule Lesson_08.ExceptionTypes do
 
   def try_resque(exc_type) do
     try do
@@ -16,8 +16,8 @@ defmodule Lesson_07.Task_02_ExceptionTypes do
     end
   end
 
-  def generate_exception(:raise), do: raise "something went wrong" # TODO try different elixir exceptions
-  def generate_exception(:throw), do: throw :something_went_wrong
+  def generate_exception(:raise), do: raise("something went wrong") # TODO try different elixir exceptions
+  def generate_exception(:throw), do: throw(:something_went_wrong)
   def generate_exception(:error), do: :erlang.error(:something_went_wrong)
   def generate_exception(:exit),  do: exit(:something_went_wrong)
 

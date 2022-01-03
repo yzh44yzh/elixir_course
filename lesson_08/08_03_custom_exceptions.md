@@ -5,12 +5,12 @@
 Представим себе, что у нас есть некий сервис с HTTP API. Он принимает входящий запрос в виде JSON объекта, и валидирует его по JSON схеме. Если запрос не соответствует схеме, то генерируется исключение пользовательского типа SchemaValidationError, содержащее название схемы:
 
 ```
-> c "07_03_custom_exception.exs"
-> alias Lesson_07.Task_03_CustomException, as: L
+> c "lib/custom_exception.exs"
+> alias Lesson_08.CustomException, as: L
 
 > L.validate(1)
 ** (SchemaValidationError) object doesn't match schema "my_request.json"
-07_03_custom_exceptions.exs:5: Lesson_07.Task_03_CustomException.validate/1
+lib/custom_exceptions.exs:5: Lesson_08.CustomException.validate/1
 ```
 
 И добавим еще одно пользовательское исключение AuthorizationError:
@@ -18,7 +18,7 @@
 ```
 > L.do_action(2)
 ** (AuthorizationError) user with role "guest" doesn't have permission to do action "modify"
-    07_03_custom_exceptions.exs:6: Lesson_07.Task_03_CustomException.validate/1
+    lib/custom_exceptions.exs:6: Lesson_08.CustomException.validate/1
 > L.validate(3)
 :ok
 ```
