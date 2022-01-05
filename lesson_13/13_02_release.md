@@ -42,13 +42,91 @@ TODO проект из одного приложения или из неско�
 
 ## Инструменты сборки
 
+### Distillery — The Elixir Release Manager
+
+https://hexdocs.pm/distillery/introduction/understanding_releases.html
+
+Releases enable simplified deployment: they are self-contained, and provide everything needed to boot the release; 
+they are easily administered via the provided shell script 
+- start/stop/restart the release, 
+- start in the background, 
+- to open up a remote console, 
+- send remote commands, 
+- and more. 
+In addition, they are archivable artifacts, meaning you can restore an old release from its tarball at any point in the future 
+The use of releases is also a prerequisite of performing hot upgrades and downgrades, one of the most powerful features of the Erlang VM.
+
+you only need to build the artifact once, and can then deploy it many times
+
+
+### разница между mix run и bin/proj start
+
+Mix itself loads/starts things a little differently than OTP releases
+
+Mix:
+- compile sources
+- starts BEAM
+- loads and starts the :kernel, :stdlib, :compiler, :elixir, and :mix applications
+- evaluates the config.exs file 
+  in order to ensure the application configuration is set up before your application starts.
+- uses the project definition to load and start applications as needed. 
+
+OTP release:
+- Mix is not included
+- boot script instructs the runtime exactly how to boot everything. 
+- custom instruction to ensure that configuration providers, like Mix.Config have a chance to run before your application is started
+
+As a result, there are some small differences in how your application will run under Mix and under a release, but for the most part, there should be no noticeable differences.
+
+Boot script:
+- consists of erlang terms
+- operates at a very low level, instructing the runtime what modules to load, checkpointing major events, using apply instructions to load and start applications, and more
+
+Mix -- специфика Эликсир. Boot script -- часть инфраструктуры Эрланг.
+
+
+### Что включает в себя релиз
+
+An OTP release at its most basic level describes the applications and their versions, that it needs to run. The file in which this is described is stored with a .rel extension, and looks like so:
+
+```
+{release,{"test","0.1.0"},
+         {erts,"8.2"},
+         [{kernel,"5.1.1"},
+          {stdlib,"3.2"},
+          {poison,"3.1.0"},
+          {logger,"1.4.1"},
+          {compiler,"7.0.3"},
+          {elixir,"1.4.1"},
+          {test,"0.1.0"},
+          {iex,"1.4.1"},
+          {sasl,"3.0.2"}]}.
+```
+
+- release name and version. 
+- version of ERTS (the Erlang Runtime System) which the release is targeting. 
+- list of the applications and versions of those applications which are required to run the release.
+
+This release descriptor (as I have come to call it), is also what is used to generate the boot script.
+convert this high level description into all of the required low-level instructions needed to boot the described release.
+
+Given the release descriptor, and the boot script, a release is packaged by gathering 
+- all of the compiled .beam files required by the applications contained in the release, 
+- the target ERTS (if included), 
+- and any supporting files - such as config.exs, sys.config, vm.args, 
+- as well as the shell script used to set up the environment and run the release 
+into a gzipped tarball for easy deployment.
+
+
+### Erlang/OTP tools
+
 В составе OTP есть приложения **systool** и **reltool**. Они низкоуровневые, и пользоваться ими трудно. Зато они позволяют собрать кастомизированые релизы под узкие задачи.
 
-TODO
-- сборка на машине разработчика и сборка в CI
-- разница между mix run и bin/proj start
 
-Distillery — The Elixir Release Manager
+### Прочее
+
+сборка на машине разработчика и сборка в CI
+
 
 Поэтично:
 Every alchemist requires good tools, and one of the greatest tools in the alchemist's disposal is the distillery. The purpose of the distillery is to take something and break it down to its component parts, reassembling it into something better, more powerful. That is exactly what this project does - it takes your Mix project and produces an Erlang/OTP release, a distilled form of your raw application's components; a single package which can be deployed anywhere, independently of an Erlang/Elixir installation. 
@@ -169,9 +247,10 @@ contains OTP environment variables as specified in mix.exs and config.exs
 sys.config -- настройки на уровне релиза, одинаковые для всех машин
 двойной запуск для генерации sys.config
 
+prod-конфиги запакованы в релиз. Это значит, они идентичные на всех машинах, куда релиз будет доставлен. Как сделать разную конфигурацию для разных машин? Способ "из коробки" -- через переменные окружения. Или можно использовать альтернативные системы конфигурации, которые предлагают сторонние библиотеки.
 
 
-*** Emulator flags
+### Emulator flags
 vm.args
 
 Deal with memory management, multicore architectures, ports and sockets, low-level tracing, or other internal optimizations.
