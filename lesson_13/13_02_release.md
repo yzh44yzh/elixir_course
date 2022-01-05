@@ -64,12 +64,28 @@ and you get to see how the sausage is made.
 ```
 defp deps do
   [
-    {:distillery, "~> 1.5", runtime: false},
+    {:distillery, "~> 2.0", runtime: false},
   ]
 end
 
-$ mix release.init # generates rel/config.exs
-$ mix release --env=prod
+$ mix distillery.init # generates rel/config.exs
+```
+
+rel/config.exs
+```
+release :myapp do
+  set version: current_version(:myapp)
+end
+
+environment :prod do
+  set include_erts: true
+  set vm_args: "rel/prod.vm.args"
+end
+```
+There are a large number of options you can set in either the release or environment definition. 
+
+```
+$ mix distillery.release --env=prod
 ...
 ==> Release successfully built!
 You can run it in one of the following ways:

@@ -1,64 +1,115 @@
-defmodule Lesson_08.CustomException do
+defmodule Lesson08.CustomExceptions do
 
+  alias Model, as: M
+  
+  def request1(), do: %{token: "aaa", data: %{a: 42}}
+
+  def request2(), do: %{token: "bbb", data: %{a: 42}}
+  
+  def request3(), do: %{token: "aaa", data: %{b: 42}}
+  
+  def request4(), do: %{token: "ccc", data: %{a: 42}}
+  
   def handle(request) do
     try do
+      authorize(request)
+      authenticate(request)
       validate(request)
-      do_action(request)
+      result = do_something_useful(request)
+      {200, result}
     rescue
-      error in [SchemaValidationError] ->
-        IO.puts("validation failed, schema name is #{error.schema_name}")
-        :error
-      error in [AuthorizationError] ->
-        IO.puts("authorization failed, #{error.message}")
-        :error
+      error in [M.AuthenticationError, M.AuthorizationError] ->
+        {403, Exception.message(error)}
+      error in [M.SchemaValidationError] ->
+        {409, M.SchemaValidationError.message(error)}
+      error -> {500, "internal server error"}
+    end
+  end
+
+  def authorize(request) do
+    case request.token do
+      "aaa" -> :ok
+      "bbb" -> :ok
+      _ -> raise M.AuthenticationError, {:token, request.token}
+    end
+  end
+
+  def authenticate(request) do
+    case request.token do
+      "aaa" -> :ok
+      _ -> raise M.AuthorizationError, {:guest, :reconfigure}
     end
   end
 
   def validate(request) do
-    case request do
-      1 -> raise SchemaValidationError, "my_request.json"
-      _ -> :ok
+    case Map.has_key?(request.data, :a) do
+      true -> :ok
+      false -> raise M.SchemaValidationError, "some-schema.json"
     end
   end
 
-  def do_action(request) do
-    case request do
-      2 -> raise AuthorizationError, {"guest", "modify"}
-      _ -> :ok
-    end
+  def do_something_useful(request) do
+    request.data.a
   end
-
+  
 end
 
+defmodule Model do
 
-defmodule SchemaValidationError do
-  
+  defmodule AuthenticationError do
     defexception [
-      :message,
+      :token,
+      :login
+    ]
+
+    @impl true
+    def exception({auth_type, data}) do
+      case auth_type do
+        :token -> %Model.AuthenticationError{token: data, login: nil}
+        :login -> %Model.AuthenticationError{token: nil, login: data}
+      end
+    end
+
+    @impl true
+    def message(error) do
+      case {error.token, error.login} do
+        {_token, nil} -> "invalid token"
+        {nil, _login} -> "invalid login"
+      end
+    end
+  end
+  
+  defmodule AuthorizationError do
+    defexception [
+      :role,
+      :action
+    ]
+
+    @impl true
+    def exception({role, action}) do
+      %Model.AuthorizationError{role: role, action: action}
+    end
+
+    @impl true
+    def message(error) do
+      "role '#{error.role}' is not allowed to do action '#{error.action}'"
+    end
+  end
+
+  defmodule SchemaValidationError do
+    defexception [
       :schema_name
     ]
 
     @impl true
     def exception(schema_name) do
-      msg = "object doesn't match schema \"#{schema_name}\""
-      %SchemaValidationError{message: msg, schema_name: schema_name}
+      %Model.SchemaValidationError{schema_name: schema_name}
     end
-    
-end
 
-
-defmodule AuthorizationError do
-
-  defexception [
-    :message,
-    :role,
-    :action
-  ]
-
-  @impl true
-  def exception({role, action}) do
-    msg = "user with role \"#{role}\" doesn't have permission to do action \"#{action}\""
-    %AuthorizationError{message: msg, role: role, action: action}
+    @impl true
+    def message(error) do
+      "data is not match to schema '#{error.schema_name}'"
+    end
   end
 
 end

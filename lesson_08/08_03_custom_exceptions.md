@@ -5,12 +5,9 @@
 Представим себе, что у нас есть некий сервис с HTTP API. Он принимает входящий запрос в виде JSON объекта, и валидирует его по JSON схеме. Если запрос не соответствует схеме, то генерируется исключение пользовательского типа SchemaValidationError, содержащее название схемы:
 
 ```
-> c "lib/custom_exception.exs"
-> alias Lesson_08.CustomException, as: L
-
-> L.validate(1)
-** (SchemaValidationError) object doesn't match schema "my_request.json"
-lib/custom_exceptions.exs:5: Lesson_08.CustomException.validate/1
+> c "lib/custom_exceptions.exs"
+> alias Lesson_08.CustomExceptions, as: L
+> L.handle(L.request1())
 ```
 
 И добавим еще одно пользовательское исключение AuthorizationError:
