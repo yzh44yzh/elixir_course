@@ -8,7 +8,9 @@ TODO проект из одного приложения или из неско�
 - скомпилированный код (байткод) наших приложений;
 - байткод всех необходимых зависимостей;
 - конфигурация;
-- скрипты для управления системой (для запуска, остановки и тд).
+- скрипты загрузки системы;
+- скрипты для управления системой (запуска, остановка, remote console и тд);
+- ERTS (опционально).
 
 В состав релиза не входит:
 - mix;
@@ -81,6 +83,8 @@ As a result, there are some small differences in how your application will run u
 Boot script:
 - consists of erlang terms
 - operates at a very low level, instructing the runtime what modules to load, checkpointing major events, using apply instructions to load and start applications, and more
+The script containing instructions for the VM on how to boot. 
+The source form has the .script extension, and the “compiled” or binary form of the script has the .boot extension. 
 
 Mix -- специфика Эликсир. Boot script -- часть инфраструктуры Эрланг.
 
@@ -116,6 +120,9 @@ Given the release descriptor, and the boot script, a release is packaged by gath
 - and any supporting files - such as config.exs, sys.config, vm.args, 
 - as well as the shell script used to set up the environment and run the release 
 into a gzipped tarball for easy deployment.
+
+Overlay:
+When a release is constructed, and prior to it being archived, additional files or directories may be desired in the release, and overlays are used to accomplish that. They consist of a few primitive operations: mkdir, copy, link, and template, and allow you to do one of those four operations to extend the contents of the release as desired.
 
 
 ### Erlang/OTP tools
@@ -226,6 +233,26 @@ _build/prod/rel/proj_name/bin/proj_name
 
 ## Configuration
 
+BEAM на старте читает все настройки из sys.config
+В принципе, можно было бы этим и пользоваться. Но sys.config неудобен тем, что в конфигурация в нем описана в erlang term. 
+Здесь легко сделать синтаксическую ошибку -- нехватает запятой, или лишняя -- и нода не стартует. А валидации синтаксиса нет.
+Даже опытный эрлангист может сделать ошибку. А конфигурацией занимается не только разработчик, а и QA и DevOps.
+
+Поэтому обычно идут по другому пути -- генерируют sys.config автоматически из каких-то других конфигов. 
+Эликсир тоже идет по этому пути.
+
+dev, test, prod - конфиги. 
+releases-конфиг.
+переменные окружения.
+
+Environment -- A named set of configuration settings which apply to all releases built for that environment. It differs from Mix’s environment, in that it refers to the target environment, not the build environment.
+
+Profile -- A specific combination of release and environment configuration settings.
+по идее можно подготовить отдельный профиль для каждого deployment host.
+
+sys.config -- A static file containing Erlang terms, it is one way configuration can be provided to a release.
+vm.args -- A file which provides configuration to the Erlang VM when it starts a release.
+
 _build/prod/rel/proj_name/releases/0.1.0/
 where 0.1.0 is a version of your application as provided in mix.exs
 
@@ -275,6 +302,20 @@ default to 65,536. range is 1,024 to 134,217,727.
 
 A **deployment** is a way of getting a release into an environment where it can be used.
 
+Машина, на которой происходит сборка релиза должна соответствовать машине, где система будет запускаться и работать:
+- OS, 
+- kernel version, 
+- architecture, 
+- and system libraries. 
+
+Теоретически релиз может быть в некоторой мере кросс-платформенным: BEAM-файлы, конфигурация и bash-скрипты.
+Но если в него включена ERTS, то она привязана к конкретной ОС и архитектуре, и зависит от системных библиотек.
+(А если ERTS не включена, то подразумевается, что на целевой машине она уже есть, и в нужной версии).
+Кроме того, в зависимостях могут быть библиотеки, включающие C-код. 
+
+Можно подготовить соответствующий докер-контейнер, и собирать в нем.
+Или можно собирать в CI на какой-то специально подготовленной для этого машине.
+
 
 ## Live upgrade
 
@@ -297,3 +338,7 @@ Alternative approach: restart nodes in cluster one by one.
 A **hot upgrade** is a kind of deployment that allows the release of a currently running application
 to be changed while that application continues to run —
 the upgrade happens in place with no user-detectable disruption.
+
+Appup - A file containing Erlang terms which describes with **high-level** instructions how to upgrade and downgrade between the current release and one or more older releases.
+
+Relup - A file containing Erlang terms which describes with **low-level** instructions how to upgrade and downgrade between the current release and one or more older releases.
