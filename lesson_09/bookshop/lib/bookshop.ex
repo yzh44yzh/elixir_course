@@ -91,7 +91,7 @@ defmodule BookShop do
           title: title,
           author: author
 }
-      false -> raise BookNotFoundError, title
+      false -> raise BookShopError.BookNotFoundError, title
     end
   end
 
@@ -129,11 +129,13 @@ defmodule BookShop do
 
   defmodule ValidatorEx do
 
+    alias BookShopError, as: E
+    
     @spec validate_incoming_data!(map()) :: map()
     def validate_incoming_data!(json_data) do
       case Utils.rand_success() do
         true -> json_data
-        false -> raise InvalidDataError
+        false -> raise E.InvalidDataError
       end
     end
 
@@ -142,7 +144,7 @@ defmodule BookShop do
     def validate_cat!(cat_name) do
       case Utils.rand_success() do
         true -> {:cat, cat_name}
-        false -> raise CatNotFoundError, cat_name
+        false -> raise E.CatNotFoundError, cat_name
       end
     end
 
@@ -151,7 +153,7 @@ defmodule BookShop do
     def validate_address!(address) do
       case Utils.rand_success() do
         true -> {:address, address}
-        false -> raise InvalidAddressError
+        false -> raise E.InvalidAddressError
       end
     end
 

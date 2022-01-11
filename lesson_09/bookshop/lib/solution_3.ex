@@ -25,7 +25,7 @@ defmodule Solution3 do
             order = BookShop.create_order(cat, address, books)
             {:ok, order}
         rescue
-            error -> {:error, error.message}
+            error -> {:error, Exception.message(error)}
         end
     end
 
