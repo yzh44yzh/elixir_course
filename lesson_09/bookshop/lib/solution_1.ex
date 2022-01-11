@@ -1,43 +1,49 @@
 defmodule Solution1 do
 
+  alias BookShop, as: BS
   alias BookShop.Validator, as: V
   
-  @spec main :: {:ok, BookShop.Order.t} | {:error, term}
+  @spec main :: {:ok, BS.Order.t} | {:error, term}
   def main() do
-    BookShop.test_data |> handle_create_order
+    BS.test_data() |> handle
   end
 
-
-  @spec handle_create_order(map) :: {:ok, BookShop.Order.t} | {:error, term}
-  def handle_create_order(data) do
+  @spec handle(BS.json) :: {:ok, BS.Order.t} | {:error, term}
+  def handle(data) do
     case V.validate_incoming_data(data) do
-      {:error, reason} -> {:error, reason}
-      {:ok, %{
-          "cat" => cat0,
-          "address" => address0,
-          "books" => books0
-       }} ->
-          case V.validate_cat(cat0) do
-            {:error, reason} -> {:error, reason}
-            {:ok, cat} ->
-              case V.validate_address(address0) do
-                {:error, reason} -> {:error, reason}
-                {:ok, address} ->
-                  books1 = Enum.map(books0, 
-                  fn %{"title" => title, "author" => author} ->
-                    BookShop.get_book(title, author)
+      {:ok, data} ->
+        %{"cat" => cat_name} = data
+        case V.validate_cat(cat_name) do
+          {:ok, cat} ->
+            %{"address" => address_str} = data
+            case V.validate_address(address_str) do
+              {:ok, address} ->
+                %{"books" => books} = data
+                maybe_books = Enum.map(
+                  books,
+                  fn(%{"author" => author, "title" => title}) ->
+                    BS.Book.get_book(author, title)
                   end)
-                  invalid_books = Enum.filter(books1, fn ({res, _}) -> res == :error end)
-                  case invalid_books do
-                    [{:error, reason} | _] -> {:error, reason}
-                    [] ->
-                      books2 = Enum.map(books1, fn ({:ok, book}) -> book end)
-                      BookShop.create_order(cat, address, books2)
-                  end
-              end
-          end
+                invalid_books = Enum.filter(
+                  maybe_books,
+                  fn
+                    ({:ok, _}) -> false
+                    ({:error, _}) -> true
+                  end)
+                case invalid_books do
+                  [] ->
+                    books = Enum.map(maybe_books, fn({:ok, book}) -> book end)
+                    order = BS.Order.new(cat, address, books)
+                    {:ok, order}
+                  [error | _] -> error
+                end
+              {:error, error} -> {:error, error}
+            end
+          {:error, error} -> {:error, error}
+        end
+      {:error, error} -> {:error, error}
     end
   end
-
+  
 end
 

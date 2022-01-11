@@ -17,11 +17,11 @@ defmodule Solution6 do
       {:ok, books} <- Enum.map(
         books0,
         fn(%{"title" => title, "author" => author})->
-          BookShop.get_book(title, author)
+          BookShop.Book.get_book(title, author)
         end)
         |> FP.sequence()
     ) do
-      BookShop.create_order(cat, address, books)
+      BookShop.Order.new(cat, address, books)
     end
   end
 

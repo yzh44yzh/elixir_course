@@ -31,7 +31,7 @@ defmodule Solution4 do
   def validate_books(%{"books" => books0} = state) do
     books1 = Enum.map(books0,
       fn %{"title" => title, "author" => author} ->
-        BookShop.get_book(title, author)
+        BookShop.Book.get_book(title, author)
       end)
     case FP.sequence(books1) do
       {:ok, books2} -> {:ok, Map.put(state, :books, books2)}
@@ -42,7 +42,7 @@ defmodule Solution4 do
 
   @spec create_order(map) :: {:ok, BookShop.Order.t}
   def create_order(%{:cat => cat, :address => address, :books => books}) do
-    order = BookShop.create_order(cat, address, books)
+    order = BookShop.Order.new(cat, address, books)
     {:ok, order}
   end
 
