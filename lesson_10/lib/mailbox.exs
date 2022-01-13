@@ -1,4 +1,4 @@
-defmodule Lesson_09.Task_02_Mailbox do
+defmodule Lesson_09.Mailbox do
 
   def check_mailbox() do
     receive do

@@ -73,10 +73,9 @@ spawn возвращает **Pid** -- идентификатор процесс�
 Давайте попробуем запустить несколько процессов:
 
 ```
-iex(1)> c("09_01_processes.exs")
-[Lesson_09.Task_01_Processes]
-iex(2)> alias Lesson_09.Task_01_Processes, as: T
-Lesson_09.Task_01_Processes
+iex(1)> c("lib/processes.exs")
+[Lesson_09.Processes]
+iex(2)> alias Lesson_09.Processes, as: T
 iex(3)> T.run_processes(10)
 ```
 

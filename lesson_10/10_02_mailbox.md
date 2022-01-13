@@ -5,11 +5,9 @@
 Чтобы прочитать сообщения в почтовом ящике, нужно использовать конструкцию `receive`. Она аналогична конструкции `case`, тоже состоит из шаблонов и охранных выражений.
 
 ```
-iex(1)> c "09_02_mailbox.exs"
-[Lesson_09.Task_02_Mailbox]
-iex(2)> alias Lesson_09.Task_02_Mailbox, as: T
-Lesson_09.Task_02_Mailbox
-
+iex(1)> c "lib/mailbox.exs"
+[Lesson_09.Mailbox]
+iex(2)> alias Lesson_09.Mailbox, as: T
 iex(3)> send(self(), {:tag1, "Hello"})
 {:tag1, "Hello"}
 iex(4)> T.check_mailbox()
@@ -28,8 +26,6 @@ got unknown msg :hello
 :ok
 ```
 
-
-
 ## receive .. after
 
 Если в момент вызова receive почтовый ящик пуст, то процесс блокируется и ждет сообщений. Часто нужно ограничить время ожидания. Для этого используется `receive .. after`.
@@ -44,7 +40,6 @@ iex(5)> T.check_mailbox(1000)
 got msg :hello
 :ok
 ```
-
 
 ## receive действует избирательно
 
