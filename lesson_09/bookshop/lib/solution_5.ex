@@ -1,18 +1,22 @@
 defmodule Solution5 do
-
-  alias BookShop.Validator, as: V
+  alias BookShop, as: BS
   alias Solution4, as: S4
 
-  @spec main() :: {:ok, BookShop.Order.t} | {:error, term}
   def main() do
-    FP.pipeline(BookShop.test_data,               
-      [
-        &V.validate_incoming_data/1,
-        &S4.validate_cat/1,
-        &S4.validate_address/1,
-        &S4.validate_books/1,
-        &S4.create_order/1
-      ])
+    BS.test_data() |> handle
   end
 
+  @spec handle(BS.json) :: {:ok, BS.Order.t} | {:error, term}
+  def handle(data) do
+    state = %{incoming_data: data}
+    FP.pipeline(state, [
+          &S4.step1/1,
+          &S4.step2/1,
+          &S4.step3/1,
+          &S4.step4/1,
+          &S4.step5/1
+        ])
+  end
+
+  
 end

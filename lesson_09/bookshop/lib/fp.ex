@@ -17,6 +17,9 @@ defmodule FP do
     end
   end
 
+  def bind(funs) do
+    fn(arg) -> pipeline(arg, funs) end
+  end
 
   def pipeline(arg, funs) do
     Enum.reduce(funs, {:ok, arg},
@@ -26,7 +29,11 @@ defmodule FP do
       end)
   end
 
+  @type success_val :: any
+  @type error_val :: any
+  @type result(s, e) :: {:ok, s} | {:error, e}
 
+  @spec sequence([result(success_val, error_val)]) :: result([success_val], error_val)
   def sequence([]), do: {:ok, []}
   def sequence([{:error, reason} | _]), do: {:error, reason} 
   def sequence([{:ok, val} | tail]) do
