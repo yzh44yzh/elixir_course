@@ -36,4 +36,14 @@ defmodule FP do
     end
   end
 
+  def not_curried_fun(a, b, c) do
+    a + b + c
+  end
+
+  def curried_fun(a) do
+    fn(b) ->
+      fn(c) -> a + b + c end
+    end
+  end
+  
 end
