@@ -5,7 +5,11 @@ defmodule Solution4 do
   @spec main() :: {:ok, BookShop.Order.t} | {:error, term}
   def main() do
     f = FP.bind(FP.bind(FP.bind(FP.bind(
-                  &V.validate_incoming_data/1, &validate_cat/1), &validate_address/1), &validate_books/1), &create_order/1)
+            &V.validate_incoming_data/1,
+            &validate_cat/1),
+          &validate_address/1),
+        &validate_books/1),
+      &create_order/1)
     f.(BookShop.test_data)
   end
   

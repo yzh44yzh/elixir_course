@@ -8,16 +8,16 @@
 
 Идея проста -- положить всю цепочку функций в список, пройти по списку, вызвать каждую функцию по-очереди, обработать результат предыдущей функции и передать в следущую. 
 
-Реализация тоже проста: lib/fp.ex
+Реализация тоже проста: 
 
 ```
-  def pipeline(arg, funs) do
-    Enum.reduce(funs, {:ok, arg},
-      fn
-        (f, {:ok, prev_res}) -> f.(prev_res)
-        (_, {:error, reason}) -> {:error, reason}
-      end)
-  end
+def pipeline(arg, funs) do
+  Enum.reduce(funs, {:ok, arg},
+    fn
+      (f, {:ok, prev_res}) -> f.(prev_res)
+      (_, {:error, reason}) -> {:error, reason}
+    end)
+end
 ```
 
 Теперь наше решение выглядит так: lib/solution_5.ex
