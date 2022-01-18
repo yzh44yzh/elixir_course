@@ -6,8 +6,8 @@
 
 ```
 iex(1)> c "lib/mailbox.exs"
-[Lesson_09.Mailbox]
-iex(2)> alias Lesson_09.Mailbox, as: T
+[Lesson_10.Mailbox]
+iex(2)> alias Lesson_10.Mailbox, as: T
 iex(3)> send(self(), {:tag1, "Hello"})
 {:tag1, "Hello"}
 iex(4)> T.check_mailbox()

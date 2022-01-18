@@ -1,25 +1,25 @@
-defmodule Lesson_09.Task_05_Map_Reduce do
+defmodule Lesson_10.Map_Reduce do
 
   def start() do
-    Lesson_09.Task_05_Map_Reduce.Coordinator.start()
+    Lesson_10.Map_Reduce.Coordinator.start()
   end
   
   
   defmodule Coordinator do
     
-    alias Lesson_09.Task_05_Map_Reduce.Mapper
-    alias Lesson_09.Task_05_Map_Reduce.Reducer
+    alias Lesson_10.Map_Reduce.Mapper
+    alias Lesson_10.Map_Reduce.Reducer
     
     def start() do
       processes_tree = 
       {:reducer, :root_reducer, [
           {:reducer, :r1, [
-              {:mapper, :w1, "./09_01_processes.md"},
-              {:mapper, :w2, "./09_02_mailbox.md"}
+              {:mapper, :w1, "./10_01_processes.md"},
+              {:mapper, :w2, "./10_02_mailbox.md"}
             ]},
           {:reducer, :r2, [
-              {:mapper, :w3, "./09_03_link.md"},
-              {:mapper, :w4, "./09_04_monitor.md"}
+              {:mapper, :w3, "./10_03_link.md"},
+              {:mapper, :w4, "./10_04_monitor.md"}
             ]}
         ]}
       

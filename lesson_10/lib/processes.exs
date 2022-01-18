@@ -1,4 +1,4 @@
-defmodule Lesson_09.Processes do
+defmodule Lesson_10.Processes do
 
   def run_processes(num) do
     for id <- 1..num, do: spawn(__MODULE__, :start, [id])

@@ -13,11 +13,10 @@
 Запустим несколько процессов под монитором:
 
 ```
-iex(1)> c "09_04_monitor.exs"
-[Lesson_09.Task_04_Monitor]
-iex(2)> alias Lesson_09.Task_04_Monitor, as: T
-Lesson_09.Task_04_Monitor
-iex(3)> T.run_and_exit(5)
+iex(1)> c "lib/monitor.exs"
+[Lesson_10.Monitor]
+iex(2)> alias Lesson_10.Monitor, as: M
+iex(3)> M.run_and_exit(5)
 Process id:1 pid:#PID<0.117.0> started
 Process id:2 pid:#PID<0.118.0> started
 Process id:3 pid:#PID<0.119.0> started
@@ -45,16 +44,11 @@ Process id:2 pid:#PID<0.118.0> stopped
 
 ```
 iex(4)> flush()
-{:DOWN, #Reference<0.2596432641.4157341700.33113>, :process, #PID<0.119.0>,
- :some_reason}
-{:DOWN, #Reference<0.2596432641.4157341700.33114>, :process, #PID<0.120.0>,
- :normal}
-{:DOWN, #Reference<0.2596432641.4157341700.33111>, :process, #PID<0.117.0>,
- :normal}
-{:DOWN, #Reference<0.2596432641.4157341700.33115>, :process, #PID<0.121.0>,
- :normal}
-{:DOWN, #Reference<0.2596432641.4157341700.33112>, :process, #PID<0.118.0>,
- :normal}
+{:DOWN, #Reference<0.2596432641.4157341700.33113>, :process, #PID<0.119.0>, :some_reason}
+{:DOWN, #Reference<0.2596432641.4157341700.33114>, :process, #PID<0.120.0>, :normal}
+{:DOWN, #Reference<0.2596432641.4157341700.33111>, :process, #PID<0.117.0>, :normal}
+{:DOWN, #Reference<0.2596432641.4157341700.33115>, :process, #PID<0.121.0>, :normal}
+{:DOWN, #Reference<0.2596432641.4157341700.33112>, :process, #PID<0.118.0>, :normal}
 :ok
 ```
 

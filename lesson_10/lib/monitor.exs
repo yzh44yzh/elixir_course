@@ -1,4 +1,4 @@
-defmodule Lesson_09.Task_04_Monitor do
+defmodule Lesson_10.Monitor do
 
   def run_and_exit(num) do
     for id <- 1..num, do: spawn_monitor(__MODULE__, :start_and_exit, [id])

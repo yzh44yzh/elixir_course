@@ -21,13 +21,15 @@
 Наша задача -- посчитать суммарное количество слов в списке файлов. С этой задачай вполне справляется утилита **wc**:
 
 ```
-$ wc -w 09_01_processes.md 09_02_mailbox.md 09_03_link.md 09_04_monitor.md
-  872 09_01_processes.md
-  644 09_02_mailbox.md
- 1162 09_03_link.md
-  325 09_04_monitor.md
- 3003 total
+$ wc -w *.md
+  874 10_01_processes.md
+  643 10_02_mailbox.md
+ 1161 10_03_link.md
+  324 10_04_monitor.md
+  508 10_05_map_reduce.md
+ 3510 total
 ```
+
 Но wc работает последовательно в одном потоке. Мы же хотим ускорить вычисление и обработать все файлы одновременно. Поэтому мы запустим отдельный процесс для каждого файла. Это будет Map-процесс. Он прочитает файл с диска, разделит его на слова и посчитает количество слов. 
 
 Затем нам нужны Reduce-процессы, чтобы собрать и суммировать данные от всех Map-процессов. Мы запустим дерево из трех Reduce-процессов: корневой и два дочерних. У каждого дочернего Reduce-процесса будет по два Map-процесса.
@@ -43,19 +45,21 @@ TODO -- нарисовать схему.
     - w4 mapper
 ```
 
+TODO подход снизу вверх, изолировано показать работу одного map и одного reduce.
+
 Запускаем код:
 
 ```
-iex(1)> c "09_05_map_reduce.exs"
-iex(2)> alias Lesson_09.Task_05_Map_Reduce, as: T
-iex(3)> T.start()
+iex(1)> c "li/map_reduce.exs"
+iex(2)> alias Lesson_10.Map_Reduce, as: MR
+iex(3)> MR.start()
 start reducer 'root_reducer' with childs [:r1, :r2]
 start reducer 'r1' with childs [:w1, :w2]
-start mapper 'w1' with file './09_01_processes.md'
-start mapper 'w2' with file './09_02_mailbox.md'
+start mapper 'w1' with file './10_01_processes.md'
+start mapper 'w2' with file './10_02_mailbox.md'
 start reducer 'r2' with childs [:w3, :w4]
-start mapper 'w3' with file './09_03_link.md'
-start mapper 'w4' with file './09_04_monitor.md'
+start mapper 'w3' with file './10_03_link.md'
+start mapper 'w4' with file './10_04_monitor.md'
 reducer r1 got result 872 from w1
 reducer r1 got result 644 from w2
 reducer root_reducer got result 1516 from r1
