@@ -1,4 +1,4 @@
-defmodule Lesson_10.GS_2 do
+defmodule Lesson_11.GS_2 do
 
   def start() do
     IO.puts("start Server")

@@ -1,4 +1,4 @@
-defmodule Lesson_10.GS_8 do
+defmodule Lesson_11.GS_8 do
 
   @timeout 5000
   

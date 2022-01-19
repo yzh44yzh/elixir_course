@@ -1,4 +1,4 @@
-defmodule Lesson_10.Task_02_Sharding do
+defmodule Lesson_11.ShardingAgent do
 
   def start() do
     state = [

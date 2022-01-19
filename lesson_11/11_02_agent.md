@@ -98,21 +98,20 @@ Agent.start(fn () -> state end, [name: :sharding_info])
 Обернем агента в модуль, реализуем АПИ для доступа к информации о шардах, и посмотрим, как это работает:
 
 ```
-iex(1)> c "10_02_sharding_agent.exs"
-[Lesson_10.Task_02_Sharding]
-iex(2)> alias Lesson_10.Task_02_Sharding, as: T
-Lesson_10.Task_02_Sharding
-iex(3)> T.start
+iex(1)> c "lib/sharding_agent.exs"
+[Lesson_11.ShardingAgent]
+iex(2)> alias Lesson_11.ShardingAgent, as: SA
+iex(3)> SA.start
 :ok
-iex(4)> T.find_node(1)
+iex(4)> SA.find_node(1)
 {:ok, "Node-1"}
-iex(5)> T.find_node(10)
+iex(5)> SA.find_node(10)
 {:ok, "Node-1"}
-iex(6)> T.find_node(12)
+iex(6)> SA.find_node(12)
 {:ok, "Node-2"}
-iex(7)> T.find_node(30)
+iex(7)> SA.find_node(30)
 {:ok, "Node-3"}
-iex(8)> T.find_node(300)
+iex(8)> SA.find_node(300)
 {:error, :not_found}
 ```
 
@@ -124,9 +123,9 @@ iex(8)> T.find_node(300)
 Добавим в наш модуль такое АПИ:
 
 ```
-> r T
+> r SA
 > nodes = ["Node-1", "Node-2", "Node-3", "Node-4", "Node-5"]
-> T.reshard(nodes, 48) 
+> SA.reshard(nodes, 48) 
 [
   {36, 44, "Node-5"},
   {27, 35, "Node-4"},
@@ -134,9 +133,10 @@ iex(8)> T.find_node(300)
   {9, 17, "Node-2"},
   {0, 8, "Node-1"}
 ]
-> T.find_node(30)
+> SA.find_node(30)
 {:ok, "Node-4"}
 ```
+
 
 ## Взаимодействие двух агентов
 
@@ -147,7 +147,7 @@ iex(8)> T.find_node(300)
 ```
 def add_user(username) do
   shard = :erlang.phash2(username, 48)
-  {:ok, node} = Lesson_10.Task_02_Sharding.find_node(shard)
+  {:ok, node} = Lesson_11.ShardingAgent.find_node(shard)
   Agent.update(:online_users, fn(users) -> [{username, shard, node} | users] end)
 end
 ```
@@ -157,10 +157,10 @@ end
 Нужно запустить оба агента прежде, чем вызывать их АПИ:
   
 ```
-> c "10_02_online_agent.exs"
-> c "10_02_sharding_agent.exs"
-> alias Lesson_10.Task_02_Online, as: O
-> alias Lesson_10.Task_02_Sharding, as: S
+> c "lib/online_agent.exs"
+> c "lib/sharding_agent.exs"
+> alias Lesson_11.OnlineAgent, as: O
+> alias Lesson_11.ShardingAgent, as: S
 > S.start
 > O.start
 > O.add_user("Helen")

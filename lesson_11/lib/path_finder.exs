@@ -1,4 +1,4 @@
-defmodule PathFinder do
+defmodule Lesson_11.PathFinder do
 
   use GenServer
 
