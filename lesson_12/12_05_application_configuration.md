@@ -24,6 +24,7 @@ iex(9)> Application.fetch_env(:my_cool_app, :param3)
 Настройки хранятся в application environment, это быстрое in-memory key-value хранилище. Оно находится в глобальной области видимости, и к нему можно обращаться из любого места в коде.
 
 В нашем приложении пока нет настроек, их можно добавить в **mix.exs**:
+
 ```
 def application do
   [
@@ -34,6 +35,7 @@ end
 ```
 
 И тогда настройки появятся сразу после запуска приложения:
+
 ```
 $ iex -S mix
 iex(1)> Application.get_all_env(:my_cool_app)
@@ -52,6 +54,7 @@ config :my_cool_app,
 ```
 
 Настройки в этом файле переопределяют настройки в mix.exs:
+
 ```
 iex(1)> Application.get_all_env(:my_cool_app)
 [param1: 42, param3: true, param2: "hello"]
@@ -60,6 +63,7 @@ iex(1)> Application.get_all_env(:my_cool_app)
 Давайте запустим в нашем приложении PathFinder и ShardingAgent, а нужные для них настройки вынесем в config.exs.
 
 Настройки:
+
 ```
 config :my_cool_app,
   data_file: "cities.csv",
@@ -80,6 +84,7 @@ config :my_cool_app,
 ```
 
 Запуск процессов:
+
 ```
   @impl true
   def start(_start_type, _args) do

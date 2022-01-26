@@ -13,6 +13,7 @@
 Нет необходимости постоянно держать долгоживущий процесс для такой задачи. Здесь лучше подойдет короткоживущий процесс, который выполнит свою работу и завершится. А при необходимости запустится снова, снова выполнит работу и завершится.
 
 Динамический супервизор не запускает ничего в `init`. Вместо этого нужен явный вызов `start_child/2` для каждого дочернего процесса:
+
 ```
 defmodule AuthDataLoaderSup do
 
@@ -24,7 +25,7 @@ defmodule AuthDataLoaderSup do
 
   def start_child() do
     url = "http://auth_service.some_cluster.data_center/rules"
-    spec = {Lesson_11.AuthDataLoader, [url]}
+    spec = {Lesson_12.AuthDataLoader, [url]}
     DynamicSupervisor.start_child(__MODULE__, spec)
   end
 
@@ -37,6 +38,7 @@ end
 ```
 
 Рабочий процесс реализуем как GenServer с отложеной инициализацией:
+
 ```
 defmodule AuthDataLoader do
 
@@ -71,39 +73,43 @@ defmodule AuthDataLoader do
 
 end
 ```
+
 Загрузку и сохранение данных мы просто имитируем.
 
 Запускаем:
+
 ```
 defmodule MyService do
 
   def start() do
     children = [
-      Lesson_11.AuthDataLoaderSup,
+      Lesson_12.AuthDataLoaderSup,
     ]
     Supervisor.start_link(children, strategy: :one_for_one) 
   end
 
   def update_auth_rules() do
-    Lesson_11.AuthDataLoaderSup.start_child()
+    Lesson_12.AuthDataLoaderSup.start_child()
   end
 
 end
 ```
+
 и смотрим, как это работает:
+
 ```
 iex(1)> c "lib/dyn_sup.exs"
-[Lesson_11, Lesson_11.AuthDataLoader, Lesson_11.AuthDataLoaderSup,
- Lesson_11.MyService]
-iex(2)> Lesson_11.MyService.start()
+[Lesson_12, Lesson_12.AuthDataLoader, Lesson_12.AuthDataLoaderSup,
+ Lesson_12.MyService]
+iex(2)> Lesson_12.MyService.start()
 {:ok, #PID<0.125.0>}
-iex(3)> Lesson_11.MyService.update_auth_rules()
+iex(3)> Lesson_12.MyService.update_auth_rules()
 worker #PID<0.128.0> started with http://auth_service.some_cluster.data_center/rules
 load data from http://auth_service.some_cluster.data_center/rules
 {:ok, #PID<0.128.0>}
 save data [:rule_1, :rule_2, :rule_3]
 work done
-iex(4)> Lesson_11.MyService.update_auth_rules()
+iex(4)> Lesson_12.MyService.update_auth_rules()
 worker #PID<0.130.0> started with http://auth_service.some_cluster.data_center/rules
 load data from http://auth_service.some_cluster.data_center/rules
 {:ok, #PID<0.130.0>}

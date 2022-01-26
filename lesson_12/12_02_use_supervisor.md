@@ -7,6 +7,7 @@
 Во-первых, функцию для запуска процесса общепринято называть `start_link`, и она должна принимать один аргумент. Можно назвать функцию иначе, и аргументов сделать больше, но тогда в супервизоре придется переопределять настройки по-умолчанию, что не всегда удобно.
 
 Во-вторых, мы передадим в эту функцию имя агента и его начальное состояние. Так мы сможем запустить несколько агентов с разными именами и состояниями. А поскольку наша функция принимает один аргумент, то придется передать кортеж:
+
 ```
 def start_link({agent_name, state}) do
   Agent.start(fn () -> state end, [name: agent_name])
@@ -14,6 +15,7 @@ end
 ```
 
 Функцию `find_node` тоже добработаем, чтобы можно было указать имя агента:
+
 ```
 def find_node(agent_name, shard_num) do
   Agent.get(agent_name, fn(state) -> do_find_node(state, shard_num) end)
@@ -21,6 +23,7 @@ end
 ```
 
 Запустим одного агента, и будем использовать child specification по-умолчанию:
+
 ```
 def start() do
   state = [
@@ -37,54 +40,63 @@ end
 ```
 
 Здесь child specification выглядит предельно просто:
+
 ```
 {ShardingAgent, {:agent_1, state}}
 ```
+
 Это модуль агента, и аргументы для start_link. Этого достаточно, потому что в модуле агента мы применяем магию:
+
 ```
 use Agent
 ```
+
 Это специальный макрос, который неявно добавляет в модуль функцию `child_spec/1`. Супервизор вызывает эту функцию и получает child specification непосредственно от модуля, который он собирается запускать.
+
 ```
 > c "lib/agent_with_sup.exs"
 
-> Lesson_11.ShardingAgent.child_spec(:no_args)
+> Lesson_12.ShardingAgent.child_spec(:no_args)
 %{
-  id: Lesson_11.ShardingAgent,
-  start: {Lesson_11.ShardingAgent, :start_link, [:no_args]}
+  id: Lesson_12.ShardingAgent,
+  start: {Lesson_12.ShardingAgent, :start_link, [:no_args]}
 }
 ```
+
 В Эликсире (в отличие от Эрланга) принято соглашение, что каждый модуль сам определяет child specification, необходимый для его запуска. Для Task, Agent и GenServer это генерируется неявно со значениями по умолчанию.
 
 Если мы захотим что-то переопределить, что достаточно передать нужные ключи в макрос:
+
 ```
 use Agent, restart: :permanent
 ```
+
 и макрос сгенерирует нужную реализацию:
+
 ```
-> Lesson_11.ShardingAgent.child_spec(:no_args)
+> Lesson_12.ShardingAgent.child_spec(:no_args)
 %{
-  id: Lesson_11.ShardingAgent,
+  id: Lesson_12.ShardingAgent,
   restart: :permanent,
-  start: {Lesson_11.ShardingAgent, :start_link, [:no_args]}
+  start: {Lesson_12.ShardingAgent, :start_link, [:no_args]}
 }
 ```
 
 Запускаем и смотрим, как это работает:
 
 ```
-iex(9)> Lesson_11.start()
+iex(9)> Lesson_12.start()
 {:ok, #PID<0.167.0>}
 
-iex(10)> Lesson_11.ShardingAgent.find_node(:agent_1, 0)
+iex(10)> Lesson_12.ShardingAgent.find_node(:agent_1, 0)
 {:ok, "Node-1"}
-iex(12)> Lesson_11.ShardingAgent.find_node(:agent_1, 10)
+iex(12)> Lesson_12.ShardingAgent.find_node(:agent_1, 10)
 {:ok, "Node-1"}
-iex(13)> Lesson_11.ShardingAgent.find_node(:agent_1, 15) 
+iex(13)> Lesson_12.ShardingAgent.find_node(:agent_1, 15) 
 {:ok, "Node-2"}
-iex(14)> Lesson_11.ShardingAgent.find_node(:agent_1, 40)
+iex(14)> Lesson_12.ShardingAgent.find_node(:agent_1, 40)
 {:ok, "Node-4"}
-iex(15)> Lesson_11.ShardingAgent.find_node(:agent_1, 60)
+iex(15)> Lesson_12.ShardingAgent.find_node(:agent_1, 60)
 {:error, :not_found}
 ```
 
@@ -124,15 +136,15 @@ end
 Смотрим, как это работает:
 
 ```
-iex(6)> Lesson_11.start_2_agents()
+iex(6)> Lesson_12.start_2_agents()
 {:ok, #PID<0.125.0>}
-iex(7)> Lesson_11.ShardingAgent.find_node(:agent_a, 5)
+iex(7)> Lesson_12.ShardingAgent.find_node(:agent_a, 5)
 {:ok, "Node-2"}
-iex(8)> Lesson_11.ShardingAgent.find_node(:agent_b, 5)
+iex(8)> Lesson_12.ShardingAgent.find_node(:agent_b, 5)
 {:ok, "Node-1"}
-iex(9)> Lesson_11.ShardingAgent.find_node(:agent_a, 10)
+iex(9)> Lesson_12.ShardingAgent.find_node(:agent_a, 10)
 {:error, :not_found}
-iex(10)> Lesson_11.ShardingAgent.find_node(:agent_b, 10)
+iex(10)> Lesson_12.ShardingAgent.find_node(:agent_b, 10)
 {:ok, "Node-2"}
 ```
 
@@ -141,40 +153,43 @@ iex(10)> Lesson_11.ShardingAgent.find_node(:agent_b, 10)
 
 ## Запускаем Task под супервизором
 
-Модуль
-[Task.Supervisor](https://hexdocs.pm/elixir/1.12/Task.Supervisor.html)
-предоставляет аналогичное АПИ как и модуль 
-[Task](https://hexdocs.pm/elixir/1.12/Task.html)
+Модуль [Task.Supervisor](https://hexdocs.pm/elixir/1.12/Task.Supervisor.html) предоставляет аналогичное АПИ как и модуль [Task](https://hexdocs.pm/elixir/1.12/Task.html)
 
 Так что нам достаточно вместо:
+
 ```
 Task.async(__MODULE__, :find_elixir_sources, [path])
 ```
+
 сделать
+
 ```
 {:ok, sup_pid} = Task.Supervisor.start_link()
 Task.Supervisor.async(sup_pid, __MODULE__, :find_elixir_sources, [path])
 ```
 
 и все работает:
+
 ```
 iex(1)> c "lib/task_with_sup.exs"
-[Lesson_11, Lesson_11.FindSourcesTask]
-iex(2)> task = Lesson_11.FindSourcesTask.start("lib")
-iex(3)> Lesson_11.FindSourcesTask.get_result(task)
+[Lesson_12, Lesson_12.FindSourcesTask]
+iex(2)> task = Lesson_12.FindSourcesTask.start("lib")
+iex(3)> Lesson_12.FindSourcesTask.get_result(task)
 ["lib/task_with_sup.exs", "lib/agent_with_sup.exs"]
-iex(4)> task = Lesson_11.FindSourcesTask.start("../lesson_10/lib")
-iex(5)> Lesson_11.FindSourcesTask.get_result(task)
-["../lesson_10/lib/path_finder2.exs", "../lesson_10/lib/path_finder.exs"]
+iex(4)> task = Lesson_12.FindSourcesTask.start("../lesson_11/lib")
+iex(5)> Lesson_12.FindSourcesTask.get_result(task)
+["../lesson_11/lib/path_finder2.exs", "../lesson_11/lib/path_finder.exs"]
 ```
 
 Task можно запустить под обычным супервизором так же, как мы выше запускали Agent:
+
 ```
 child_spec = [
   {MyTaskModule, args}
 ]
 Supervisor.start_link(child_spec, strategy: :one_for_all)
 ```
+
 Но в этом случае нет способа получить результат работы Task. Это подходит для каких нибудь фоновых задач, как, например, прогрев кэшей.
 
 
@@ -184,33 +199,40 @@ Supervisor.start_link(child_spec, strategy: :one_for_all)
 
 ```
 iex(1)> c "lib/gen_server_with_sup.exs"
-[Lesson_11, Lesson_11.PathFinder]
-iex(2)> Lesson_11.PathFinder.child_spec(:no_args)
+[Lesson_12, Lesson_12.PathFinder]
+iex(2)> Lesson_12.PathFinder.child_spec(:no_args)
 %{
-  id: Lesson_11.PathFinder,
-  start: {Lesson_11.PathFinder, :start_link, [:no_args]}
+  id: Lesson_12.PathFinder,
+  start: {Lesson_12.PathFinder, :start_link, [:no_args]}
 }
 ```
 
 Запуск сервера нужно немного поправить, вместо:
+
 ```
 def start() do
   GenServer.start(__MODULE__, :no_args, [name: @server_name])
 end
 ```
+
 сделаем:
+
 ```
 def start_link(_) do
   GenServer.start_link(__MODULE__, :no_args, [name: @server_name])
 end
+
 ```
 чтобы соответствовать child spec, чтобы дочерний процесс линковался с супервизором.
 
 Поправим путь к данным: 
+
 ```
-@cities_file "../lesson_10/data/cities.csv"
+@cities_file "../lesson_11/data/cities.csv"
 ```
+
 Добавим запуск через супервизор:
+
 ```
 def start() do
   children = [
@@ -218,14 +240,16 @@ def start() do
   ]
   Supervisor.start_link(children, strategy: :one_for_all)
 end
+
 ```
 Запускаем и проверяем:
 ```
-iex(6)> Lesson_11.PathFinder.start()
+
+iex(6)> Lesson_12.PathFinder.start()
 {:ok, #PID<0.163.0>}
-iex(7)> Lesson_11.PathFinder.get_route("Москва", "Владивосток")
+iex(7)> Lesson_12.PathFinder.get_route("Москва", "Владивосток")
 {:error, :no_route}
-iex(9)> Lesson_11.PathFinder.get_route("Москва", "Астрахань")
+iex(9)> Lesson_12.PathFinder.get_route("Москва", "Астрахань")
 {:ok, ["Москва", "Мурманск", "Астрахань"], 5469}
 ```
 
@@ -233,7 +257,7 @@ iex(9)> Lesson_11.PathFinder.get_route("Москва", "Астрахань")
 
 Нам еще нужно научиться запускать супервизор под супервизором. Для этого дочерний супервизор должен быть представлен модулем. 
 
-Как и для GenServer, существует Supervisor behaviour, который нужно реализовать в этом модуле. behaviour требует наличия только одной функции -- init/1.
+Как и для GenServer, существует Supervisor behaviour, который нужно реализовать в этом модуле. behaviour требует наличия только одной функции -- `init/1`.
 
 Запуск supervisor похож на запуск gen\_server. Вот картинка, аналогичная той, что мы видели в 10-м уроке:
 ![Supervisor Init](./img/supervisor_init.png)
@@ -254,8 +278,8 @@ end
 @impl true
 def init(_args) do
   children = [
-    {Lesson_11.AgentSup, [:no_args]},
-    {Lesson_11.PathFinder, [:no_args]}
+    {Lesson_12.AgentSup, [:no_args]},
+    {Lesson_12.PathFinder, [:no_args]}
   ]
   Supervisor.init(children, strategy: :one_for_all) 
 end
@@ -272,25 +296,25 @@ c "lib/agent_with_sup.exs"
 c "lib/gen_server_with_sup.exs"
 c "lib/sup.exs"
 
-iex(13)> Lesson_11.RootSup.child_spec(:no_args)
+iex(13)> Lesson_12.RootSup.child_spec(:no_args)
 %{
-  id: Lesson_11.RootSup,
-  start: {Lesson_11.RootSup, :start_link, [:no_args]},
+  id: Lesson_12.RootSup,
+  start: {Lesson_12.RootSup, :start_link, [:no_args]},
   type: :supervisor
 }
-iex(14)> Lesson_11.AgentSup.child_spec(:no_args)
+iex(14)> Lesson_12.AgentSup.child_spec(:no_args)
 %{
-  id: Lesson_11.AgentSup,
-  start: {Lesson_11.AgentSup, :start_link, [:no_args]},
+  id: Lesson_12.AgentSup,
+  start: {Lesson_12.AgentSup, :start_link, [:no_args]},
   type: :supervisor
 }
 
-Lesson_11.MyApp.start_sup_tree()
+Lesson_12.MyApp.start_sup_tree()
 
-Lesson_11.ShardingAgent.find_node(:agent_a, 5)
-Lesson_11.ShardingAgent.find_node(:agent_b, 5)
-Lesson_11.PathFinder.get_route("Москва", "Владивосток")
-Lesson_11.PathFinder.get_route("Москва", "Астрахань")
+Lesson_12.ShardingAgent.find_node(:agent_a, 5)
+Lesson_12.ShardingAgent.find_node(:agent_b, 5)
+Lesson_12.PathFinder.get_route("Москва", "Владивосток")
+Lesson_12.PathFinder.get_route("Москва", "Астрахань")
 ```
 
 Таким образом у нас получилось дерево процессов:

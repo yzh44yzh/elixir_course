@@ -1,10 +1,10 @@
-defmodule Lesson_11 do
+defmodule Lesson_12 do
 
   defmodule MyApp do
 
     def start_sup_tree() do
       children = [
-        Lesson_11.RootSup
+        Lesson_12.RootSup
       ]
       Supervisor.start_link(children, strategy: :one_for_one) 
     end
@@ -21,8 +21,8 @@ defmodule Lesson_11 do
     @impl true
     def init(_args) do
       children = [
-        {Lesson_11.AgentSup, [:no_args]},
-        {Lesson_11.PathFinder, [:no_args]}
+        {Lesson_12.AgentSup, [:no_args]},
+        {Lesson_12.PathFinder, [:no_args]}
       ]
       Supervisor.init(children, strategy: :one_for_all) 
     end
@@ -50,11 +50,11 @@ defmodule Lesson_11 do
       children = [
         %{
           id: :agent_a,
-          start: {Lesson_11.ShardingAgent, :start_link, [{:agent_a, state_1}]}
+          start: {Lesson_12.ShardingAgent, :start_link, [{:agent_a, state_1}]}
         },
         %{
           id: :agent_b,
-          start: {Lesson_11.ShardingAgent, :start_link, [{:agent_b, state_2}]}
+          start: {Lesson_12.ShardingAgent, :start_link, [{:agent_b, state_2}]}
         }
       ]
       Supervisor.init(children, strategy: :one_for_all)

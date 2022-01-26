@@ -1,16 +1,16 @@
-defmodule Lesson_11 do
+defmodule Lesson_12 do
 
   defmodule MyService do
 
     def start() do
       children = [
-        Lesson_11.AuthDataLoaderSup,
+        Lesson_12.AuthDataLoaderSup,
       ]
       Supervisor.start_link(children, strategy: :one_for_one) 
     end
 
     def update_auth_rules() do
-      Lesson_11.AuthDataLoaderSup.start_child()
+      Lesson_12.AuthDataLoaderSup.start_child()
     end
     
   end
@@ -25,7 +25,7 @@ defmodule Lesson_11 do
     
     def start_child() do
       url = "http://auth_service.some_cluster.data_center/rules"
-      spec = {Lesson_11.AuthDataLoader, [url]}
+      spec = {Lesson_12.AuthDataLoader, [url]}
       DynamicSupervisor.start_child(__MODULE__, spec)
     end
 

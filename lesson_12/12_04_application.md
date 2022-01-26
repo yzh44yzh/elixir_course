@@ -21,6 +21,7 @@
 В-третьих, это приложения, входящие в состав OTP. Например, приложение для работы с сетью **inets** или приложения, отвечающие за шифрование **crypto** и **ssl**.
 
 Если просто запусить iex консоль, то в ней уже запущены 6 приложений:
+
 ```
 iex(1)> Application.started_applications()
 [
@@ -34,6 +35,7 @@ iex(1)> Application.started_applications()
 ```
 
 Эрланг консоль проще, в ней запущены всего 2 приложения:
+
 ```
 1> application:which_applications().
 [{stdlib,"ERTS  CXC 138 10","3.13.2"},
@@ -91,6 +93,7 @@ $ cat _build/dev/lib/my_cool_app/ebin/my_cool_app.app
 Часть этой информации известна при сборке, например, имена модулей. Другая часть должна быть указана в `mix.exs` -- конфигурационном файле для mix.
 
 В нашем пустом проекте mix.exs выглядит так:
+
 ```
 defmodule MyCoolApp.MixProject do
   use Mix.Project
@@ -117,9 +120,11 @@ defmodule MyCoolApp.MixProject do
   end
 end
 ```
+
 Отсюда берутся имя и версия приложения, а так же список других приложений, от которых зависит наше. Здесь указан только `:logger`. Остальные зависимости, `:elixir`, `:strlib`, `:kernel` подключаются неявно. 
 
 Также mix неявно считает, что точкой запуска приложения является модуль `MyCoolApp`. Это можно переопределить, указав ключ `:mod`:
+
 ```
 def application do
   [
@@ -130,12 +135,13 @@ end
 ```
 
 Так же можно явно указать имена процессов:
+
 ```
 def application do
   [
     extra_applications: [:logger],
     mod: {MyMod, [some_args]},
-    registered: [:agent_1, :agent2, PathFinder]
+    registered: [:agent_a, :agent_b, PathFinder]
   ]
 end
 ```
@@ -144,6 +150,7 @@ end
 ## Application Behaviour
 
 По умолчанию mix генерирует точку входа в приложение как модуль с именем, совпадающим с именем приложения:
+
 ```
 defmodule MyCoolApp do
   @moduledoc """
@@ -218,6 +225,7 @@ iex(3)> Application.started_applications()
 ### start/2
 
 Обработчик `start/2` принимает 2 аргумента: тип запуска приложения и произвольные данные из mix.exs, если они есть:
+
 ```
 my_cool_app.ex:
   def start(_start_type, some_args) do
@@ -236,6 +244,7 @@ mix:exs:
 Тип запуска касается распределенных приложений, которые запускаются на нескольких узлах в кластере. Мы сейчас не будем рассматривать эту тему.
 
 Обработчик должен запустить дерево супервизоров и вернуть pid корневого супервизора.
+
 ```
   def start(_start_type, _args) do
     children = []

@@ -1,4 +1,4 @@
-defmodule Lesson_11 do
+defmodule Lesson_12 do
 
   defmodule PathFinder do
 
@@ -9,7 +9,7 @@ defmodule Lesson_11 do
     @type route :: {[city], distance}
 
     @server_name __MODULE__
-    @cities_file "../lesson_10/data/cities.csv"
+    @cities_file "../lesson_11/data/cities.csv"
 
 
     def start() do
