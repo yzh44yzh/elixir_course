@@ -17,7 +17,7 @@ defmodule Lesson_12 do
     
     def find_elixir_sources(path) do
       # find lib -name *.ex -o -name *.exs
-      {response, 0} = System.cmd("find", [path, "-name", "*.exs", "-o", "-name", "*.exs"])
+      {response, 0} = System.cmd("find", [path, "-name", "*.exs", "-o", "-name", "*.ex"])
       String.split(response, "\n")
       |> Enum.filter(fn(line) -> line != "" end)
     end

@@ -5,7 +5,7 @@ defmodule Lesson_12 do
     use Agent, restart: :permanent
 
     def start_link({agent_name, state}) do
-      Agent.start(fn () -> state end, [name: agent_name])
+      Agent.start_link(fn () -> state end, [name: agent_name])
     end
 
     def find_node(agent_name, shard_num) do
