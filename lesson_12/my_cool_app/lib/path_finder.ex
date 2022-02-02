@@ -1,4 +1,4 @@
-defmodule MyCoolApp.PathFinder do
+defmodule PathFinder do
 
   use GenServer
 
@@ -6,68 +6,96 @@ defmodule MyCoolApp.PathFinder do
   @type distance :: integer
   @type route :: {[city], distance}
 
-  @server_name __MODULE__
+  ## Public API
 
-
-  def start_link(data_file) do
-    GenServer.start_link(__MODULE__, data_file, [name: @server_name])
+  def start_link({name, data_file}) do
+    GenServer.start_link(__MODULE__, [data_file], name: name)
   end
 
-  @spec get_route(city, city) :: {:ok, route} | {:error, term}
-  def get_route(from_city, to_city) do
-    GenServer.call(@server_name, {:get_route, from_city, to_city})
+  def get_route(name, city1, city2) do
+    GenServer.call(name, {:get_route, city1, city2})
   end
+
+  def reload_data(name) do
+    GenServer.cast(name, :reload_data)
+  end
+
   
+  ## behaviour GenServer
+
   @impl true
-  def init(data_file) do
+  def init([data_file]) do
+    IO.puts("init")
     state = %{data_file: data_file}
-    IO.puts("init PathFinder #{inspect state}")
     {:ok, state, {:continue, :delayed_init}}
   end
 
   @impl true
-  def handle_continue(:delayed_init, state) do
+  def handle_continue(:delayed_init, %{:data_file => data_file} = state) do
+    IO.puts("handle_continue")
     case state do
-      %{graph: graph} -> :digraph.delete(graph)
+      %{:graph => graph} -> :digraph.delete(graph)
       _ -> :ok
     end
-    graph = :digraph.new([:cyclic])
-    data = load_data(state.data_file)
-    Enum.reduce(data, graph, &add_item/2)
-    distancies = make_distancies_map(data)
-    state = %{graph: graph, distancies: distancies}
+    graph = :digraph.new()
+    data = load_data!(data_file)
+    init_graph(graph, data)
+    dist_map = init_distancies(data)
+    state = %{
+      graph: graph,
+      dist: dist_map,
+      data_file: data_file
+    }
     {:noreply, state}
   end
-  
+
   @impl true
-  def handle_call({:get_route, from_city, to_city}, _from, state) do
-    %{graph: graph, distancies: distancies} = state
-    reply =
-      case :digraph.get_short_path(graph, from_city, to_city) do
-        false -> {:error, :no_route} 
-                 route ->
-            distance = get_distance(distancies, route)
-            {:ok, route, distance}
-      end
+  def handle_call(
+    {:get_route, city1, city2},
+    _from,
+    %{:graph => graph, :dist => dist} = state
+  ) do
+    reply = case :digraph.get_short_path(graph, city1, city2) do
+              false -> {:error, :no_route}
+              route ->
+                total_dist = get_total_dist(route, dist)
+                {:ok, route, total_dist}
+            end
     {:reply, reply, state}
   end
 
-  def handle_call(unknown_msg, _from, state) do
-    IO.puts("got unknown msg in handle_call: #{inspect unknown_msg}")
-    {:reply, {:error, :invalid_call}, state}
+  def handle_call(unknown_message, _from, state) do
+    IO.puts("ERROR: PathFinder.call got unknown message #{unknown_message}")
+    {:reply, {:error, :unknown_message}, state}
+  end
+
+  @impl true
+  def handle_cast(:reload_data, state) do
+    IO.puts("reload_data")
+    {:noreply, state, {:continue, :delayed_init}}
   end
   
-  @impl true
-  def handle_info(msg, state) do
-    IO.puts("got message #{inspect msg}")
+  def handle_cast(unknown_message, state) do
+    IO.puts("ERROR: PathFinder.cast got unknown message #{unknown_message}")
     {:noreply, state}
   end
   
+  @impl true
+  def handle_info(message, state) do
+    IO.puts("handle_info #{inspect message}")
+    {:noreply, state}
+  end
 
-  # Inner functions
+  def terminate(state) do
+    {:noreply, state}
+  end
 
-  defp load_data(path) do
-    File.read!(path)
+  
+
+  ## private functions
+
+  defp load_data!(data_file) do
+    File.read!(data_file)
     |> String.split()
     |> Enum.map(&parse_line/1)
   end
@@ -78,40 +106,38 @@ defmodule MyCoolApp.PathFinder do
     {city1, city2, dist}
   end
 
-  defp make_distancies_map(data) do
+  defp init_graph(graph, data) do
+    Enum.each(data,
+      fn({city1, city2, _dist}) ->
+        :digraph.add_vertex(graph, city1)
+        :digraph.add_vertex(graph, city2)
+        :digraph.add_edge(graph, city1, city2)
+        :digraph.add_edge(graph, city2, city1)
+      end)
+  end
+
+  defp init_distancies(data) do
     Enum.reduce(data, %{},
-      fn ({city1, city2, dist}, acc) ->
+      fn({city1, city2, dist}, acc) ->
         key = make_key(city1, city2)
         Map.put(acc, key, dist)
-      end)
+        end)
   end
 
-  defp make_key(city1, city2) do
-    Enum.sort([city1, city2]) |> :erlang.list_to_tuple()
-  end
-  
-  defp add_item({city1, city2, dist} = item, graph) do
-    v1 = :digraph.add_vertex(graph, city1) # non-functional, (mutates ETS) 
-    v2 = :digraph.add_vertex(graph, city2)
-    :digraph.add_edge(graph, v1, v2, dist)
-    res = :digraph.add_edge(graph, v2, v1, dist) # imitate non-directed graph with two directions
-    case res do
-      {:error, e} -> raise "error adding item #{inspect item}, #{inspect e}"
-      _ -> :ok
-    end
-    graph
+  defp make_key(city1, city2), do: Enum.sort([city1, city2]) |> :erlang.list_to_tuple()
+
+  defp get_total_dist(route, dist_map) do
+    [first | rest] = route
+    acc = {first, 0}
+    Enum.reduce(rest, acc,
+      fn(curr_city, {prev_city, total_dist}) ->
+        key = make_key(curr_city, prev_city)
+        dist = Map.fetch!(dist_map, key)
+        {curr_city, total_dist + dist}
+      end)
+    |> elem(1)
   end
 
-  defp get_distance(distancies, path) do
-    [first | rest] = path
-    Enum.reduce(
-      rest,
-      {first, 0},
-      fn (city, {prev_city, dist}) ->
-        key = make_key(city, prev_city)
-        {city, dist + Map.fetch!(distancies, key)}
-      end)
-      |> elem(1)
-  end
-  
 end
+
+
