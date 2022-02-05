@@ -1,11 +1,32 @@
-defmodule LRU_Cache do
-  use GenServer
+defmodule LRU_App do
+  use Application
 
-  ## Public API
+  def start(_, _) do
+    options = %{
+      num_tables: 6,
+      key_lifetime: 60000
+    }
+    child_spec = [
+      {LRU_GenerationCache, options}
+    ]
+    Supervisor.start_link(child_spec, strategy: :one_for_all)
+  end
   
-  # NOTE: use start_link/1 to run under supervisor
-  def start(options \\ %{}) do
-    GenServer.start(__MODULE__, options, name: __MODULE__)
+end
+
+defmodule LRU_GenerationCache do
+
+  # table_1 [k4,new]
+  # table_2 [k6, k7]
+  # table_3 [k4,old, k5]
+
+  use GenServer
+  require Logger
+  
+  # Public API
+
+  def start_link(options) do
+    GenServer.start_link(__MODULE__, options, name: __MODULE__)
   end
 
   def stop() do
@@ -24,23 +45,23 @@ defmodule LRU_Cache do
     GenServer.cast(__MODULE__, {:delete, key})
   end
 
+  # GenServer Behavior
   
-  ## GenServer behavior
-
   @impl true
   def init(options) do
-    IO.puts("init with options #{inspect options}")
+    Logger.info("#{__MODULE__}.init with options #{inspect options}")
     num_tables = Map.get(options, :num_tables, 5)
-    key_lifetime = Map.get(options, :key_lifetime, 60000) # miliseconds
-
+    key_lifetime = Map.get(options, :key_lifetime, 60000) # 1 min
     rotate_time = div(key_lifetime, num_tables)
     :erlang.send_after(rotate_time, self(), :rotate)
-    
+
+    tables = create_tables(num_tables)
+
     state = %{
-      rotate_time: rotate_time,
-      tables: create_tables(num_tables)
+      tables: tables,
+      rotate_time: rotate_time
     }
-    IO.puts("state: #{inspect state}")
+    Logger.info("state #{inspect state}")
     {:ok, state}
   end
 
@@ -60,7 +81,7 @@ defmodule LRU_Cache do
     [top_table | _] = tables
     :ets.insert(top_table, {key, value})
     size = :ets.info(top_table, :size)
-    IO.puts("put #{inspect key} into #{inspect top_table}, now it has #{size} items")
+    Logger.info("put #{inspect key} into #{inspect top_table}, table has size #{size}")
     {:reply, :ok, state}
   end
 
@@ -74,6 +95,7 @@ defmodule LRU_Cache do
     {:reply, {:error, :unknown_message}, state}
   end
 
+  
   @impl true
   def handle_cast({:delete, key}, %{tables: tables} = state) do
     Enum.each(tables, fn(table) -> :ets.delete(table, key) end)
@@ -97,8 +119,8 @@ defmodule LRU_Cache do
     IO.puts("ERROR: #{__MODULE__}.handle_info got unknown message #{inspect msg}")
     {:noreply, state}
   end
-
-  ## Private functions
+  
+  # Private functions
 
   defp create_tables(num_tables) do
     Enum.map(1..num_tables, fn(id) ->
@@ -108,10 +130,10 @@ defmodule LRU_Cache do
   end
 
   defp rotate_tables(tables) do
-    IO.puts("rotate_tables #{inspect tables}")
+    # Logger.info("rotate_tables #{inspect tables}")
     [last_table | rest] = Enum.reverse(tables)
     table_name = :ets.info(last_table, :name)
-    IO.puts("drop #{table_name}")
+    # Logger.info("drop #{table_name}")
     :ets.delete(last_table)
     new_table = :ets.new(table_name, [:set, :private])
     [new_table | Enum.reverse(rest)]
