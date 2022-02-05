@@ -17,14 +17,16 @@ defmodule MyCoolProject do
 
     @impl true
     def init(_) do
+      state_a = Application.get_env(:my_cool_project, :agent_a_state)
+      state_b = Application.get_env(:my_cool_project, :agent_b_state)
       child_spec = [
       %{
         id: :agent_a,
-        start: {MyCoolProject.Worker, :start_link, [{:agent_a, %{a: 42}}]}
+        start: {MyCoolProject.Worker, :start_link, [{:agent_a, state_a}]}
       },
       %{
         id: :agent_b,
-        start: {MyCoolProject.Worker, :start_link, [{:agent_b, %{b: 100}}]}
+        start: {MyCoolProject.Worker, :start_link, [{:agent_b, state_b}]}
       }      ]
       Supervisor.init(child_spec, strategy: :one_for_one)
     end
