@@ -16,6 +16,7 @@ defmodule LRU_Cache do
     case :ets.lookup(__MODULE__, key) do
       [{^key, value, created, lifetime_ms}] ->
         if valid?(created, lifetime_ms) do
+          GenServer.cast(__MODULE__, {:update, key}) 
           {:ok, value}
         else
           delete(key) # cast does not block client
@@ -68,6 +69,17 @@ defmodule LRU_Cache do
   end
 
   @impl true
+  def handle_cast({:update, key}, state) do
+    IO.puts("update #{key}")
+    case :ets.lookup(__MODULE__, key) do
+      [{^key, value, _, lifetime_ms}] ->
+        created = :os.system_time(:millisecond)
+        :ets.insert(__MODULE__, {key, value, created, lifetime_ms})
+      [] -> :ok
+    end
+    {:noreply, state}
+  end
+  
   def handle_cast({:delete, key}, state) do
     IO.puts("delete #{key}")
     :ets.delete(__MODULE__, key)
