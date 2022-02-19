@@ -6,7 +6,7 @@
 
 Рекурсивно обходим указанный каталог, получаем список файлов вместе с их глубиной:
 
-```
+```elixir
 $ iex lib/unbounded_recursion.exs
 > alias UnboundedRecursion, as: R
 > files = R.browse("/path/to/lesson_04")
@@ -34,7 +34,7 @@ $ iex lib/unbounded_recursion.exs
 
 Рендерим полученный список в виде дерева:
 
-```
+```elixir
 > res = R.render(files)
 " lesson_04\n|-- 04_01_pattern_matching.md\n|-- 04_02_pattern_matching_for
 _maps.md\n|-- 04_03_case.md\n|-- 04_04_cond.md\n|-- 04_05_do_end.md\n|-- h
