@@ -29,5 +29,23 @@ def render_template(template, lesson):
     exit(0)  # TEMP
 
 
+def insert_source(source, source_dir):
+    s = source.split(':')
+    source_file = '{}.exs'.format(s[0])
+    mark = s[1]
+    # TODO open file, find mark, get part of file
+    return '```SOURCE from {} {} {}```'.format(source_dir, source_file, mark)
+
+
+def try_chevron_lambda():
+    template = 'insert part of file {{# source}}fizz_buzz_01:test{{/ source}} END'
+    data = {
+        'source': lambda source, _render: insert_source(source, 'lesson_01/lib')
+    }
+    res = chevron.render(template, data=data)
+    print(res)
+
+
 if __name__ == '__main__':
-    render_all_lessons()
+    # render_all_lessons()
+    try_chevron_lambda()
