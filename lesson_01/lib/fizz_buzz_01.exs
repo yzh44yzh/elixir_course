@@ -1,8 +1,4 @@
 defmodule FizzBuzz01 do
-  @moduledoc """
-  https://ru.wikipedia.org/wiki/Fizz_buzz
-  """
-
 
   def main() do
     Enum.each(1..100, &fizzbuzz/1)

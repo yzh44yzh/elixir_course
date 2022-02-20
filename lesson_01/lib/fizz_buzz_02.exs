@@ -1,8 +1,4 @@
 defmodule FizzBuzz02 do
-  @moduledoc """
-  https://ru.wikipedia.org/wiki/Fizz_buzz
-  """
-
 
   def main() do
     1..100
