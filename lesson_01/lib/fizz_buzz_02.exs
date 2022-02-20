@@ -1,6 +1,5 @@
 defmodule FizzBuzz02 do
   @moduledoc """
-  Элементарная задача на понимание базовых конструкций программирования.
   https://ru.wikipedia.org/wiki/Fizz_buzz
   """
 
