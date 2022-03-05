@@ -1,5 +1,6 @@
 defmodule FizzBuzz03 do
 
+  # MARK:fizzbuzz_100
   def main() do
     fizzbuzz_100()
     |> Enum.join(" ")
@@ -12,6 +13,7 @@ defmodule FizzBuzz03 do
     1..100
     |> Enum.map(&fizzbuzz/1)
   end
+  # END_MARK:fizzbuzz_100
 
 
   @spec fizzbuzz(integer) :: String.t
@@ -28,6 +30,7 @@ defmodule FizzBuzz03 do
 
 end
 
+# MARK:test
 ExUnit.start()
 
 defmodule FizzBuzzTest do
@@ -58,3 +61,4 @@ defmodule FizzBuzzTest do
     assert res |> Enum.drop(9) |> Enum.take(6) == ["Buzz", "11", "Fizz", "13", "14", "FizzBuzz"]
   end
 end
+# END_MARK:test
