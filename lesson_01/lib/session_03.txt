@@ -1,0 +1,7 @@
+$ elixir lib/fizz_buzz_03.exs
+...
+
+Finished in 0.03 seconds (0.03s on load, 0.00s on tests)
+3 tests, 0 failures
+
+Randomized with seed 681561

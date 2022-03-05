@@ -33,7 +33,7 @@ def render_template(template, lesson):
 
 def insert_source(source, source_dir):
     s = source.split(':')
-    source_file = os.path.join(source_dir, f'{s[0]}.exs')
+    source_file = os.path.join(source_dir, f'{s[0]}')
     with open(source_file, 'r') as sf:
         source = sf.read()
         if len(s) > 1:

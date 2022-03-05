@@ -56,7 +56,7 @@ defmodule FizzBuzzTest do
   end
 
   test "fizzbuzz_100" do
-    res = fizzbuzz_100
+    res = fizzbuzz_100()
     assert Enum.take(res, 5) == ["1", "2", "Fizz", "4", "Buzz"]
     assert res |> Enum.drop(9) |> Enum.take(6) == ["Buzz", "11", "Fizz", "13", "14", "FizzBuzz"]
   end
