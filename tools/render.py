@@ -7,13 +7,11 @@ def render_all_lessons():
     for i in range(1, 15):
         lesson = 'lesson_{:02d}'.format(i)
         render_lesson(lesson)
-        exit(0)  # TEMP
 
 
 def render_lesson(lesson):
     print(f'Render {lesson}')
-    # tmp_path = f'./{lesson}/tmp/*.md' # TEMP
-    tmp_path = f'./{lesson}/tmp/*buzz.ru.md'
+    tmp_path = f'./{lesson}/tmp/*.md'
     for template in glob.glob(tmp_path):
         render_template(template, lesson)
 
@@ -37,15 +35,17 @@ def insert_source(source, source_dir):
     s = source.split(':')
     source_file = os.path.join(source_dir, f'{s[0]}.exs')
     with open(source_file, 'r') as sf:
-        # TODO process file not found
         source = sf.read()
         if len(s) > 1:
             begin_mark = f'# MARK:{s[1]}'
             begin_pos = source.find(begin_mark)
+            if begin_pos == -1:
+                raise RuntimeError(f'mark {s[1]} is not found in {source_file}')
             begin_pos += len(begin_mark)
             end_mark = f'# END_MARK:{s[1]}'
             end_pos = source.find(end_mark)
-            # TODO process mark not found
+            if end_pos == -1:
+                raise RuntimeError(f'end of mark {s[1]} is not found in {source_file}')
             return source[begin_pos:end_pos].strip()
         else:
             return source.strip()
