@@ -89,7 +89,7 @@ f = FP.bind(FP.bind(FP.bind(FP.bind(
 f.(BookShop.test_data)
 ```
 
-Увы, в Эликсире нельзя сделать как в Хаскеле, в префиксном виде:
+Увы, в Эликсире нельзя сделать как в Хаскеле, в префиксном виде(но справедливости ради стоит сказать, что Эликсир предоставляет возможность создавать свои кастомные операторы, хоть и более скромные, чем в Хаскеле. Смотрите модуль [Operators](https://hexdocs.pm/elixir/operators.html)):
 
 ```elixir
 f = validate_incoming_data >>= validate_cat >>= validate_address >>= validate_books >>= create_order
