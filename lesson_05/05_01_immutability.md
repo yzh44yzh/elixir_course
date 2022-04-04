@@ -63,8 +63,22 @@ iex(3)> my_list = my_list ++ [6,7,8]
 
 Поэтому полного копирования не происходит. Вместо этого, при создании новой структуры данных BEAM переиспользует часть или всю старую структура. Иммутабельность позволяет это делать.
 
-TODO: У Саши Журича взять картинки, как работает structure sharing для tuple и list.
-page 38.
+<!-- TODO: У Саши Журича взять картинки, как работает structure sharing для tuple и list.
+page 38. -->
+
+Кортеж:
+```elixir
+a_tuple = {a, b, c}
+new_tuple = put_elem(a_tuple, 1, b2)
+```
+<img src="./imgs/tuple2.png" height="400px" align="center">
+
+Список: 
+```elixir
+list = [a, b, c, d, e]
+insert_instead_of_c(list, c2)
+```
+<img src="./imgs/list.png" height="400px" align="center">
 
 В примере выше, 3 списка совмесно используют одну и ту же область памяти. А новая память выделяется только под новые элементы. Аналогично работает и Map.
 
