@@ -1,5 +1,7 @@
 # Типы данных
 
+TODO в этом уроке поверхностное знакомство. Потом разберем глубже.
+
 • 5 Value types:
 – Arbitrary-sized integers
 – Floating-point numbers

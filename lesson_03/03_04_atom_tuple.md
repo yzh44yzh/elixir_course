@@ -16,7 +16,7 @@
 {127, 0, 0, 1}
 ```
 
-В кортежах на первой позиции часто ставят атом, чтобы обозначить, что за данные собраны в кортеже. Таким образом кортеж помечается тэгом (tagged tuple).
+В кортежах на первой позиции часто ставят атом, чтобы обозначить, что за данные собраны в кортеже. Таким образом кортеж помечается тэгом, и это называется **тэгированный кортеж (tagged tuple)**.
 
 ```elixir
 {:user, "Bob", :male, 23}
@@ -44,6 +44,9 @@ IO.puts(x) # => 5
 IO.puts(y) # => 10
 ```
 
+TODO: elem/2
+TODO: more examples with user, get name, get age
+
 Рассмотрим реализацию функции distance, которая вычисляет расстояние между двумя точками:
 
 ```elixir
@@ -55,6 +58,8 @@ def distance(point1, point2) do
   :math.sqrt(:math.pow(x_dist, 2) + :math.pow(y_dist, 2))
 end
 ```
+TODO: templating, extract code from lib/*.exs
+TODO: abs not needed, but logical to use
 
 Функция принимает в аргументах две точки, извлекает их координаты с помощью сопоставления с образцом, и по теореме Пифагора вычисляет расстояние между точками.
 
@@ -73,6 +78,7 @@ def distance({:point, x1, y1}, {:point, x2, y2}) do
   :math.sqrt(:math.pow(x_dist, 2) + :math.pow(y_dist, 2))
 end
 ```
+TODO: need another lib/exs for this
 
 Результат работы функции:
 
@@ -107,3 +113,11 @@ elixir lib/lesson_03/task_03_04_atom_tuple.exs
 Окружность представлена кортежем `{:circle, center, radius}`, где center — это кортеж `:point`.
 
 Прямоугольник представлен кортежем `{:rect, left_top, right_bottom}`, где left_top и right_bottom — это кортежи `:point`.
+
+TODO: в скринкасте я использовал @type и @spec. Стоит ли их вводить на данном этапе? Собственно, @spec уже был на самом первом занятии. А @type удобный способ формально описать, что такое point, circle, rect.
+
+TODO: я сперва сделал `is_point_inside_cirle` и `is_point_inside_rect`, а потом обобщил до `is_point_inside_figure`. Есть смысл это сохранить.
+
+TODO: в эликсире принято `point_inside_figure?`, нужно переделать нейминг.
+
+TODO: code and sessions from templates
