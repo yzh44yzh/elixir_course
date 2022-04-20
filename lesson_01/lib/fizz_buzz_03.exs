@@ -4,7 +4,7 @@ defmodule FizzBuzz03 do
   def main() do
     fizzbuzz_100()
     |> Enum.join(" ")
-    |> IO.puts
+    |> IO.puts()
   end
 
 

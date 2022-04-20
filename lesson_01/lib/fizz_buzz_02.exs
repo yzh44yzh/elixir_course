@@ -4,7 +4,7 @@ defmodule FizzBuzz02 do
     1..100
     |> Enum.map(&fizzbuzz/1)
     |> Enum.join(" ")
-    |> IO.puts
+    |> IO.puts()
   end
 
 
