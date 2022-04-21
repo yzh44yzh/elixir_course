@@ -10,8 +10,10 @@ defmodule Lesson_03.Task_03_06_Map do
     """
   end
 
+  @spec count_words(String.t) :: %{String.t => integer}
   def count_words(string) do
-    String.split(string)
+    string
+    |> String.split()
     |> count_words(%{})
   end
 

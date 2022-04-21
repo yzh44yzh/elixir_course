@@ -36,7 +36,7 @@ BEAM гарантирует, что make_ref при каждом вызове г
 
 Recursive data structure, consists of:
 - byte (integer in range 0-255)
-- binary
+- String.t (binary)
 - IO List
 
 Useful for incrementally building output that will be forwarded to an IO device (socket or file).
@@ -78,8 +78,18 @@ iex(16)> IO.puts page_io
 Конечно, функциональный язык не может обойтись без анонимных функций, они же лямбды, они же замыкания. Для них тоже есть отдельный тип данных. Эти функции можно сохранять в переменную, передавать как аргументы в другие функции, и даже посылать на другую ноду, чтобы выполнить там.
 
 ```
-iex(18)> f = fn(val) -> rem(val, 2) == 0 end
+iex(19)> my_fun = fn(arg) -> arg * 2 end
 #Function<44.97283095/1 in :erl_eval.expr/5>
+iex(20)> my_fun.(24)
+48
+iex(22)> my_fun.(my_fun.(42))
+168
+
+iex(25)> apply_twice = fn(f, arg) -> f.(f.(arg)) end
+iex(26)> apply_twice.(my_fun, 42)
+168
+
+iex(18)> f = fn(val) -> rem(val, 2) == 0 end
 iex(19)> Enum.filter([1,2,3,4,5], f)
 [2, 4]
 ```
@@ -90,5 +100,10 @@ iex(19)> Enum.filter([1,2,3,4,5], f)
 Простые и составные типы данных.
 Условность этого разделения (pid простой или составной?)
 
-Сравнение значений:
+Сравнение значений
+
+Операция сравнения определена для любого значения. То есть, любое значение любого типа можно сравнивать с любым другим значением.
+
 number < atom < reference < function < port < pid < tuple < map < list < binary
+
+TODO пример: сортировка списка с разнородными данными

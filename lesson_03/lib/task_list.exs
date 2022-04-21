@@ -3,6 +3,7 @@ defmodule Lesson_03.Task_03_05_List do
   @doc """
   Операция merge из алгоритма Merge Sort.
   """
+  @spec merge(list, list) :: list
   def merge(list1, list2) do
     merge(list1, list2, [])
   end
