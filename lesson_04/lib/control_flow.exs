@@ -12,6 +12,11 @@ defmodule ControlFlow do
           :feed -> IO.puts("feed the cat #{name}")
           :pet -> IO.puts("pet the cat #{name}")
         end
+      {:rat, name} ->
+        case action do
+          :feed -> IO.puts("feed the rat #{name}")
+          :pet -> IO.puts("pet the rat #{name}")
+        end
     end
   end
 
@@ -21,20 +26,17 @@ defmodule ControlFlow do
       {{:dog, name}, :pet} -> IO.puts("pet the dog #{name}")
       {{:cat, name}, :feed} -> IO.puts("feed the cat #{name}")
       {{:cat, name}, :pet} -> IO.puts("pet the cat #{name}")
+      {{:rat, name}, :feed} -> IO.puts("feed the rat #{name}")
+      {{:rat, name}, :pet} -> IO.puts("pet the rat #{name}")
     end
   end
 
-  def handle3({:dog, name}, :feed) do
-    IO.puts("feed the dog #{name}")
-  end
-  def handle3({:dog, name}, :pet) do
-    IO.puts("pet the dog #{name}")
-  end
-  def handle3({:cat, name}, :feed) do
-    IO.puts("feed the cat #{name}")
-  end
-  def handle3({:cat, name}, :pet) do
-    IO.puts("pet the cat #{name}")
+  def handle3({:dog, name}, :feed), do: IO.puts("feed the dog #{name}")
+  def handle3({:dog, name}, :pet), do: IO.puts("pet the dog #{name}")
+  def handle3({:cat, name}, :feed), do: IO.puts("feed the cat #{name}")
+  def handle3({:cat, name}, :pet), do: IO.puts("pet the cat #{name}")
+  def handle3({animal, name}, action) do
+    IO.puts("do #{action} with the #{animal} #{name}")
   end
 
   def handle4(animal) do
