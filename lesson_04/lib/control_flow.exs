@@ -39,6 +39,11 @@ defmodule ControlFlow do
     IO.puts("do #{action} with the #{animal} #{name}")
   end
 
+  # TODO
+  def handle_({:dog, name, age}, :feed) when age > 10, do: IO.puts("give more food to the dog #{name}")
+  def handle_({:dog, name, _age}, :feed), do: IO.puts("feed the dog #{name}")
+  def handle_({:dog, name, _age}, :pet), do: IO.puts("pet the dog #{name}")
+
   def handle4(animal) do
     case animal do
       {:dog, name, age} when age > 10 -> IO.puts("#{name} is a dog older than 10")
