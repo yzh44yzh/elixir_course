@@ -11,8 +11,8 @@ def render_all_lessons():
 
 def render_lesson(lesson):
     print(f'Render {lesson}')
-    tmp_path = f'./{lesson}/tmp/*.md'
-    for template in glob.glob(tmp_path):
+    tmpl_path = f'./{lesson}/tmpl/*.md'
+    for template in glob.glob(tmpl_path):
         render_template(template, lesson)
 
 

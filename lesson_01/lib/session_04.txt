@@ -1,0 +1,98 @@
+# MARK:start
+~/p/elixir_course_junior/lib/lesson_01 $ iex
+Erlang/OTP 23 [erts-11.1] [source] [64-bit] [smp:8:8] [ds:8:8:10] [async-threads:1] [hipe]
+
+Interactive Elixir (1.10.4) - press Ctrl+C to exit (type h() ENTER for help)
+iex(1)>
+# END_MARK:start
+
+
+# MARK:compile
+iex(1)> c "fizz_buzz01.ex"
+[FizzBuzz01]
+iex(2)> h c
+# END_MARK:compile
+
+
+# MARK:recompile
+iex(3)> r FizzBuzz01
+warning: redefining module FizzBuzz01 (current version defined in memory)
+  fizz_buzz01.ex:1
+
+{:reloaded, FizzBuzz01, [FizzBuzz01]}
+# END_MARK:recompile
+
+
+# MARK:autocomplete
+> FizzBuzz01.<tab>
+> FizzBuzz01.main
+# END_MARK:autocomplete
+
+
+# MARK:introspection
+iex(4)> i 42
+iex(5)> i 3.14
+iex(6)> i "hello"
+iex(7)> i Map
+# END_MARK:introspection
+
+
+# MARK:history
+iex(9)> 42 * 2
+84
+iex(10)> v
+84
+iex(11)> v 9
+84
+iex(12)> 20 + 30
+50
+iex(13)> v
+50
+iex(14)> v 12
+50
+iex(15)> v 9
+84
+# END_MARK:history
+
+
+# MARK:help
+iex> h
+iex> h Map
+iex> h Map.get
+iex> h Map. <Tab>
+iex> h Map.fetch
+# END_MARK:help
+
+
+# MARK:module_help
+iex(21)> b Map
+No callbacks for Map were found
+iex(22)> b GenServer
+...
+# END_MARK:module_help
+
+
+# MARK:module_info
+iex(22)> Map.module_info
+iex(23)> FizzBuzz01.module_info
+# END_MARK:module_info
+
+
+# MARK:fizzbuzz_help
+iex(26)> h FizzBuzz02
+FizzBuzz01 was not compiled with docs
+# END_MARK:fizzbuzz_help
+
+
+# MARK:fizzbuzz_help_2
+iex(41)> c("fizz_buzz02.ex", ".")
+iex(42)> h FizzBuzz02
+iex(43)> h FizzBuzz02.main
+# END_MARK:fizzbuzz_help_2
+
+
+# MARK:runtime_info
+iex(28)> runtime_info
+iex(28)> runtime_info :memory
+# END_MARK:runtime_info
+
