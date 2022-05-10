@@ -2,38 +2,75 @@
 ~/p/elixir_course_junior/lib/lesson_01 $ iex
 Erlang/OTP 23 [erts-11.1] [source] [64-bit] [smp:8:8] [ds:8:8:10] [async-threads:1] [hipe]
 
-Interactive Elixir (1.10.4) - press Ctrl+C to exit (type h() ENTER for help)
+Interactive Elixir (1.13.4) - press Ctrl+C to exit (type h() ENTER for help)
 iex(1)>
 # END_MARK:start
 
 
 # MARK:compile
-iex(1)> c "fizz_buzz01.ex"
-[FizzBuzz01]
-iex(2)> h c
+iex(1)> c "lib/fizz_buzz_02.exs"
+[FizzBuzz02]
 # END_MARK:compile
 
 
-# MARK:recompile
-iex(3)> r FizzBuzz01
-warning: redefining module FizzBuzz01 (current version defined in memory)
-  fizz_buzz01.ex:1
+# MARK:compile_help
+iex(2)> h c
+def c(files, path \\ :in_memory)
+Compiles the given files.
+...
+# END_MARK:compile_help
 
-{:reloaded, FizzBuzz01, [FizzBuzz01]}
+
+# MARK:recompile
+iex(3)> r FizzBuzz02
+warning: redefining module FizzBuzz02 (current version defined in memory)
+  lib/fizz_buzz_02.exs:1
+
+{:reloaded, [FizzBuzz02]}
 # END_MARK:recompile
 
 
 # MARK:autocomplete
-> FizzBuzz01.<tab>
-> FizzBuzz01.main
+> Fizz.<tab>
+> FizzBuzz02.<tab>
+> FizzBuzz02.m<tab>
+> FizzBuzz02.main
 # END_MARK:autocomplete
 
 
 # MARK:introspection
 iex(4)> i 42
+Term
+  42
+Data type
+  Integer
+...
+
 iex(5)> i 3.14
-iex(6)> i "hello"
-iex(7)> i Map
+Term
+  3.14
+Data type
+  Float
+...
+
+iex(6)> my_str = "Hello"
+iex(7)> i my_str
+Term
+  "Hello"
+Data type
+  BitString
+Byte size
+  5
+Description
+  This is a string: a UTF-8 encoded binary ...
+  
+iex(8)> my_list = [1, 2, 3]
+iex(9)> i my_list
+Term
+  [1, 2, 3]
+Data type
+  List
+...
 # END_MARK:introspection
 
 
