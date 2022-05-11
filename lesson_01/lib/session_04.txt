@@ -10,7 +10,7 @@ iex(1)>
 # MARK:compile
 iex(1)> c "lib/fizz_buzz_02.exs"
 [FizzBuzz02]
-# END_MARK:compile
+B># END_MARK:compile
 
 
 # MARK:compile_help
@@ -96,40 +96,87 @@ iex(15)> v 9
 iex> h
 iex> h Map
 iex> h Map.get
-iex> h Map. <Tab>
+iex> h Map.<tab>
 iex> h Map.fetch
 # END_MARK:help
 
 
-# MARK:module_help
-iex(21)> b Map
-No callbacks for Map were found
-iex(22)> b GenServer
-...
-# END_MARK:module_help
-
-
 # MARK:module_info
 iex(22)> Map.module_info
-iex(23)> FizzBuzz01.module_info
+[
+  module: Map,
+  exports: [
+    __info__: 1,
+    delete: 2,
+    equal?: 2,
+    fetch: 2,
+    fetch!: 2,
+...
+
+iex(23)> FizzBuzz02.module_info
+[
+  module: FizzBuzz02,
+  exports: [__info__: 1, fizzbuzz: 1, main: 0, module_info: 0, module_info: 1],
+  attributes: [vsn: [19328415140430776990959847375304151410]],
+  compile: [
+...
 # END_MARK:module_info
 
 
 # MARK:fizzbuzz_help
-iex(26)> h FizzBuzz02
-FizzBuzz01 was not compiled with docs
+iex(26)> h FizzBuzz04
+FizzBuzz04 was not compiled with docs
 # END_MARK:fizzbuzz_help
 
 
 # MARK:fizzbuzz_help_2
-iex(41)> c("fizz_buzz02.ex", ".")
-iex(42)> h FizzBuzz02
-iex(43)> h FizzBuzz02.main
+iex(41)> c("lib/fizz_buzz_04.exs", ".")
+iex(42)> h FizzBuzz04
+iex(43)> h FizzBuzz04.main
 # END_MARK:fizzbuzz_help_2
 
 
 # MARK:runtime_info
 iex(28)> runtime_info
-iex(28)> runtime_info :memory
+## System and architecture 
+
+Elixir version:     1.13.4
+Erlang/OTP version: 23
+...
+
+## Memory 
+
+Total:              20 MB
+Atoms:              328 KB
+...
+
+## Statistics / limits 
+
+Uptime:             1 minutes and 40 seconds
+...
+
+iex(29)> runtime_info :system
+
+## System and architecture 
+
+Elixir version:     1.13.4
+Erlang/OTP version: 23
+ERTS version:       11.1
+Compiled for:       x86_64-unknown-linux-gnu
+Schedulers:         8
+Schedulers online:  8
+...
+
+iex(30)> runtime_info :memory
+
+## Memory 
+
+Total:              20 MB
+Atoms:              328 KB
+Binaries:           111 KB
+Code:               7 MB
+ETS:                510 KB
+Processes:          4 MB
+...
 # END_MARK:runtime_info
 
