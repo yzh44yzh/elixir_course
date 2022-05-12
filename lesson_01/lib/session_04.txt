@@ -15,7 +15,8 @@ B># END_MARK:compile
 
 # MARK:compile_help
 iex(2)> h c
-def c(files, path \\ :in_memory)
+                        def c(files, path \\ :in_memory)                         
+
 Compiles the given files.
 ...
 # END_MARK:compile_help
@@ -31,10 +32,10 @@ warning: redefining module FizzBuzz02 (current version defined in memory)
 
 
 # MARK:autocomplete
-> Fizz.<tab>
-> FizzBuzz02.<tab>
-> FizzBuzz02.m<tab>
-> FizzBuzz02.main
+iex(4)> Fizz.<tab>
+iex(5)> FizzBuzz02.<tab>
+iex(6)> FizzBuzz02.m<tab>
+iex(7)> FizzBuzz02.main
 # END_MARK:autocomplete
 
 
@@ -93,11 +94,11 @@ iex(15)> v 9
 
 
 # MARK:help
-iex> h
-iex> h Map
-iex> h Map.get
-iex> h Map.<tab>
-iex> h Map.fetch
+iex(16)> h
+iex(17)> h Map
+iex(18)> h Map.get
+iex(19)> h Map.<tab>
+iex(20)> h Map.fetch
 # END_MARK:help
 
 
