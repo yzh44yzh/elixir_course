@@ -63,7 +63,7 @@ Byte size
   5
 Description
   This is a string: a UTF-8 encoded binary ...
-  
+
 iex(8)> my_list = [1, 2, 3]
 iex(9)> i my_list
 Term
@@ -124,40 +124,60 @@ iex(23)> FizzBuzz02.module_info
 
 
 # MARK:fizzbuzz_help
+iex(25)> c "lib/fizz_buzz_04.exs"
 iex(26)> h FizzBuzz04
 FizzBuzz04 was not compiled with docs
 # END_MARK:fizzbuzz_help
 
 
 # MARK:fizzbuzz_help_2
-iex(41)> c("lib/fizz_buzz_04.exs", ".")
-iex(42)> h FizzBuzz04
-iex(43)> h FizzBuzz04.main
+iex(27)> c("lib/fizz_buzz_04.exs", ".")
+iex(28)> h FizzBuzz04
+                                   FizzBuzz04
+
+FizzBuzz is a simple task to show basic usage of Elixir.
+
+iex(29)> h FizzBuzz04.fizzbuzz_100
+
+                               def fizzbuzz_100()
+
+  @spec fizzbuzz_100() :: [String.t()]
+
+Produces list of strings for numbers from 1 to 100.
+
+iex(30)> h FizzBuzz04.fizzbuzz
+
+                                def fizzbuzz(n)
+
+  @spec fizzbuzz(integer()) :: String.t()
+
+Produces string result for a single number.
+
 # END_MARK:fizzbuzz_help_2
 
 
 # MARK:runtime_info
 iex(28)> runtime_info
-## System and architecture 
+## System and architecture
 
 Elixir version:     1.13.4
 Erlang/OTP version: 23
 ...
 
-## Memory 
+## Memory
 
 Total:              20 MB
 Atoms:              328 KB
 ...
 
-## Statistics / limits 
+## Statistics / limits
 
 Uptime:             1 minutes and 40 seconds
 ...
 
 iex(29)> runtime_info :system
 
-## System and architecture 
+## System and architecture
 
 Elixir version:     1.13.4
 Erlang/OTP version: 23
@@ -169,7 +189,7 @@ Schedulers online:  8
 
 iex(30)> runtime_info :memory
 
-## Memory 
+## Memory
 
 Total:              20 MB
 Atoms:              328 KB
@@ -179,4 +199,3 @@ ETS:                510 KB
 Processes:          4 MB
 ...
 # END_MARK:runtime_info
-
