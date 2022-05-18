@@ -1,16 +1,15 @@
 \documentclass[10pt]{beamer}
 
-\usepackage{listings}
-
-\usepackage{wrapfig}
-
-\usepackage{graphicx}
-\graphicspath{ {../img/} }
-
 \usepackage{fontspec}
 \setmainfont{Ubuntu}[]
 \setsansfont{Ubuntu}[]
 \setmonofont{Ubuntu Mono}[]
+
+\usepackage{graphicx}
+\graphicspath{ {../img/} }
+
+\usepackage[absolute,overlay]{textpos} % [showboxes]
+\usepackage{listings}
 
 \beamertemplatenavigationsymbolsempty
 
@@ -35,15 +34,19 @@
 
 
 \begin{frame}
-  \frametitle{Агнер Краруп Эрланг}
-  \begin{wrapfigure}{l}{0.25\textwidth}
+  \frametitle{Предыстория: начало ХХ века.}
+  \begin{textblock*}{70pt}(30pt,60pt)
     \includegraphics{agner_krarup_erlang}
-  \end{wrapfigure}
-  Датский математик, статистик и инженер.
-  \par \bigskip
-  Научный подход к изучению трафика в телефонных сетях.
-  \par \bigskip
-  Автор "Теории массового обслуживания".
+  \end{textblock*}
+  \begin{textblock*}{220pt}(120pt,65pt)
+    \textbf{Агнер Краруп Эрланг}
+    \par \bigskip
+    Датский математик, статистик и инженер.
+    \par \bigskip
+    Научный подход к изучению трафика в телефонных сетях.
+    \par \bigskip
+    Автор "Теории массового обслуживания".
+  \end{textblock*}
 \end{frame}
 
 \begin{frame}
@@ -57,7 +60,7 @@
   \frametitle{Теория массового обслуживания}
   применяется в телекоммуникационных системах,
   \par \bigskip
-  и шире:
+  а также:
   \begin{itemize}
   \item в логистике,
   \item в управлении автомобильным движением,
@@ -68,10 +71,9 @@
 
 \begin{frame}
   \frametitle{Эрланг}
-  Родился в шведской компании Эрикссон (Ericsson).
+  Язык Эрланг родился в шведской компании \textbf{Эрикссон} (\textbf{Ericsson}).
   \par \bigskip
-  Крупный поставщик телекомуникационного
-  оборудования и услуг.
+  Крупный поставщик телекомуникационного оборудования и~услуг.
 \end{frame}
 
 \begin{frame}
@@ -87,9 +89,9 @@
 
 \begin{frame}
   \frametitle{Ericsson’s Computer Science Laboratory}
-  Задача найти более эффективные средства
+  Задача:
   \par \bigskip
-  разработки софта для железа и сервисов компании.
+  Найти более эффективные средства разработки софта для железа и сервисов компании.
 \end{frame}
 
 \begin{frame}
@@ -108,30 +110,38 @@
   Ни один язык не имеет нужных возможностей.
   \par \bigskip
   Главная проблема -- многопоточность.
-  \par \bigskip
-  В итоге лаборатория решила
-  разработать свой язык программирования.
 \end{frame}
 
 \begin{frame}
-  \frametitle{Популярность Эрланг}
-  2002 год, ejabberd -- первый крупный open source проект.
+  \frametitle{Эрланг}
+  \begin{textblock*}{75pt}(30pt,60pt)
+    \includegraphics[scale=2.8]{erlang_logo}
+  \end{textblock*}
+  \begin{textblock*}{220pt}(120pt,70pt)
+    В итоге лаборатория решила разработать свой язык~программирования.
+  \end{textblock*}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Эрланг}
+  1998 год: Эрланг выпушен в open source.
+  \par \bigskip
+  2002 год: \textbf{Ejabberd} -- первый крупный open source проект.
   \par \bigskip
   Стал основой для большинства IM (Instant Messaging) систем,
   \par \bigskip
-  в т.ч. для широко известного WhatsApp.
+  в т.ч. для широко известного \textbf{WhatsApp}.
 \end{frame}
 
 \begin{frame}
-  \frametitle{Популярность Эрланг}
-  2006 год, поддержка симметричной мультипроцессорности (SMP)
+  \frametitle{Эрланг}
+  2006 год: поддержка симметричной мультипроцессорности (SMP).
   \par \bigskip
-  Эрланг научился эффективно использовать
-  все имеющиеся в системе процессорные ядра.
+  Эрланг научился эффективно использовать все имеющиеся в~системе процессорные ядра.
 \end{frame}
 
 \begin{frame}
-  \frametitle{Популярность Эрланг}
+  \frametitle{Эрланг}
   У IT-индустрии появилась потребность
   разрабатывать многопоточные программы.
   \par \bigskip
@@ -150,23 +160,35 @@
 
 \begin{frame}
   \frametitle{Эликсир}
-  Эликсир создан в 2012 году в компании Plataformatec.
-  \par \bigskip
-  Его автор -- Жозе Валим.
-  \par \bigskip
-  Один из основных разработчиков фреймворка Ruby on Rails
-  и сооснователь компании Plataformatec.
+  \begin{textblock*}{75pt}(30pt,60pt)
+    \includegraphics[scale=2.9]{elixir_logo}
+  \end{textblock*}
+  \begin{textblock*}{220pt}(120pt,60pt)
+    Эликсир создан в 2012 году в компании Plataformatec.
+    \par \bigskip
+    Его автор -- \textbf{Жозе Валим}.
+    \par \bigskip
+    Один из основных разработчиков фреймворка Ruby on Rails
+    и сооснователь компании Plataformatec.
+  \end{textblock*}
 \end{frame}
 
 \begin{frame}
   \frametitle{Эликсир}
   Позаимствовал идеи из Ruby, Clojure и Эрланг.
   \par \bigskip
-  Большое влияние Ruby и Ruby on Rails.
+  Развивался под влиянием Ruby и Ruby on Rails.
   \par \bigskip
   Система макросов заимствована из Clojure.
   \par \bigskip
   Унаследовал все возможности Эрланг и его виртуальной машины.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Эликсир}
+  2014 год: Эликсир 1.0
+  \par \bigskip
+  2015 год: Ecto 1.0 и Phoenix 1.0
 \end{frame}
 
 \end{document}
