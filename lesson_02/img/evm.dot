@@ -12,29 +12,16 @@ digraph GS {
             Планировщик
             "Управление памятью"
             IO
-            Криптография
-            Диск
-            Сеть
         }
 
         subgraph clusterApps {
             label = <<b>Приложения</b>>;
             Apps [fillcolor=gold2];
 
-            "OTP Apps"
             kernel
             stdlib
-            inets
-            crypto
-
-            "User Apps"
-            my_cool_app
-
-            Dependencies
-            elixir
-            logger
-            cowboy
-            plug
+            Cowboy
+            Plug
         }
 
         subgraph clusterBEAM {
@@ -49,26 +36,11 @@ digraph GS {
     ERTS -> Планировщик
     ERTS -> "Управление памятью"
     ERTS -> IO
-    ERTS -> Криптография
 
-    IO -> Диск
-    IO -> Сеть
-
-    Apps -> "OTP Apps"
-    Apps -> "User Apps"
-    Apps -> Dependencies
-
-    "OTP Apps" -> kernel
-    "OTP Apps" -> stdlib
-    "OTP Apps" -> inets
-    "OTP Apps" -> crypto
-
-    "User Apps" -> my_cool_app
-
-    Dependencies -> elixir
-    Dependencies -> logger
-    Dependencies -> cowboy
-    Dependencies -> plug
+    Apps -> kernel
+    Apps -> stdlib
+    Apps -> Cowboy
+    Apps -> Plug
 
     BEAM -> Компилятор
     BEAM -> Интерпретатор
