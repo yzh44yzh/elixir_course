@@ -50,7 +50,7 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{Erlang Virual Machine}
+  \frametitle{Erlang Virtual Machine}
   Еще несколько свойств:
   \begin{itemize}
   \item Симметричная многопроцессорность (Symmetric~Multiprocessing);
@@ -183,20 +183,142 @@
   Используем локально на машине разработчика.
 \end{frame}
 
-%% \begin{frame}
-%%   \frametitle{}
-%% \end{frame}
+\begin{frame}
+  \frametitle{Симметричная многопроцессорность}
+  BEAM эффективно использует все CPU.
+  \par \bigskip
+  Умеет перераспределять нагрузку между ними.
+\end{frame}
 
-%% \begin{frame}
-%%   \frametitle{}
-%% \end{frame}
+\begin{frame}
+  \frametitle{Симметричная многопроцессорность}
+  Производительность линейно масштабируется с~ростом~числа~ядер.
+  \par \bigskip
+  Проверяли на чипах с 1024 ядрами.
+  \par \bigskip
+  Работает "из коробки".
+\end{frame}
 
-%% \begin{frame}
-%%   \frametitle{}
-%% \end{frame}
+\begin{frame}
+  \frametitle{Модель акторов}
+  Один из способов реализации многопоточности.
+\end{frame}
 
-%% \begin{frame}
-%%   \frametitle{}
-%% \end{frame}
+\begin{frame}
+  \frametitle{Модель акторов}
+  Система состоит из акторов,
+  \par \bigskip
+  которые действуют паралельно и независимо друг от друга,
+  \par \bigskip
+  имеют собственное состояние
+  \par \bigskip
+  и общаются друг с другом с помощью отправки сообщений.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Модель акторов}
+  Для модель акторов реализована как библиотека.
+  \par \bigskip
+  Например, библиотека \textbf{Akka} для Java и Scala.
+  \par \bigskip
+  Но в BEAM эта модель поддерживается на уровне языка.
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Система реального времени}
+  Реагирует на запросы с гарантированным лимитом времени.
+  \par \bigskip
+  Нарушение лимита времени считается отказом~системы~(\textbf{hard~real-time}),
+  \par \bigskip
+  или снижением качества работы системы (\textbf{soft real-time}).
+\end{frame}
+
+\begin{frame}
+  \frametitle{Система реального времени}
+  Применяется в промышленности, транспорте, медицине.
+  \par \bigskip
+  Управление атомной электростанцией.
+  \par \bigskip
+  Авионика самолета.
+  \par \bigskip
+  Беспилотный автомобиль.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Система реального времени}
+  BEAM поддерживает \textbf{soft real-time} благодаря:
+  \begin{itemize}
+  \item вытесняющей многозадачности (preemptive scheduling);
+  \item изолированному IO;
+  \item особенностям сборки мусора (garbage collection).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Сборщик мусора}
+  Отдельный для каждого процесса,
+  \par \bigskip
+  срабатывает независимо от других процессов,
+  \par \bigskip
+  в разные моменты времени.
+  \par \bigskip
+  Нет эффекта \textbf{stop world}.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Сборщик мусора}
+  Вообще не запускается:
+  \begin{itemize}
+  \item короткоживущие процессы;
+  \item долгоживущие процессы, потребляющие мало памяти.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Сборщик мусора}
+  Сборка мусора оказывает мало влияния
+  \par \bigskip
+  на производительность системы.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Интерактивная консоль}
+  REPL-консоль (\textbf{R}ead, \textbf{E}val, \textbf{P}rint, \textbf{L}oop).
+  \par \bigskip
+  Работает не только локально, но и удаленно.
+  \par \bigskip
+  Интроспекция -- чтение информации о системе в~реальном~времени.
+  \par \bigskip
+  Можно взаимодействовать с production системой.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Трассировка}
+  Получение событий системы в реальном времени:
+  \begin{itemize}
+  \item вызовы функций, аргументы, возвращаемые значения;
+  \item работа планировщика;
+  \item потреблении памяти;
+  \item работа сборщиков мусора;
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Трассировка}
+  Получение событий системы в реальном времени:
+  \begin{itemize}
+  \item жизненный цикл процессов (старт, остановка и др);
+  \item отправка и получение сообщений;
+  \item состояние памяти процессов.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Трассировка}
+  Теоретически можно узнать почти все о работе системы.
+  \par \bigskip
+  Cложность в том, чтобы найти именно ту информацию, которая~нужна.
+\end{frame}
 
 \end{document}
