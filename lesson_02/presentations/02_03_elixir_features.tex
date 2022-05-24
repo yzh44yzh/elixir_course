@@ -1,0 +1,82 @@
+\documentclass[10pt]{beamer}
+
+\usepackage{fontspec}
+\setmainfont{Ubuntu}[]
+\setsansfont{Ubuntu}[]
+\setmonofont{Ubuntu Mono}[]
+
+\usepackage{graphicx}
+\graphicspath{ {../img/} }
+
+\usepackage{listings}
+\lstset{
+  language=ML,
+  keywordstyle=\color{blue},
+  backgroundcolor=\color{lightgray}
+}
+
+\beamertemplatenavigationsymbolsempty
+
+\title{Свойства Эликсир}
+
+\begin{document}
+
+\begin{frame}
+  \frametitle{Свойства Эликсир}
+  \begin{itemize}
+  \item Мощная система макросов
+  \item Высокоуровневый язык
+  \item Экосистема и сообщество
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Система макросов}
+  Работает на уровне абстрактного синтаксического дерева.
+  \par \bigskip
+  Позволяет расширять язык и строить Domain~Specific~Languages.
+  \par \bigskip
+  Примеры: \textbf{Ecto} и \textbf{Phoenix}.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Высокоуровневый язык}
+  \begin{itemize}
+  \item Оператор \textbf{pipe}
+  \item Макрос \textbf{with}
+  \item Абстракции Эликсир
+  \item Абстракции Эрланг
+  \end{itemize}  
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Оператор pipe}
+  pipe
+  \begin{lstlisting}
+    a = func1()
+    b = func2(a)
+    c = func3(b)
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Макрос with}
+  with
+\end{frame}
+
+\begin{frame}
+  \frametitle{Абстракции Эликсир}
+  Enum
+\end{frame}
+
+\begin{frame}
+  \frametitle{Абстракции Эрланг}
+  HOF
+\end{frame}
+
+\begin{frame}
+  \frametitle{Экосистема и сообщество}
+\end{frame}
+
+\end{document}
