@@ -52,31 +52,86 @@
 
 \begin{frame}[fragile]
   \frametitle{Оператор pipe}
-  pipe
+  Несколько вызовов функций:
   \begin{lstlisting}
-    a = func1()
-    b = func2(a)
-    c = func3(b)
+    a = 42
+    b = func1(a)
+    c = func2(b)
+    d = func3(c)
+  \end{lstlisting}
+  Можно собрать в цепочку:
+  \begin{lstlisting}
+    d = func3(func2(func1(42))
+  \end{lstlisting}
+  С оператором pipe сохраняется естественный порядок:
+  \begin{lstlisting}
+    d = 42 |> func1() |> func2() |> func3()
   \end{lstlisting}
 \end{frame}
 
-\begin{frame}
+\begin{frame}[fragile]
   \frametitle{Макрос with}
-  with
+  Композиция функций, которые могут вернуть ошибку:
+  \begin{lstlisting}
+    case func1() do
+      {:ok, a} -> 
+        case func2() do
+          {:ok, b} -> 
+            case func3() do
+              {:ok, c} -> a + b + c
+              error -> error
+            end
+          error -> error
+       end
+       error -> error
+    end
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Макрос with}
+  С макросом \textbf{with}:
+  \begin{lstlisting}
+    with(
+      a = func1(),
+      b = func2(),
+      c = func3()
+    ) do
+      a + b + c
+    end
+  \end{lstlisting}
+  Обработка ошибок в стиле \textbf{Railway programming} (или~\textbf{do-notation}).
 \end{frame}
 
 \begin{frame}
   \frametitle{Абстракции Эликсир}
-  Enum
+  \begin{itemize}
+  \item Коллекции \textbf{Enum}
+  \item Ленивые коллекции \textbf{Stream}
+  \item Строковые литералы \textbf{Sigil}
+  \item Протоколы
+  \item \textbf{Task} и \textbf{Agent}
+  \end{itemize}
 \end{frame}
 
 \begin{frame}
   \frametitle{Абстракции Эрланг}
-  HOF
+  \begin{itemize}
+  \item Функции высшего порядка
+  \item Конструкторы списков
+  \item Сопоставление с образцом
+  \item \textbf{gen\_server} и \textbf{supervisor}
+  \end{itemize}
 \end{frame}
 
 \begin{frame}
   \frametitle{Экосистема и сообщество}
+  \begin{itemize}
+  \item Большое и активное сообщество
+  \item Много библиотек и инструментов
+  \item Язык и экосистема быстро развиваются
+  \item Заимствование идей и инструменов из Эликсир в Эрланг
+  \end{itemize}
 \end{frame}
 
 \end{document}
