@@ -1,0 +1,190 @@
+\documentclass[10pt]{beamer}
+
+\usepackage{fontspec}
+\setmainfont{Ubuntu}[]
+\setsansfont{Ubuntu}[]
+\setmonofont{Ubuntu Mono}[]
+
+\usepackage{graphicx}
+\graphicspath{ {../img/} }
+
+\usepackage{listings}
+\lstset{
+  language=ML,
+  keywordstyle=\color{blue},
+  backgroundcolor=\color{lightgray}
+}
+
+\beamertemplatenavigationsymbolsempty
+
+\title{Недостатки Эликсир}
+
+\begin{document}
+
+\begin{frame}
+  \frametitle{Недостатки BEAM и Эликсир}
+  \begin{itemize}
+  \item Недостатки BEAM
+    \begin{itemize}
+    \item Скорость выполнения кода
+    \item Небольшая экосистема
+    \item Не мейнстрим
+    \end{itemize}
+  \item Недостатки Эликсир
+    \begin{itemize}
+    \item Проблемы в дизайне языка
+    \item Динамическая типизация
+    \item Разница между исходным кодом и байткодом
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Скорость выполнения кода}
+  Языки по скорости выполнения:
+  \begin{itemize}
+  \item интерпретируемые (\textbf{Python}, \textbf{Ruby})
+  \item компилируемые в байткод (\textbf{Elixir}, \textbf{Java})
+  \item компилируемые в нативный код (\textbf{Go}, \textbf{C++})
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Скорость выполнения кода}
+  Эликсир быстрее \textbf{Python} и \textbf{Ruby},
+  \par \bigskip
+  но медленее \textbf{Java} и \textbf{Go}.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Скорость выполнения кода}
+  Это про скорость одного потока на одном ядре.
+  \par \bigskip
+  А у нас многопоточность.
+  \par \bigskip
+  Тут важнее средства языка,
+  \par \bigskip
+  архитектура виртуальной машины и приложения.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Небольшая экосистема}
+  Библиотеки, инструменты и сообщество разработчиков.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Небольшая экосистема}
+  Количество репозиториев на Github:
+  \begin{itemize}
+  \item Эрланг -- \textbf{20К}
+  \item Эликсир -- \textbf{36К}
+  \item Ruby -- \textbf{1.5M}
+  \item JavaScript -- \textbf{5M}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Небольшая экосистема}
+  Качество важнее количества.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Не мейнстрим}
+  Компании не хотят использовать технологию, в~которой~мало~разработчиков.
+  \par \bigskip
+  Это риск для бизнеса.
+  \par \bigskip
+  Разработчики не хотят изучать технологию, которую~используют~мало~компаний.
+  \par \bigskip
+  Это риск для карьеры.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Проблемы в дизайне языка}
+  Тщательно продуманные дизайн, семантика,
+  \par \bigskip
+  синтаксис и реализация -- это не про Эликсир.
+  \par \bigskip
+  (мнение Эрлангистов :)
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Проблемы в дизайне языка}
+  Вызов функций без круглых скобок:
+  \begin{lstlisting}
+    my_fun(arg1, arg2)
+    my_fun arg1, arg2
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Проблемы в дизайне языка}
+  Два синтаксиса для словарей:
+  \begin{lstlisting}
+    m1 = %{a: 42}
+    m1.a
+
+    m2 = %{"a" => 42}
+    m2["a"]
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Проблемы в дизайне языка}
+  Однострочный \textit{do..end}:
+  \begin{lstlisting}
+    my_fun(a, b), do: a + b
+    
+    my_fun(a, b) do
+      a + b
+    end
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Проблемы в дизайне языка}
+  Вызов анонимной функции:
+  \begin{lstlisting}
+    my_fun = fn(a) -> a * a end 
+    my_fun.(42)
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Проблемы в дизайне языка}
+  Хорошая новость в том, что ко всему привыкаешь :)
+\end{frame}
+
+\begin{frame}
+  \frametitle{Динамическая типизация}
+  Статическая типизация поддерживается~в~некоторой~степени.
+  \par \bigskip
+  \textbf{Dialyzer} ограничен в возможностях, и~его~легко~игнорировать.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Динамическая типизация}
+  Языки для BEAM со статической типизацией:
+  \par \bigskip
+  \textbf{Alpaka}, \textbf{Gleam}, \textbf{Haskerl}, \textbf{Caramel}.
+  \par \bigskip
+  Не зрелые, не для реальных проектов.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Разница между исходным кодом и байткодом}
+  Абстракции высокого уровня,
+  \par \bigskip
+  широкое использование макросов.
+  \par \bigskip
+  Код сильно отличается от байткода.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Разница между исходным кодом и байткодом}
+  Трудно понять, что именно работает в рантайме.
+  \par \bigskip
+  Это усложняет интроспекцию и трассировку.
+\end{frame}
+
+\end{document}
