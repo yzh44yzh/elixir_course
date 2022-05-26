@@ -1,4 +1,4 @@
-\documentclass[10pt]{beamer}
+\documentclass[10pt,xcolor=x11names]{beamer}
 
 \usepackage{fontspec}
 \setmainfont{Ubuntu}[]
@@ -9,10 +9,29 @@
 \graphicspath{ {../img/} }
 
 \usepackage{listings}
+\lstdefinelanguage{elixir}{
+    morekeywords={case,catch,def,do,else,false,%
+        use,alias,receive,timeout,defmacro,defp,%
+        for,if,import,defmodule,defprotocol,%
+        nil,defmacrop,defoverridable,defimpl,%
+        super,fn,raise,true,try,end,with,%
+        unless},
+    otherkeywords={<-,->, |>, \%\{, \}, \{, \, (, )},
+    sensitive=true,
+    morecomment=[l]{\#},
+    morecomment=[n]{/*}{*/},
+	basicstyle=\ttfamily,
+	breaklines,
+	showstringspaces=false,
+	frame=trbl
+}
+
+%% https://latex-tutorial.com/color-latex/
 \lstset{
-  language=ML,
-  keywordstyle=\color{blue},
-  backgroundcolor=\color{lightgray}
+  language=elixir,
+  keywordstyle=\color{SteelBlue4},
+  identifierstyle=\color{DeepSkyBlue3},
+  backgroundcolor=\color{Ivory1}
 }
 
 \beamertemplatenavigationsymbolsempty
