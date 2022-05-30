@@ -1,0 +1,98 @@
+\documentclass[10pt,xcolor=x11names]{beamer}
+
+\usepackage{fontspec}
+\setmainfont{Ubuntu}[]
+\setsansfont{Ubuntu}[]
+\setmonofont{Ubuntu Mono}[]
+
+\usepackage{graphicx}
+\graphicspath{ {../img/} }
+
+\beamertemplatenavigationsymbolsempty
+
+\title{Сфера применения BEAM и Эликсир}
+
+\begin{document}
+
+\begin{frame}
+  \frametitle{Сфера применения BEAM}
+  Протокол HTTP решает проблему,
+  \par \bigskip
+  как одному серверу обслужить много клиентов,
+  \par \bigskip
+  благодаря двум ограничениям:
+  \par \bigskip
+  \begin{itemize}
+    \item короткое время жизни соединения,
+    \item отстутствие состояния.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Сфера применения BEAM}
+  Долгоживущее TCP-соединение: минуты, часы, недели.
+  \par \bigskip
+  Как правило есть состояние.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Сфера применения BEAM}
+  Отдельный процесс на каждое соединение.
+  \par \bigskip
+  Сотни тысяч одновременных соединений.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Сфера применения BEAM}
+  Мессенджеры и многопользовательские чаты.
+\end{frame}
+
+\begin{frame}
+  \frametitle{WhatsUp}
+  \textbf{2012 год} -- золотое время компании.
+  \par \bigskip
+  \textbf{450M} активных пользователей.
+  \par \bigskip
+  \textbf{32} инженера.
+\end{frame}
+
+\begin{frame}
+  \frametitle{WhatsUp}
+  \textbf{35M} сообщений в секунду.
+  \par \bigskip
+  \textbf{2M} соединений на один сервер
+  \par \bigskip
+  \textbf{24} CPU, \textbf{100GB} RAM.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Чат-сервер Wargaming}
+  \textbf{12K} запросов в секунду.
+  \par \bigskip
+  \textbf{300K} соединений на один сервер.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Сфера применения Эликсир}
+  Авторы Эликсир имели другой опыт.
+  \par \bigskip
+  \textbf{Жозе Валим} был одним из разработчиков \textbf{Ruby on Rails}.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Сфера применения Эликсир}
+  Быстрый и масштабируемый веб-фреймворк.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Сфера применения Эликсир}
+  Долгоживущие соединения: \textbf{Channels} и \textbf{LiveView}.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Сфера применения Эликсир}
+  Эликсир лучше подходит для веб-разработки, чем Эрланг.
+\end{frame}
+
+
+\end{document}
