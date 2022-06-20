@@ -120,6 +120,8 @@ got unknown msg :hello
 :ok
 ```
 
+<img src="./img/give_name_to_pid.svg" alt="drawing" width="350"/>
+
 Имена глобальны на уровне всей системы, и в любой момент времени под конкретным именем может быть зарегистрирован только один процесс.
 
 ```
@@ -148,6 +150,8 @@ iex(7)> Process.registered()
 Как видим, их довольно много.
 
 Мы можем узнать Pid процесса по имени:
+
+<img src="./img/who_are_you.svg" alt="drawing" width="250"/>
 
 ```
 iex(11)> Process.whereis(:pool_manager)
