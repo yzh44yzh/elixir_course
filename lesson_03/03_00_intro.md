@@ -1,22 +1,37 @@
 # Типы данных
 
-TODO в этом уроке поверхностное знакомство. Потом разберем глубже.
+Любой язык программирования начинается с базовых типов данных и операций над ними.
 
-• 5 Value types:
-– Arbitrary-sized integers
-– Floating-point numbers
-– Atoms
-– Ranges
-– Regular expressions
+Из базовых типов строятся более сложные типы, которые тоже имеют свой набор операций.
 
-• 2 System types:
-– PIDs and ports
-– References
+Наконец, из базовых и сложных типов можно создавать новые, пользовательские типы данных, и реализовывать новые операции над ними.
 
-• 4 Collection types:
-– Tuples
-– Lists
-– Maps
-– Binaries
+В этом уроке мы начнем знакомиться с базовыми типами.
 
-Functions are a type too.
+TODO общая картина
+
+number
+  int
+  float
+
+bool
+
+atom
+
+collections
+  tuple
+  list
+  map
+  string/binary
+
+other
+  pid
+  port
+  reference
+  function
+  
+complex types
+  io list
+  keyword list
+  range
+  
