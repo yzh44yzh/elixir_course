@@ -24,7 +24,7 @@ collections
   map
   string/binary
 
-other
+system types
   pid
   port
   reference
