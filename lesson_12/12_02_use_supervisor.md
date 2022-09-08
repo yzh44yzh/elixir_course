@@ -14,7 +14,7 @@ def start_link({agent_name, state}) do
 end
 ```
 
-Функцию `find_node` тоже добработаем, чтобы можно было указать имя агента:
+Функцию `find_node` тоже доработаем, чтобы можно было указать имя агента:
 
 ```
 def find_node(agent_name, shard_num) do
@@ -319,4 +319,3 @@ Lesson_12.PathFinder.get_route("Москва", "Астрахань")
 
 Таким образом у нас получилось дерево процессов:
 ![Supervision Tree](./img/supervision_tree.png)
-
