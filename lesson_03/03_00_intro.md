@@ -8,13 +8,11 @@
 
 В этом уроке мы начнем знакомиться с базовыми типами.
 
-TODO общая картина
-
 number
-  int
+  integer
   float
 
-bool
+boolean
 
 atom
 
@@ -34,4 +32,5 @@ complex types
   io list
   keyword list
   range
+  sigil: Date, Time, DateTime, RE
   

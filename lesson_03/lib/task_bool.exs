@@ -7,19 +7,51 @@ defmodule Lesson_03.Task_03_03_Bool do
   https://en.wikipedia.org/wiki/Three-valued_logic
   """
 
-  def sk_not(true), do: false
-  def sk_not(false), do: true
-  def sk_not(nil), do: nil
+  defmodule Step1 do
+    
+    def sk_not(true), do: false
+    def sk_not(nil), do: nil
+    def sk_not(false), do: true
+    
+    def sk_and(false, false), do: false
+    def sk_and(false, nil), do: false
+    def sk_and(false, true), do: false
+    def sk_and(nil, false), do: false
+    def sk_and(nil, nil), do: nil
+    def sk_and(nil, true), do: nil
+    def sk_and(true, false), do: false
+    def sk_and(true, nil), do: nil
+    def sk_and(true, true), do: true
 
-  def sk_and(false, _), do: false
-  def sk_and(nil, false), do: false
-  def sk_and(nil, _), do: nil
-  def sk_and(true, second_arg), do: second_arg
+    def sk_or(false, false), do: false
+    def sk_or(false, nil), do: nil
+    def sk_or(false, true), do: true
+    def sk_or(nil, false), do: nil
+    def sk_or(nil, nil), do: nil
+    def sk_or(nil, true), do: true
+    def sk_or(true, false), do: true
+    def sk_or(true, nil), do: true
+    def sk_or(true, true), do: true
+    
+  end
 
-  def sk_or(true, _), do: true
-  def sk_or(nil, true), do: true
-  def sk_or(nil, _), do: nil
-  def sk_or(false, second_arg), do: second_arg
+  defmodule Step2 do
+    
+    def sk_not(true), do: false
+    def sk_not(false), do: true
+    def sk_not(nil), do: nil
+    
+    def sk_and(false, _), do: false
+    def sk_and(nil, false), do: false
+    def sk_and(nil, _), do: nil
+    def sk_and(true, second_arg), do: second_arg
+
+    def sk_or(true, _), do: true
+    def sk_or(nil, true), do: true
+    def sk_or(nil, _), do: nil
+    def sk_or(false, second_arg), do: second_arg
+    
+  end
 
 end
 
@@ -27,12 +59,13 @@ ExUnit.start()
 
 defmodule Task_03_03_Test do
   use ExUnit.Case
-  import Lesson_03.Task_03_03_Bool
+  # import Lesson_03.Task_03_03_Bool.Step1
+  import Lesson_03.Task_03_03_Bool.Step2
 
   test "Stephen Kleene, not" do
     assert sk_not(true) == false
-    assert sk_not(false) == true
     assert sk_not(nil) == nil
+    assert sk_not(false) == true
   end
 
   test "Stephen Kleene, and" do

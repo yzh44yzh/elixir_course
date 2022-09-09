@@ -128,8 +128,6 @@ elixir lib/lesson_03/task_03_04_atom_tuple.exs
 
 TODO: в скринкасте я использовал @type и @spec. Стоит ли их вводить на данном этапе? Собственно, @spec уже был на самом первом занятии. А @type удобный способ формально описать, что такое point, circle, rect.
 
-TODO: я сперва сделал `is_point_inside_cirle` и `is_point_inside_rect`, а потом обобщил до `is_point_inside_figure`. Есть смысл это сохранить.
-
-TODO: в эликсире принято `point_inside_figure?`, нужно переделать нейминг.
+TODO: я сперва сделал `point_inside_cirle?` и `point_inside_rect?`, а потом обобщил до `point_inside_figure?`. Есть смысл это сохранить.
 
 TODO: code and sessions from templates
