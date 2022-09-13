@@ -6,20 +6,26 @@ defmodule Lesson_03.Task_03_07_String do
   
   @spec align([String.t]) :: [String.t]
   def align(words) do
-    max_length = words
-    |> Enum.map(&String.length/1)
-    |> Enum.max
+    max_length =
+      words
+      |> Enum.map(&String.length/1)
+      |> Enum.max
 
     Enum.map(words, fn w -> align_word(w, max_length) end)
-    # |> Enum.join("\n")
   end
 
   @spec align_word(String.t, integer) :: String.t
-  def align_word(word, to_length) do
-    length = String.length(word)
-    left = div(to_length - length, 2)
-    String.pad_leading(word, left + length)
-    |> String.pad_trailing(to_length)
+  def align_word(word, length) do
+    diff = length - String.length(word)
+    left = div(diff, 2)
+    right = diff - left
+    make_padding(left) <> word <> make_padding(right)
+  end
+
+  def make_padding(0), do: ""
+  
+  def make_padding(length) when length > 0 do
+    " " <> make_padding(length - 1)
   end
 
 end
@@ -30,6 +36,13 @@ defmodule Task_03_07_Test do
   use ExUnit.Case
   import Lesson_03.Task_03_07_String
 
+  test "make padding" do
+    assert make_padding(0) == ""
+    assert make_padding(1) == " "
+    assert make_padding(2) == "  "
+    assert make_padding(5) == "     "
+  end
+  
   test "align word" do
     assert " bob " == align_word("bob", 5)
     assert " bob  " == align_word("bob", 6)
@@ -38,7 +51,6 @@ defmodule Task_03_07_Test do
 
   test "align" do
     assert ["  cat   ", " zebra  ", "elephant"] == align(~w'cat zebra elephant')
-    # assert "  cat   \n zebra  \nelephant" == align(~w'cat zebra elephant')
   end
 
 end
