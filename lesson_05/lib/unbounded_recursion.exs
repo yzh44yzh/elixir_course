@@ -1,40 +1,26 @@
 defmodule UnboundedRecursion do
 
   def browse(path) do
-    browse(path, 0)
+    browse(path, "", [])
   end
 
-  defp browse(path, depth) do
-    children = if File.dir?(path) do
-      {:ok, items} = File.ls(path)
-      items
-      |> Enum.sort
-      |> browse_list(path, depth + 1, [])
-    else
-      []
-    end
-    current = {Path.basename(path), depth}
-    [current | children]
+  defp browse([], _parent, acc), do: acc
+  
+  defp browse([path | tail], parent, acc) do
+    new_acc = browse(path, parent, acc)
+    browse(tail, parent, new_acc)
   end
-
-  defp browse_list([], _, _, acc), do: acc
-  defp browse_list([item | items], path, depth, acc) do
-    children = browse(Path.join(path, item), depth)
-    browse_list(items, path, depth, acc ++ children)
-  end
-
-  def render([]), do: ""
-  def render([file | tail]) do
-    render_file(file) <> "\n" <> render(tail)
-  end
-
-  def render_file({name, depth}) do
-    render_depth(depth) <> " " <> name
-  end
-
-  def render_depth(0), do: ""
-  def render_depth(n) do
-    "|--" <> render_depth(n - 1)
+  
+  defp browse(path, parent, acc) when is_binary(path) do
+    full_path = Path.join(parent, path)
+    cond do
+      File.regular?(full_path) ->
+        [full_path | acc]
+      File.dir?(full_path) ->
+        {:ok, items} = File.ls(full_path)
+        new_acc = Enum.sort(items) |> browse(full_path, acc)
+        [full_path | new_acc]
+      end
   end
 
 end
