@@ -15,7 +15,7 @@ defmodule StreamExamples do
   end
 
 
-  @data_file "./data.txt"
+  @data_file "./data/dictionary.txt"
 
   def find_longest(file \\ @data_file) do
     File.read!(file)

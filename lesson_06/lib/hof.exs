@@ -70,8 +70,8 @@ defmodule HOF do
   end
 
   @spec sort_by(list(), :id | :name | :age) :: list()
-  def sort_by(users, compare_type) do
-    comparator = case compare_type do
+  def sort_by(users, by_attr) do
+    comparator = case by_attr do
                    :id -> &compare_by_id/2
                    :name -> &compare_by_name/2
                    :age -> &compare_by_age/2
@@ -95,6 +95,23 @@ defmodule HOF do
       {:user, _, _, age1} = user1
       {:user, _, _, age2} = user2
       age1 < age2
+  end
+  
+  @spec sort_by(list(), :id | :name | :age, :asc | :desc) :: list()
+  def sort_by(users, by_attr, direction) do
+    comparator = case {by_attr, direction} do
+                   {:id, :asc} -> &compare_by_id/2
+                   {:id, :desc} -> invert(&compare_by_id/2)
+                   {:name, :asc} -> &compare_by_name/2
+                   {:name, :desc} -> invert(&compare_by_name/2)
+                   {:age, :asc} -> &compare_by_age/2
+                   {:age, :desc} -> invert(&compare_by_age/2)
+                 end
+    Enum.sort(users, comparator)
+  end
+
+  def invert(fun) do
+    fn (arg1, arg2) -> not fun.(arg1, arg2) end
   end
 
   def group_users(users) do
