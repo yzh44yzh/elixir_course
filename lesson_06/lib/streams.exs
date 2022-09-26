@@ -23,11 +23,7 @@ defmodule StreamExamples do
     |> Enum.map(fn(line) -> String.split(line, ":") end)
     |> Enum.map(fn([term | _]) -> term end)
     |> Enum.map(fn(term) -> {String.length(term), term} end)
-    |> Enum.reduce(fn(current_item, longest_item) ->
-      {cl, _} = current_item
-      {ll, _} = longest_item
-      if cl > ll, do: current_item, else: longest_item
-    end)
+    |> Enum.max_by(fn({len, _term}) -> len end)
     |> elem(1)
   end
 
@@ -36,11 +32,7 @@ defmodule StreamExamples do
     |> Stream.map(fn(line) -> String.split(line, ":") end)
     |> Stream.map(fn([term | _]) -> term end)
     |> Stream.map(fn(term) -> {String.length(term), term} end)
-    |> Enum.reduce(fn(current_item, longest_item) ->
-      {cl, _} = current_item
-      {ll, _} = longest_item
-      if cl > ll, do: current_item, else: longest_item
-    end)
+    |> Enum.max_by(fn({len, _term}) -> len end)
     |> elem(1)
   end
 
@@ -59,6 +51,19 @@ defmodule StreamExamples do
     "<table>" <> content <> "</table>"
   end
 
+  def make_table_2(data) do
+    bg = Stream.cycle(["white_bg", "gray_bg"])
+    numbers = Stream.iterate(1, fn a -> a + 1 end)
+    content =
+      Stream.zip(numbers, bg)
+      |> Enum.zip(data)
+      |> Enum.map(
+        fn({{num, css_style}, {a, b}}) ->
+          "<tr class='#{css_style}'><td>#{num}</td><td>#{a}</td><td>#{b}</td></tr>"
+        end)
+      |> Enum.join("\n")
+    "<table>\n" <> content <> "\n</table>"
+  end
 
   def unfold_example() do
     unfolder = fn(i) -> {i, i + 5} end

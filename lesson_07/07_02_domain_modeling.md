@@ -14,14 +14,14 @@ TODO нарисовать схему
 
 ```
 $ iex -S mix
-iex(1)> SimpleExample.create()
+iex(1)> Event.sample_tuple_event()
 {:event, "Team Meeting", ~U[2021-03-10 19:40:00.000000Z],
  {{:address, ...
 ```
 
 Или можно использовать map и списки:
 ```
-iex(3)> SimpleExample.create_map()
+iex(3)> Event.sample_map_event()
 %{
   agenda: [ ...
 ```
@@ -30,7 +30,7 @@ iex(3)> SimpleExample.create_map()
 
 Но, конечно, Эликсир предлагает более удобные средства:
 ```
-iex(1)> event = StructExample.create()
+iex(1)> Event.sample_struct_event()
 %Model.Event.Event{ ...
 ```
 
@@ -86,7 +86,7 @@ event = %E.Event{event | location:
 
 Посмотрим как они работают на примере map:
 ```
-event = SimpleExample.create_map()
+event = Event.sample_map_event()
 ```
 
 **get_in**
@@ -126,7 +126,7 @@ event = update_in(event, keys, fn(number) -> number + 10 end)
 
 Если мы попытаемся вызывать put_in, update_in для struct, то увидим, что макросы работают, а функции нет.
 ```
-event = StructExample.create()
+event = Event.sample_struct_event()
 
 event = put_in(event.location.room.number, 613)
 

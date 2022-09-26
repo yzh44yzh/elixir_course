@@ -108,8 +108,8 @@ UUID: universally unique identifier
 File.read!("data/dictionary.txt") |>
 String.split("\n") |>
 Enum.map(fn(line) -> String.split(line, ":") end) |>
-Enum.map(fn([term, _definition]) -> String.length(term) end) |>
-Enum.max
+Enum.map(fn([term, _definition]) -> ...
+Enum.max_by
 
 ```
 В этой реализации мы загружаем в память весь файл, 15 Гб, и 4 раза выполняем проход по словарю.
@@ -119,8 +119,8 @@ Enum.max
 ```
 File.stream!("data/dictionary.txt") |>
 Stream.map(fn(line) -> String.split(line, ":") end) |>
-Stream.map(fn([term, _definition]) -> String.length(term) end) |>
-Enum.max
+Stream.map(fn([term, _definition]) -> ...
+Enum.max_by
 
 ```
 Функция File.stream! возвращает ленивую коллекцию, отдающие данные из файла построчно. В этом случае мы загружаем данные в память небольшими порциями, и выполняем только один проход по нему. Последний вызов в цепочке должен активировать вычисления, поэтому там Enum а не Stream.
@@ -155,6 +155,9 @@ IO.puts
 <tr class='grey'><td>row 4</td></tr>
 <tr class='white'><td>row 5</td></tr>
 ```
+
+TODO: make_table2
+используем Stream.cycle и Stream.iterate.
 
 **Stream.unfold** можно рассматривать как функцию, противоположную fold (reduce). Если fold сворачивает список в одиночное значение, то unfold разворачивает список из одиночного значения. Она принимает на вход начальное состояние и разворачивающую функцию. Разворачивающая функция принимает на вход текущее состояние, и возвращает кортеж из двух значений. Первый элемент кортежа, это то, что становится очередным элементом списка. Второй элемент кортежа, это новое состояние, которое передается в разворачивающую функцию на следущем шаге.
 
