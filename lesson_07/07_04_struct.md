@@ -54,40 +54,6 @@ event =
 Но все равно это не удобно.
 
 
-## put_in, update_in для map
-
-В Эликсир есть более удобные средства для доступа к вложеным данным и их обновления. Модуль Kernel содежит макросы и одноименные им функции: `get_in`, `put_in`, `update_in`.
-
-Посмотрим как они работают на примере map:
-```
-event = Event.sample_map_event()
-```
-
-**get_in**
-```
-event.location.room.number
-get_in(event, [:location, :room, :number])
-```
-get_in имеет только форму функции, потому что чтение доступно и так, без макроса.
-
-**put_in**
-```
-event = put_in(event.location.room.number, 611)
-event = put_in(event, [:location, :room, :number], 612)
-```
-put_in имеет форму и функции, и макроса. Макрос разворачивается в одноименную функцию. А функция выполняет такое же каскадное обновление, как мы делали вручную.
-
-**update_in**
-```
-event = update_in(event.location.room.number, fn(number) -> number + 10 end)
-event = update_in(event, [:location, :room, :number], fn(number) -> number + 10 end)
-```
-Макросы подходят, когда весь путь известен статически, на этапе компиляции. Функции подходят, когда путь формируется динамически в рантайме:
-```
-keys = [:location, :room, :number]
-event = update_in(event, keys, fn(number) -> number + 10 end)
-```
-
 ## put_in, update_in для struct
 
 Если мы попытаемся вызывать put_in, update_in для struct, то увидим, что макросы работают, а функции нет.
