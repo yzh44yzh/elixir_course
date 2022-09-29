@@ -1,12 +1,11 @@
 defmodule Model.TypedStruct do
 
   defmodule Event do
-    alias Model.TypedStruct.Topic
     @type t :: %__MODULE__{
       title: String.t,
       datetime: DateTime.t,
-      location: Model.TypedStruct.Location.t,
-      participants: [Model.TypedStruct.Participant.t],
+      location: Location.t,
+      participants: [Participant.t],
       agenda: [Topic.t]
     }
     @enforce_keys [:title, :datetime, :location, :participants, :agenda]
@@ -43,7 +42,6 @@ defmodule Model.TypedStruct do
   end
 
   defmodule Location do
-    alias Model.TypedStruct.{Address, Room}
     @type t :: %__MODULE__{
       address: Address.t,
       room: Room.t
