@@ -9,9 +9,9 @@ defmodule Lesson_03.Task_03_03_Bool do
 
   defmodule Step1 do
     
-    def sk_not(true), do: false
-    def sk_not(nil), do: nil
     def sk_not(false), do: true
+    def sk_not(nil), do: nil
+    def sk_not(true), do: false
     
     def sk_and(false, false), do: false
     def sk_and(false, nil), do: false
@@ -37,9 +37,8 @@ defmodule Lesson_03.Task_03_03_Bool do
 
   defmodule Step2 do
     
-    def sk_not(true), do: false
-    def sk_not(false), do: true
     def sk_not(nil), do: nil
+    def sk_not(arg), do: not arg
     
     def sk_and(false, _), do: false
     def sk_and(nil, false), do: false
