@@ -10,6 +10,8 @@ defmodule Lesson08.CustomExceptions do
   
   def request4(), do: %{token: "ccc", data: %{a: 42}}
   
+  def request5(), do: %{token: "aaa", data: %{a: 100}}
+  
   def handle(request) do
     try do
       authorize(request)
@@ -21,8 +23,10 @@ defmodule Lesson08.CustomExceptions do
       error in [M.AuthenticationError, M.AuthorizationError] ->
         {403, Exception.message(error)}
       error in [M.SchemaValidationError] ->
-        {409, M.SchemaValidationError.message(error)}
-      error -> {500, "internal server error"}
+        {409, Exception.message(error)}
+      error ->
+        IO.puts(Exception.format(:error, error, __STACKTRACE__))
+        {500, "internal server error"}
     end
   end
 
@@ -48,6 +52,10 @@ defmodule Lesson08.CustomExceptions do
     end
   end
 
+  def do_something_useful(%{data: %{a: 100}}) do
+    raise "something happened"
+  end
+  
   def do_something_useful(request) do
     request.data.a
   end
@@ -57,37 +65,31 @@ end
 defmodule Model do
 
   defmodule AuthenticationError do
-    defexception [
-      :token,
-      :login
-    ]
+    defexception [:type, :token, :login]
 
     @impl true
     def exception({auth_type, data}) do
       case auth_type do
-        :token -> %Model.AuthenticationError{token: data, login: nil}
-        :login -> %Model.AuthenticationError{token: nil, login: data}
+        :token -> %AuthenticationError{type: auth_type, token: data}
+        :login -> %AuthenticationError{type: auth_type, login: data}
       end
     end
 
     @impl true
     def message(error) do
-      case {error.token, error.login} do
-        {_token, nil} -> "invalid token"
-        {nil, _login} -> "invalid login"
+      case error.type do
+        :token -> "invalid token"
+        :login -> "invalid login"
       end
     end
   end
   
   defmodule AuthorizationError do
-    defexception [
-      :role,
-      :action
-    ]
+    defexception [:role, :action]
 
     @impl true
     def exception({role, action}) do
-      %Model.AuthorizationError{role: role, action: action}
+      %AuthorizationError{role: role, action: action}
     end
 
     @impl true
@@ -97,13 +99,11 @@ defmodule Model do
   end
 
   defmodule SchemaValidationError do
-    defexception [
-      :schema_name
-    ]
+    defexception [:schema_name]
 
     @impl true
     def exception(schema_name) do
-      %Model.SchemaValidationError{schema_name: schema_name}
+      %SchemaValidationError{schema_name: schema_name}
     end
 
     @impl true
