@@ -10,7 +10,13 @@ defmodule Solution4 do
   @spec handle(BS.json) :: {:ok, BS.Order.t} | {:error, term}
   def handle(data) do
     state = %{incoming_data: data}
-    f = FP.bind( FP.bind( FP.bind( FP.bind(&step1/1, &step2/1), &step3/1 ), &step4/1), &step5/1)
+    f = 
+      FP.bind(&step1/1, &step2/1)
+      |> FP.bind(&step2/1)
+      |> FP.bind(&step3/1)
+      |> FP.bind(&step4/1)
+      |> FP.bind(&step5/1)
+    
     f.(state)
   end
 

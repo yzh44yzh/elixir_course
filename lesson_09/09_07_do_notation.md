@@ -18,8 +18,8 @@ do
 
 ```
 with {:ok, var1} <- func1(params),
-  var2 = func2(params),
-  {:ok, var3} <- func3(params)
+     var2 = func2(params),
+     {:ok, var3} <- func3(params)
 do
   do_something(var1, var2, var3)
 end
@@ -43,7 +43,7 @@ do
 
 ```
 with var1 <- func1(),
-  var2 <- func2()
+     var2 <- func2()
 do
   ...
 ```

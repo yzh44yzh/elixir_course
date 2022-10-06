@@ -50,3 +50,15 @@ defmodule Model.Struct do
   end
 
 end
+
+defimpl Model.CalendarItem, for: Model.Struct.Event do
+
+  def get_title(event) do
+    event.title
+  end
+
+  def get_datetime(event) do
+    event.datetime
+  end
+
+end
