@@ -1,4 +1,4 @@
-defmodule BookShopError do
+defmodule BookShop.Error do
   
   defmodule InvalidDataError do
 

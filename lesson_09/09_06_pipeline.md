@@ -11,10 +11,12 @@
 Реализация тоже проста: 
 
 ```
-def pipeline(arg, funs) do
-  Enum.reduce(funs, {:ok, arg},
+def pipeline(state, fun_list) do
+  Enum.reduce(
+    fun_list,
+    {:ok, state},
     fn
-      (f, {:ok, prev_res}) -> f.(prev_res)
+      (f, {:ok, state}) -> f.(state)
       (_, {:error, reason}) -> {:error, reason}
     end)
 end

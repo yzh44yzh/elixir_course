@@ -19,8 +19,7 @@ do
 ```
 with {:ok, var1} <- func1(params),
      var2 = func2(params),
-     {:ok, var3} <- func3(params)
-do
+     {:ok, var3} <- func3(params) do
   do_something(var1, var2, var3)
 end
 ```
@@ -29,33 +28,43 @@ end
 
 На самом деле здесь нет ничего, связанного с монадами, а работает обычное сопоставление с образцом. 
 
-Есть один маленький нюанс. Поскольку with -- это макрос с синтаксическим сахаром, то его нельзя написать так:
+Без синтаксического сахара макрос выглядит так:
+```
+with(line1, line2, line2) do 
+  do_something 
+end
+```
+
+Cинтаксический сахар не позволяет написать что-то вроде настоящей do-нотации:
 
 ```
 with
-  var1 <- func1(),
-  var2 <- func2()
-do
-  ...
+  line1
+  line2
+  line3
+  do_something
 ```
 
 Писать нужно так:
 
 ```
-with var1 <- func1(),
-     var2 <- func2()
-do
-  ...
+with line1,
+     line2,
+     line3 do
+  do_something
+end
 ```
 
 Либо так:
 
 ```
 with(
-  var1 <- func1(),
-  var2 <- func2()
+  line1,
+  line2,
+  line3
 ) do
-  ...
+  do_something
+end
 ```
 
 Решение с макросом `with` выглядит так: lib/solution_6.ex

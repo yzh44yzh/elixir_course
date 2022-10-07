@@ -3,11 +3,11 @@
 Шаблонность кода вызвана тем, что результат каждого вызова нужно проверить на ошибку. Добавим модуль BookShop.ValidatorEx, чтобы его функции сообщали об ошибках через исключения, а не через возвращаемое значение.
 
 ```
-iex(2)> Solution3.main()
+iex(2)> Solution3.handle(data)
 {:error, "cat 'Tihon' is not found"}
-iex(3)> Solution3.main()
+iex(3)> Solution3.handle(data)
 {:error, "invalid data"}
-iex(4)> Solution3.main()
+iex(4)> Solution3.handle(data)
 {:ok,
  %BookShop.Order{ 
    books: [

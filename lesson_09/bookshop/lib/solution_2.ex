@@ -1,18 +1,9 @@
 defmodule Solution2 do
 
-  alias BookShop, as: BS
+  alias BookShop.Model, as: M
   alias BookShop.Validator, as: V
 
-  @spec main :: {:ok, BS.Order.t} | {:error, term}
-  def main() do
-    BS.test_data |> handle()
-  end
-
-  def call_handle_many_times do
-    0..20 |> Enum.map(fn _ -> main() end)
-  end
-
-  @spec handle(BS.json) :: {:ok, BS.Order.t} | {:error, term}
+  @spec handle(M.json) :: {:ok, M.Order.t} | {:error, term}
   def handle(data) do
     state = %{incoming_data: data}
     step1(state)
@@ -46,7 +37,7 @@ defmodule Solution2 do
   def step4(%{incoming_data: data} = state) do
     maybe_books = Enum.map(
       data["books"],
-      fn(book_data) -> BS.Book.get_book(book_data["author"], book_data["title"]) end
+      fn(book_data) -> M.Book.get_book(book_data["author"], book_data["title"]) end
     )
 
     books_or_error = Enum.reduce(
@@ -68,7 +59,7 @@ defmodule Solution2 do
   end
 
   def step5(%{cat: cat, address: address, books: books}) do
-    order = BS.Order.new(cat, address, books)
+    order = M.Order.new(cat, address, books)
     {:ok, order}
   end
 

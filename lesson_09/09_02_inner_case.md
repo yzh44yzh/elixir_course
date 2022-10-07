@@ -3,13 +3,13 @@
 ```
 $ iex -S mix
 ...
-iex(1)> Solution1.main()
+iex(1)> Solution1.handle(data)
 {:error, {:book_not_found, "Distributed systems for fun and profit"}}
 
-iex(2)> Solution1.main()
+iex(2)> Solution1.handle(data)
 {:error, :invalid_incoming_data}
 
-iex(3)> Solution1.main()
+iex(3)> Solution1.handle(data)
 %BookShop.Order{
   books: [
     %BookShop.Book{
@@ -31,8 +31,6 @@ iex(3)> Solution1.main()
   customer: {:cat, "Tihon"},
   shipping_address: {:address, "Coolcat str 7/42 Minsk Belarus"}
 }
-
-> Enum.map(1..20, fn(_) -> Solution1.main() end)
 ```
 
 Здесь получилось 4 уровня вложенности. Пока что это не так страшно. Но что, если понадобится добавить еще один шаг валидации? Два шага? Десять? Или переставить некоторые шаги местами?
