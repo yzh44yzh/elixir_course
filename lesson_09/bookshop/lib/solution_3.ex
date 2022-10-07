@@ -8,6 +8,10 @@ defmodule Solution3 do
     BookShop.test_data |> handle()
   end
 
+  def call_handle_many_times do
+    0..20 |> Enum.map(fn _ -> main() end)
+  end
+
   @spec handle(BS.json) :: {:ok, BS.Order.t} | {:error, term}
   def handle(data) do
     try do

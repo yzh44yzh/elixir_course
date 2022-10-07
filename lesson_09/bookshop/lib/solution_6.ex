@@ -6,6 +6,10 @@ defmodule Solution6 do
     BS.test_data() |> handle
   end
 
+  def call_handle_many_times do
+    0..20 |> Enum.map(fn _ -> main() end)
+  end
+
   @spec handle(BS.json) :: {:ok, BS.Order.t} | {:error, term}
   def handle(data) do
     with(
@@ -13,14 +17,15 @@ defmodule Solution6 do
       %{"cat" => cat_name, "address" => address_str, "books" => books} = data,
       {:ok, cat} <- V.validate_cat(cat_name),
       {:ok, address} <- V.validate_address(address_str),
-      {:ok, books} <- Enum.map(
+      maybe_books = Enum.map(
         books,
         fn(%{"author" => author, "title" => title}) ->
           BS.Book.get_book(author, title)
-        end)
-        |> FP.sequence()
+        end),
+      {:ok, books} <- FP.sequence(maybe_books)
     ) do
-      BS.Order.new(cat, address, books)
+      order = BS.Order.new(cat, address, books)
+      {:ok, order}
     end
   end
   

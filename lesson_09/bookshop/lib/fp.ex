@@ -2,6 +2,10 @@ defmodule FP do
 
   alias BookShop.Validator, as: V
 
+  @type success_val :: any
+  @type error_val :: any
+  @type result(s, e) :: {:ok, s} | {:error, e}
+
   def main() do
     f = bind(&V.validate_incoming_data/1, &V.validate_cat/1)
     f.(BookShop.test_data)
@@ -21,26 +25,27 @@ defmodule FP do
     fn(arg) -> pipeline(arg, funs) end
   end
 
-  def pipeline(arg, funs) do
-    Enum.reduce(funs, {:ok, arg},
+  def pipeline(state, fun_list) do
+    Enum.reduce(
+      fun_list,
+      {:ok, state},
       fn
-        (f, {:ok, prev_res}) -> f.(prev_res)
+        (f, {:ok, state}) -> f.(state)
         (_, {:error, reason}) -> {:error, reason}
       end)
   end
 
-  @type success_val :: any
-  @type error_val :: any
-  @type result(s, e) :: {:ok, s} | {:error, e}
-
   @spec sequence([result(success_val, error_val)]) :: result([success_val], error_val)
-  def sequence([]), do: {:ok, []}
-  def sequence([{:error, reason} | _]), do: {:error, reason} 
-  def sequence([{:ok, val} | tail]) do
-    case sequence(tail) do
-      {:ok, list} -> {:ok, [val | list]}
-      {:error, error} -> {:error, error}
-    end
+  def sequence(list) do
+    Enum.reduce(
+      list,
+      {:ok, []},
+      fn
+        (_, {:error, _} = acc) -> acc
+        ({:ok, v}, {:ok, acc}) -> {:ok, [v | acc]}
+        ({:error, _} = e, _) -> e
+      end
+    )
   end
 
   def not_curried_fun(a, b, c) do

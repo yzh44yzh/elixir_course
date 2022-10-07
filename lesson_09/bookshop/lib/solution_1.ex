@@ -8,39 +8,49 @@ defmodule Solution1 do
     BS.test_data() |> handle
   end
 
+  def call_handle_many_times do
+    0..20 |> Enum.map(fn _ -> main() end)
+  end
+
   @spec handle(BS.json) :: {:ok, BS.Order.t} | {:error, term}
   def handle(data) do
     case V.validate_incoming_data(data) do
       {:ok, data} ->
-        %{"cat" => cat_name} = data
-        case V.validate_cat(cat_name) do
+
+        case V.validate_cat(data["cat"]) do
           {:ok, cat} ->
-            %{"address" => address_str} = data
-            case V.validate_address(address_str) do
+
+            case V.validate_address(data["address"]) do
               {:ok, address} ->
-                %{"books" => books} = data
+
                 maybe_books = Enum.map(
-                  books,
-                  fn(%{"author" => author, "title" => title}) ->
-                    BS.Book.get_book(author, title)
-                  end)
-                invalid_books = Enum.filter(
+                  data["books"],
+                  fn(book_data) -> BS.Book.get_book(book_data["author"], book_data["title"]) end
+                )
+                
+                books_or_error = Enum.reduce(
                   maybe_books,
+                  [],
                   fn
-                    ({:ok, _}) -> false
-                    ({:error, _}) -> true
-                  end)
-                case invalid_books do
-                  [] ->
-                    books = Enum.map(maybe_books, fn({:ok, book}) -> book end)
+                    (_, {:error, _} = acc) -> acc
+                    ({:ok, book}, acc) -> [book | acc]
+                    ({:error, _} = e, _) -> e
+                  end
+                )
+
+                case books_or_error do
+                  books when is_list(books) ->
                     order = BS.Order.new(cat, address, books)
                     {:ok, order}
-                  [error | _] -> error
+                  {:error, error} -> {:error, error}
                 end
+
               {:error, error} -> {:error, error}
             end
+
           {:error, error} -> {:error, error}
         end
+
       {:error, error} -> {:error, error}
     end
   end

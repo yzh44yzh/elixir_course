@@ -8,6 +8,10 @@ defmodule Solution2 do
     BS.test_data |> handle()
   end
 
+  def call_handle_many_times do
+    0..20 |> Enum.map(fn _ -> main() end)
+  end
+
   @spec handle(BS.json) :: {:ok, BS.Order.t} | {:error, term}
   def handle(data) do
     state = %{incoming_data: data}
@@ -16,16 +20,13 @@ defmodule Solution2 do
 
   def step1(%{incoming_data: data} = state) do
     case V.validate_incoming_data(data) do
-      {:ok, valid_data} ->
-        state = %{state | incoming_data: valid_data}
-        step2(state)
+      {:ok, _} -> step2(state)
       {:error, error} -> {:error, error}
     end
   end
 
   def step2(%{incoming_data: data} = state) do
-    %{"cat" => cat_name} = data
-    case V.validate_cat(cat_name) do
+    case V.validate_cat(data["cat"]) do
       {:ok, cat} ->
         state = Map.put(state, :cat, cat)
         step3(state)
@@ -34,8 +35,7 @@ defmodule Solution2 do
   end
 
   def step3(%{incoming_data: data} = state) do
-    %{"address" => address_str} = data
-    case V.validate_address(address_str) do
+    case V.validate_address(data["address"]) do
       {:ok, address} ->
         state = Map.put(state, :address, address)
         step4(state)
@@ -44,24 +44,26 @@ defmodule Solution2 do
   end
 
   def step4(%{incoming_data: data} = state) do
-    %{"books" => books} = data
     maybe_books = Enum.map(
-      books,
-      fn(%{"author" => author, "title" => title}) ->
-        BS.Book.get_book(author, title)
-      end)
-    invalid_books = Enum.filter(
+      data["books"],
+      fn(book_data) -> BS.Book.get_book(book_data["author"], book_data["title"]) end
+    )
+
+    books_or_error = Enum.reduce(
       maybe_books,
+      [],
       fn
-        ({:ok, _}) -> false
-        ({:error, _}) -> true
-      end)
-    case invalid_books do
-      [] ->
-        books = Enum.map(maybe_books, fn({:ok, book}) -> book end)
+        (_, {:error, _} = acc) -> acc
+        ({:ok, book}, acc) -> [book | acc]
+        ({:error, _} = e, _) -> e
+      end
+    )
+
+    case books_or_error do
+      books when is_list(books) ->
         state = Map.put(state, :books, books)
         step5(state)
-      [error | _] -> error
+      {:error, error} -> {:error, error}
     end
   end
 
