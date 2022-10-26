@@ -1,4 +1,4 @@
-defmodule Lesson_11.ShardingAgent do
+defmodule ShardManager do
 
   def start() do
     state = [

@@ -2,8 +2,7 @@ defmodule Utils do
   
   @spec rand_success() :: boolean()
   def rand_success() do
-    rand = :rand.uniform 10
-    rand > 1
+    Enum.random(1..10) > 1
   end
 
   def call_many_times(module, num_calls \\ 20) do

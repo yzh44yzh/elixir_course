@@ -12,7 +12,7 @@
 
 Стандартный GenServer устроен точно так же:
 
-![Standard GenServer](./img/gen_server.standard.png)
+![Standard GenServer](./img/gen_server.erl.png)
 
 Те же 4 части (АПИ, call, loop и обработчики) я расположил квадратом.
 
