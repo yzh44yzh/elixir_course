@@ -103,18 +103,14 @@ defmodule Lesson_11.PathFinder do
   end
 
   defp make_key(city1, city2) do
-    Enum.sort([city1, city2]) |> :erlang.list_to_tuple()
+    Enum.sort([city1, city2]) |> List.to_tuple()
   end
   
   defp add_item({city1, city2, dist} = item, graph) do
     v1 = :digraph.add_vertex(graph, city1) # non-functional, (mutates ETS) 
     v2 = :digraph.add_vertex(graph, city2)
-    :digraph.add_edge(graph, v1, v2, dist)
-    res = :digraph.add_edge(graph, v2, v1, dist) # imitate non-directed graph with two directions
-    case res do
-      {:error, e} -> raise "error adding item #{inspect item}, #{inspect e}"
-      _ -> :ok
-    end
+    :ok = :digraph.add_edge(graph, v1, v2, dist)
+    :ok = :digraph.add_edge(graph, v2, v1, dist) # imitate non-directed graph with two directions
     graph
   end
 
