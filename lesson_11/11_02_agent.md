@@ -66,6 +66,8 @@ get_users.()
 
 ## Агент, обернутый в модуль
 
+TODO session_manager.exs
+
 Недостаток агента в том, что сторонний код имеет полный доступ к его состоянию. Это легко исправить, если обернуть агент в модуль, и реализовать доступ через АПИ модуля.
 
 Рассмотрим этот подход на примере.
@@ -98,20 +100,19 @@ Agent.start(fn () -> state end, [name: :sharding_info])
 Обернем агента в модуль, реализуем АПИ для доступа к информации о шардах, и посмотрим, как это работает:
 
 ```
-iex(1)> c "lib/sharding_agent.exs"
-[Lesson_11.ShardingAgent]
-iex(2)> alias Lesson_11.ShardingAgent, as: SA
-iex(3)> SA.start
+iex(1)> c "lib/shard_manager.exs"
+iex(2)> alias ShardManager, as: SM
+iex(3)> SM.start
 :ok
-iex(4)> SA.find_node(1)
+iex(4)> SM.find_node(1)
 {:ok, "Node-1"}
-iex(5)> SA.find_node(10)
+iex(5)> SM.find_node(10)
 {:ok, "Node-1"}
-iex(6)> SA.find_node(12)
+iex(6)> SM.find_node(12)
 {:ok, "Node-2"}
-iex(7)> SA.find_node(30)
+iex(7)> SM.find_node(30)
 {:ok, "Node-3"}
-iex(8)> SA.find_node(300)
+iex(8)> SM.find_node(300)
 {:error, :not_found}
 ```
 
@@ -123,9 +124,9 @@ iex(8)> SA.find_node(300)
 Добавим в наш модуль такое АПИ:
 
 ```
-> r SA
+> r SM
 > nodes = ["Node-1", "Node-2", "Node-3", "Node-4", "Node-5"]
-> SA.reshard(nodes, 48) 
+> SM.reshard(nodes, 48) 
 [
   {36, 44, "Node-5"},
   {27, 35, "Node-4"},
@@ -147,7 +148,7 @@ iex(8)> SA.find_node(300)
 ```
 def add_user(username) do
   shard = :erlang.phash2(username, 48)
-  {:ok, node} = Lesson_11.ShardingAgent.find_node(shard)
+  {:ok, node} = ShardManager.find_node(shard)
   Agent.update(:online_users, fn(users) -> [{username, shard, node} | users] end)
 end
 ```
@@ -157,15 +158,12 @@ end
 Нужно запустить оба агента прежде, чем вызывать их АПИ:
   
 ```
-> c "lib/online_agent.exs"
-> c "lib/sharding_agent.exs"
-> alias Lesson_11.OnlineAgent, as: O
-> alias Lesson_11.ShardingAgent, as: S
-> S.start
-> O.start
-> O.add_user("Helen")
-> O.add_user("Bob")
-> O.add_user("Kate")
+> c "lib/agents_interation.exs"
+> ShardManager.start
+> SessionManager.start
+> SessionManager.add_user("Helen")
+> SessionManager.add_user("Bob")
+> SessionManager.add_user("Kate")
 > O.get_users()
 [{"Kate", 17, "Node-2"}, {"Bob", 33, "Node-3"}, {"Helen", 13, "Node-2"}]
 ```
