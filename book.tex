@@ -1,12 +1,24 @@
-\documentclass{book}
+\documentclass[12pt]{book}
 
 \usepackage{fontspec}
+\setmainfont{Nimbus Roman}
+\setmonofont{Ubuntu Mono}
 
-\setmainfont{Ubuntu}[]
-\setsansfont{Ubuntu}[]
-\setmonofont{Ubuntu Mono}[]
+\usepackage[russian]{babel}
+
+%% \usepackage{hyperref}
+
+\title{Elixir Junior. Учебный курс.}
+\author{Юрий Жлоба}
+\date{Ноябрь 2022}
+
+%% rights: Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License
 
 \begin{document}
+
+\maketitle
+
+\tableofcontents
 
 \include{./lesson_01/01_01_fizzbuzz}
 

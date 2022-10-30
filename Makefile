@@ -2,7 +2,7 @@ build_pdf:
 	xelatex -halt-on-error \
 	book.tex
 
-show_pdf:
+show:
 	evince book.pdf &
 
 # build_epub:
