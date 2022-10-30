@@ -1,7 +1,7 @@
+# Elixir
 *.beam
-.idea
-*.iml
-.#*
-_build
-deps
-ebin
+
+# Tex
+*.aux
+*.log
+*.pdf

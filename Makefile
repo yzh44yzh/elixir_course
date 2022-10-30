@@ -1,12 +1,9 @@
-xelatex_pdf:
-	cd _build && \
+build_pdf:
 	xelatex -halt-on-error \
-	-output-directory output \
-	document.tex
+	book.tex
 
 show_pdf:
-	# evince _build/elixir_course_junior.pdf &
-	evince _build/output/document.pdf &
+	evince book.pdf &
 
-build_epub:
-	pandoc -o _build/elixir_course_junior.epub book.md
+# build_epub:
+	# pandoc -o _build/elixir_course_junior.epub book.md
