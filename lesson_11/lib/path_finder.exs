@@ -1,4 +1,4 @@
-defmodule Lesson_11.PathFinder do
+defmodule PathFinder do
 
   use GenServer
 
@@ -7,13 +7,13 @@ defmodule Lesson_11.PathFinder do
   @type route :: {[city], distance}
 
   @server_name __MODULE__
-  @cities_file "./data/cities.csv"
+  @data_file "./data/cities.csv"
   
 
   # Module API
   
   def start() do
-    GenServer.start(__MODULE__, :no_args, [name: @server_name])
+    GenServer.start(__MODULE__, @data_file, [name: @server_name])
   end
 
 
@@ -30,91 +30,98 @@ defmodule Lesson_11.PathFinder do
   # GenServer callbacks
 
   @impl true
-  def init(:no_args) do
-    graph = :digraph.new([:cyclic])
-    data = load_data()
-    Enum.reduce(data, graph, &add_item/2)
-    distancies = make_distancies_map(data)
-    state = %{graph: graph, distancies: distancies}
+  def init(data_file) do
+    state = init_state(data_file)
     {:ok, state}
   end
 
   @impl true
   def handle_call({:get_route, from_city, to_city}, _from, state) do
-    %{graph: graph, distancies: distancies} = state
+    %{graph: graph, distances: distances} = state
     reply =
       case :digraph.get_short_path(graph, from_city, to_city) do
         false -> {:error, :no_route} 
         route ->
-          distance = get_distance(distancies, route)
+          distance = get_distance(distances, route)
           {:ok, route, distance}
       end
     {:reply, reply, state}
   end
 
-  def handle_call(unknown_msg, _from, state) do
-    IO.puts("got unknown msg in handle_call: #{inspect unknown_msg}")
+  # catch all
+  def handle_call(msg, from, state) do
+    IO.puts("Server got unknow call #{inspect msg} from #{inspect from}")
     {:reply, {:error, :invalid_call}, state}
   end
   
   @impl true
   def handle_cast(:reload_data, state) do
-    %{graph: graph} = state
+    %{data_file: data_file, graph: graph} = state
     :digraph.delete(graph)
-    graph = :digraph.new([:cyclic])
-    data = load_data()
-    Enum.reduce(data, graph, &add_item/2)
-    distancies = make_distancies_map(data)
-    state = %{graph: graph, distancies: distancies}
-    {:noreply, state}
+    new_state = init_state(data_file)
+    {:noreply, new_state}
+  end
+
+  # catch all
+  def handle_cast(msg, state) do
+    IO.puts("Server got unknow cast #{inspect msg}")
+    {:noreply, state} 
   end
 
   @impl true
   def handle_info(msg, state) do
-    IO.puts("got message #{inspect msg}")
+    IO.puts("Server got msg #{inspect msg}")
     {:noreply, state}
   end
   
 
   # Inner functions
-  
-  defp load_data() do
-    load_data(@cities_file)
-  end
 
-  defp load_data(path) do
-    File.read!(path)
+  def init_state(file_name) do
+    csv_data = load_csv_data(file_name)
+    graph = :digraph.new([:cyclic])
+    Enum.each(csv_data, fn(line) -> init_graph(graph, line) end)
+    distances = init_distances(csv_data)
+    %{
+      graph: graph,
+      distances: distances,
+      data_file: file_name
+    }
+  end
+  
+  def load_csv_data(file_name) do
+    File.read!(file_name)
     |> String.split()
     |> Enum.map(&parse_line/1)
   end
 
   defp parse_line(line) do
     [city1, city2, dist] = String.split(line, ",")
-    {dist, _} = Integer.parse(dist)
+    {dist, ""} = Integer.parse(dist)
     {city1, city2, dist}
   end
 
-  defp make_distancies_map(data) do
-    Enum.reduce(data, %{},
+  def init_graph(graph, {city1, city2, _dist}) do
+    :digraph.add_vertex(graph, city1)
+    :digraph.add_vertex(graph, city2)
+    :digraph.add_edge(graph, city1, city2)
+    :digraph.add_edge(graph, city2, city1)
+  end
+
+  def init_distances(csv_data) do
+    Enum.reduce(csv_data, %{},
       fn ({city1, city2, dist}, acc) ->
         key = make_key(city1, city2)
         Map.put(acc, key, dist)
       end)
   end
 
-  defp make_key(city1, city2) do
-    Enum.sort([city1, city2]) |> List.to_tuple()
+  def make_key(city1, city2) do
+    [city1, city2] |> Enum.sort() |> List.to_tuple()
   end
   
-  defp add_item({city1, city2, dist} = item, graph) do
-    v1 = :digraph.add_vertex(graph, city1) # non-functional, (mutates ETS) 
-    v2 = :digraph.add_vertex(graph, city2)
-    :ok = :digraph.add_edge(graph, v1, v2, dist)
-    :ok = :digraph.add_edge(graph, v2, v1, dist) # imitate non-directed graph with two directions
-    graph
-  end
-
-  defp get_distance(distancies, path) do
+  def get_distance([], _distances), do: 0
+  def get_distance(distancies, path) do
     [first | rest] = path
     Enum.reduce(
       rest,
