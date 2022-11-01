@@ -1,6 +1,6 @@
 defmodule Lesson_12 do
 
-  defmodule ShardingAgent do
+  defmodule ShardManager do
 
     use Agent, restart: :permanent
 
@@ -36,7 +36,7 @@ defmodule Lesson_12 do
       {36, 47, "Node-4"}
     ]
     child_spec = [
-      {ShardingAgent, {:agent_1, state}}
+      {ShardManager, {:agent_1, state}}
     ]
     Supervisor.start_link(child_spec, strategy: :one_for_all)
   end
@@ -56,11 +56,11 @@ defmodule Lesson_12 do
     child_spec = [
       %{
         id: :agent_a,
-        start: {ShardingAgent, :start_link, [{:agent_a, state_1}]}
+        start: {ShardManager, :start_link, [{:agent_a, state_1}]}
       },
       %{
         id: :agent_b,
-        start: {ShardingAgent, :start_link, [{:agent_b, state_2}]}
+        start: {ShardManager, :start_link, [{:agent_b, state_2}]}
       }
     ]
     Supervisor.start_link(child_spec, strategy: :one_for_all)

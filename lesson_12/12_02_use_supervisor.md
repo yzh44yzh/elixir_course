@@ -2,7 +2,7 @@
 
 ## Запускаем Agent под супервизором
 
-Возьмем ShardingAgent из прошлого урока. Его нужно будет немного доработать. 
+Возьмем ShardManager из прошлого урока. Его нужно будет немного доработать. 
 
 Во-первых, функцию для запуска процесса общепринято называть `start_link`, и она должна принимать один аргумент. Можно назвать функцию иначе, и аргументов сделать больше, но тогда в супервизоре придется переопределять настройки по-умолчанию, что не всегда удобно.
 
@@ -33,7 +33,7 @@ def start() do
     {36, 47, "Node-4"}
   ]
   child_spec = [
-    {ShardingAgent, {:agent_1, state}}
+    {ShardManager, {:agent_1, state}}
   ]
   Supervisor.start_link(child_spec, strategy: :one_for_all)
 end
@@ -42,7 +42,7 @@ end
 Здесь child specification выглядит предельно просто:
 
 ```
-{ShardingAgent, {:agent_1, state}}
+{ShardManager, {:agent_1, state}}
 ```
 
 Это модуль агента, и аргументы для start_link. Этого достаточно, потому что в модуле агента мы применяем магию:
@@ -56,10 +56,10 @@ use Agent
 ```
 > c "lib/agent_with_sup.exs"
 
-> Lesson_12.ShardingAgent.child_spec(:no_args)
+> Lesson_12.ShardManager.child_spec(:no_args)
 %{
-  id: Lesson_12.ShardingAgent,
-  start: {Lesson_12.ShardingAgent, :start_link, [:no_args]}
+  id: Lesson_12.ShardManager,
+  start: {Lesson_12.ShardManager, :start_link, [:no_args]}
 }
 ```
 
@@ -74,11 +74,11 @@ use Agent, restart: :permanent
 и макрос сгенерирует нужную реализацию:
 
 ```
-> Lesson_12.ShardingAgent.child_spec(:no_args)
+> Lesson_12.ShardManager.child_spec(:no_args)
 %{
-  id: Lesson_12.ShardingAgent,
+  id: Lesson_12.ShardManager,
   restart: :permanent,
-  start: {Lesson_12.ShardingAgent, :start_link, [:no_args]}
+  start: {Lesson_12.ShardManager, :start_link, [:no_args]}
 }
 ```
 
@@ -88,15 +88,15 @@ use Agent, restart: :permanent
 iex(9)> Lesson_12.start()
 {:ok, #PID<0.167.0>}
 
-iex(10)> Lesson_12.ShardingAgent.find_node(:agent_1, 0)
+iex(10)> Lesson_12.ShardManager.find_node(:agent_1, 0)
 {:ok, "Node-1"}
-iex(12)> Lesson_12.ShardingAgent.find_node(:agent_1, 10)
+iex(12)> Lesson_12.ShardManager.find_node(:agent_1, 10)
 {:ok, "Node-1"}
-iex(13)> Lesson_12.ShardingAgent.find_node(:agent_1, 15) 
+iex(13)> Lesson_12.ShardManager.find_node(:agent_1, 15) 
 {:ok, "Node-2"}
-iex(14)> Lesson_12.ShardingAgent.find_node(:agent_1, 40)
+iex(14)> Lesson_12.ShardManager.find_node(:agent_1, 40)
 {:ok, "Node-4"}
-iex(15)> Lesson_12.ShardingAgent.find_node(:agent_1, 60)
+iex(15)> Lesson_12.ShardManager.find_node(:agent_1, 60)
 {:error, :not_found}
 ```
 
@@ -121,11 +121,11 @@ def start_2_agents() do
   child_spec = [
     %{
       id: :agent_a,
-      start: {ShardingAgent, :start_link, [{:agent_a, state_1}]}
+      start: {ShardManager, :start_link, [{:agent_a, state_1}]}
     },
     %{
       id: :agent_b,
-      start: {ShardingAgent, :start_link, [{:agent_b, state_2}]}
+      start: {ShardManager, :start_link, [{:agent_b, state_2}]}
     }
   ]
   Supervisor.start_link(child_spec, strategy: :one_for_all)
@@ -138,13 +138,13 @@ end
 ```
 iex(6)> Lesson_12.start_2_agents()
 {:ok, #PID<0.125.0>}
-iex(7)> Lesson_12.ShardingAgent.find_node(:agent_a, 5)
+iex(7)> Lesson_12.ShardManager.find_node(:agent_a, 5)
 {:ok, "Node-2"}
-iex(8)> Lesson_12.ShardingAgent.find_node(:agent_b, 5)
+iex(8)> Lesson_12.ShardManager.find_node(:agent_b, 5)
 {:ok, "Node-1"}
-iex(9)> Lesson_12.ShardingAgent.find_node(:agent_a, 10)
+iex(9)> Lesson_12.ShardManager.find_node(:agent_a, 10)
 {:error, :not_found}
-iex(10)> Lesson_12.ShardingAgent.find_node(:agent_b, 10)
+iex(10)> Lesson_12.ShardManager.find_node(:agent_b, 10)
 {:ok, "Node-2"}
 ```
 
@@ -259,7 +259,7 @@ iex(9)> Lesson_12.PathFinder.get_route("Москва", "Астрахань")
 
 Как и для GenServer, существует Supervisor behaviour, который нужно реализовать в этом модуле. behaviour требует наличия только одной функции -- `init/1`.
 
-Запуск supervisor похож на запуск gen\_server. Вот картинка, аналогичная той, что мы видели в 10-м уроке:
+Запуск Supervisor похож на запуск GenServer. Вот картинка, аналогичная той, что мы видели в 10-м уроке:
 ![Supervisor Init](./img/supervisor_init.png)
 
 Напомню, что два левых квадрата (верхний и нижний), соответствуют нашему модулю.  Два правых квадрата соответствуют коду OTP. Два верхних квадрата выполняются в процессе родителя, два нижних квадрата выполняются в дочернем процессе.
@@ -272,7 +272,7 @@ def start_link(args) do
 end
 ```
 
-Здесь мы просим supervisor запустить новый процесс для дочернего супервизора. Новый процесс входит в `loop` и вызывает callback `init/1`.
+Здесь мы просим Supervisor запустить новый процесс для дочернего супервизора. Новый процесс входит в `loop` и вызывает callback `init/1`.
 
 ```
 @impl true
@@ -311,8 +311,8 @@ iex(14)> Lesson_12.AgentSup.child_spec(:no_args)
 
 Lesson_12.MyApp.start_sup_tree()
 
-Lesson_12.ShardingAgent.find_node(:agent_a, 5)
-Lesson_12.ShardingAgent.find_node(:agent_b, 5)
+Lesson_12.ShardManager.find_node(:agent_a, 5)
+Lesson_12.ShardManager.find_node(:agent_b, 5)
 Lesson_12.PathFinder.get_route("Москва", "Владивосток")
 Lesson_12.PathFinder.get_route("Москва", "Астрахань")
 ```

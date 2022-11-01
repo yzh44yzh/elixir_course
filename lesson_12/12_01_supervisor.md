@@ -33,7 +33,7 @@
   },
   %{
     id: "child_3",
-    start: {ShardingAgent, start, []}
+    start: {ShardManager, start, []}
   }
 ]
 ```
@@ -120,7 +120,7 @@ Process.exit(child_pid, :kill)
 
 Еще можно указать значение `:infinity`, тогда супервизор не будет посылать сигнал kill, и дочерний процесс будет завершаться столько, сколько ему нужно. Если дочерний процесс сам является супервизором, то для него по-умолчанию выставляется значение `:infinity`.
 
-TODO картинка:
+TODO картинка и код на практике:
 ```
 sup:                               | worker:
                                    | init: Process.flag(:trap_exit, true)

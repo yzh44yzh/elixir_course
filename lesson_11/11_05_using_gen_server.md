@@ -24,8 +24,8 @@ end
 @impl true
 def handle_continue(:delayed_init, state) do
   ...
-  state = %{graph: graph, distancies: distancies}
-  {:noreply, state}
+  new_state = init_state(data_file)
+  {:noreply, new_state}
 end
 ```
 
@@ -33,49 +33,29 @@ end
 
 Здесь маловероятна ситуация, что сервер получит запрос раньше, чем успеет инициализироваться. handle_continue реализован через отправку сообщения самому себе. Это сообщение попадает в почтовый ящик первым, и обработается первым, раньше, чем придут запросы от клиентов.
 
+(Маловероятно, но 100% гарантии нет. Кто-то может отправить сообщение по имени процесса, когда он уже запустился, но еще не завершил init. Есть более надёжный, но и более сложный способ отложенной инициализации.)
+
 Аналогично мы можем сделать на `:reload_data` -- очистить текущее состояние и делегировать создание нового состояния в handle_continue, чтобы не дублировать код.
 
 ```
 @impl true
 def handle_continue(:delayed_init, state) do
   ...
-  state = %{graph: graph, distancies: distancies}
-  {:noreply, state}
+  new_state = init_state(data_file)
+  {:noreply, new_state}
 end
 
 @impl true
 def handle_cast(:reload_data, state) do
-  %{graph: graph} = state
-  # This is wrong, don't do this!
-  :digraph.delete(graph) 
-  state = %{} 
+  # NOTE: don't do `:digraph.delete(graph)` here
   {:noreply, state, {:continue, :delayed_init}}
 end
 ```
 
 Однако здесь вполне возможно, что сервер будет обрабатывать другие запросы после вызова `handle_cast` и до вызова `handle_continue`. Поэтому важно, чтобы state всегда был консистентным на выходе из любого обработчика. 
 
-Правильная реализация будет такая:
-```
-@impl true
-def handle_continue(:delayed_init, state) do
-  case state do
-    %{} -> :ok
-    %{graph: graph} -> :digraph.delete(graph)
-  end
-  graph = :digraph.new([:cyclic])
-  data = load_data()
-  Enum.reduce(data, graph, &add_item/2)
-  distancies = make_distancies_map(data)
-  state = %{graph: graph, distancies: distancies}
-  {:noreply, state}
-end
+Поэтому сделать очистку стейта в `handle_cast(:reload_data, ...`, а создание стейта в `handle_continue` будет неправильным.
 
-@impl true
-def handle_cast(:reload_data, state) do
-  {:noreply, state, {:continue, :delayed_init}}
-end
-```
 
 ## Блокировка на GenServer.call
 
