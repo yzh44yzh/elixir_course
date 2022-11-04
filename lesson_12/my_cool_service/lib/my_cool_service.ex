@@ -1,7 +1,4 @@
-defmodule MyCoolApp do
-  @moduledoc """
-  Documentation for `MyCoolApp`.
-  """
+defmodule MyCoolService do
 
   use Application
   require Logger

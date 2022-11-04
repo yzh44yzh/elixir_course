@@ -2,13 +2,18 @@ defmodule Lesson_12 do
 
   defmodule FindSourcesTask do
 
-    def start(path) do
+    def start_without_sup(path) do
+      Task.async(__MODULE__, :find_elixir_sources, [path])
+    end
+
+    def start_with_sup(path) do
       {:ok, sup_pid} = Task.Supervisor.start_link()
       Task.Supervisor.async(sup_pid, __MODULE__, :find_elixir_sources, [path])
     end
 
-    def start_without_sup(path) do
-      Task.async(__MODULE__, :find_elixir_sources, [path])
+    # start in sup tree
+    def start_link(path) do
+      Task.start_link(__MODULE__, :find_elixir_sources, [path])
     end
 
     def get_result(task) do

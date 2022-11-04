@@ -1,11 +1,11 @@
-defmodule MyCoolApp.MixProject do
+defmodule MyCoolService.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :my_cool_app,
+      app: :my_cool_service,
       version: "0.1.0",
-      elixir: "~> 1.11",
+      elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
@@ -15,7 +15,8 @@ defmodule MyCoolApp.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {MyCoolApp, []}
+      mod: {MyCoolService, [1,2,42]},
+      registered: [:shard_manager, :session_manager, :session_manager_registry]
     ]
   end
 

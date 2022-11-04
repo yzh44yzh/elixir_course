@@ -56,7 +56,7 @@ config :my_cool_app,
 Настройки в этом файле переопределяют настройки в mix.exs:
 
 ```
-iex(1)> Application.get_all_env(:my_cool_app)
+iex(1)> Application.get_all_env(:my_cool_service)
 [param1: 42, param3: true, param2: "hello"]
 ```
 
@@ -65,7 +65,7 @@ iex(1)> Application.get_all_env(:my_cool_app)
 Настройки:
 
 ```
-config :my_cool_app,
+config :my_cool_service,
   data_file: "cities.csv",
   sharding: %{
     agent_a: [
@@ -83,15 +83,17 @@ config :my_cool_app,
   }
 ```
 
+TODO: mix env, dev/test/prod config
+
 Запуск процессов:
 
 ```
   @impl true
   def start(_start_type, _args) do
-    data_file = Application.get_env(:my_cool_app, :data_file)
-    data_file = Application.app_dir(:my_cool_app, "priv") |> Path.join(data_file)
+    data_file = Application.get_env(:my_cool_service, :data_file)
+    data_file = Application.app_dir(:my_cool_service, "priv") |> Path.join(data_file)
 
-    sharding = Application.get_env(:my_cool_app, :sharding)
+    sharding = Application.get_env(:my_cool_service, :sharding)
 
     children = [
       {MyCoolApp.PathFinder, [data_file]},
@@ -113,10 +115,10 @@ config :my_cool_app,
 ```
 $ iex -S mix
 Compiling 3 files (.ex)
-Generated my_cool_app app
+Generated my_cool_service app
 
-init PathFinder %{data_file: ["/home/y_zhloba/p/elixir_course_junior/lesson_11/my_cool_app/_build/dev/l
-ib/my_cool_app/priv/cities.csv"]}
+init PathFinder %{data_file: ["/home/y_zhloba/p/elixir_course_junior/lesson_11/my_cool_service/_build/dev/l
+ib/my_cool_service/priv/cities.csv"]}
 init ShardingAgent agent_a [{0, 11, "Node-1"}, {12, 23, "Node-2"}, {24, 35, "Node-3"}, {36, 47, "Node-4
 "}]
 init ShardingAgent agent_b [{0, 7, "Node-1"}, {8, 15, "Node-2"}, {16, 23, "Node-3"}, {24, 31, "Node-4"}

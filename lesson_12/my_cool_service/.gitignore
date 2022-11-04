@@ -20,8 +20,7 @@ erl_crash.dump
 *.ez
 
 # Ignore package tarball (built via "mix hex.build").
-my_cool_app-*.tar
+my_cool_service-*.tar
 
-
-# Temporary files for e.g. tests
-/tmp
+# Temporary files, for example, from tests.
+/tmp/

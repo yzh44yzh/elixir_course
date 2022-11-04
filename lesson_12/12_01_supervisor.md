@@ -22,7 +22,7 @@
 [
   %{
     id: "child_1",
-    start: {PathFinder, start_link, []},
+    start: {PathFinder, start_link, []}, #MFA
     restart: :permanent,
     shutdown: 5000,
     type: :worker

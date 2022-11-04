@@ -66,13 +66,13 @@ iex(1)> Application.started_applications()
 Давайте создадим пустое приложение и посмотрим, где находится этот файл, и как он выглядит.
 
 ```
-$ mix new my_cool_app
-$ cd my_cool_app
+$ mix new my_cool_service
+$ cd my_cool_service
 $ mix compile
-$ cat _build/dev/lib/my_cool_app/ebin/my_cool_app.app
-{application,my_cool_app,
+$ cat _build/dev/lib/my_cool_service/ebin/my_cool_service.app
+{application,my_cool_service,
              [{applications,[kernel,stdlib,elixir,logger]},
-              {description,"my_cool_app"},
+              {description,"my_cool_service"},
               {modules,['Elixir.MyCoolApp']},
               {registered,[]},
               {vsn,"0.1.0"}]}.
@@ -100,7 +100,7 @@ defmodule MyCoolApp.MixProject do
 
   def project do
     [
-      app: :my_cool_app,
+      app: :my_cool_service,
       version: "0.1.0",
       elixir: "~> 1.11",
       start_permanent: Mix.env() == :prod,
@@ -193,7 +193,7 @@ $ mix compile
 $ iex -S mix
 iex(1)> Application.started_applications()
 [
-  {:my_cool_app, 'my_cool_app', '0.1.0'},
+  {:my_cool_service, 'my_cool_service', '0.1.0'},
   ...
 ]
 ```
@@ -212,11 +212,11 @@ iex(1)> Application.started_applications()
   {:stdlib, 'ERTS  CXC 138 10', '3.13.2'},
   {:kernel, 'ERTS  CXC 138 10', '7.1'}
 ]
-iex(2)> Application.start(:my_cool_app)
+iex(2)> Application.start(:my_cool_service)
 :ok
 iex(3)> Application.started_applications()
 [
-  {:my_cool_app, 'my_cool_app', '0.1.0'},
+  {:my_cool_service, 'my_cool_service', '0.1.0'},
   ...
 ]
 ```
@@ -227,7 +227,7 @@ iex(3)> Application.started_applications()
 Обработчик `start/2` принимает 2 аргумента: тип запуска приложения и произвольные данные из mix.exs, если они есть:
 
 ```
-my_cool_app.ex:
+my_cool_service.ex:
   def start(_start_type, some_args) do
   ...
   end
