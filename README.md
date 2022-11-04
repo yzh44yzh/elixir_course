@@ -190,9 +190,17 @@
 
 ## Урок №14. Erlang Term Storage.
 
-ETS, DETS, Mnesia, Persistent Term.
+14.01. ETS, DETS.
+
+14.02. Mnesia.
+
+14.03. Persistent Term.
 
 
 ## Урок №15. TCP и UDP сокеты.
+
+15.01. UDP Socket.
+
+15.02. TCP Socket.
 
 ## Курсовой проект №2.
