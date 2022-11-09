@@ -127,7 +127,9 @@ Listening socket: #Port<0.6>
 - GenServer для listener process 
 - Запустить под супервизором сразу.
 - GenServer дял acceptor processes.
-- Запустить под супервизором из Listener, чтобы передать listening_socket
+- Запустить под супервизором из Listener, чтобы передать listening socket
+  или так 
+  https://github.com/yzh44yzh/practical_erlang/blob/master/16_sockets/solution/src/mcache_server.erl
 
 В чём преимущество пула?
 
