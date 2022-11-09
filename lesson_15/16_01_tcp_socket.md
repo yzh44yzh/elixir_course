@@ -83,9 +83,53 @@ Listening socket: #Port<0.6>
 #PID<0.130.0> waits for client
 ```
 
+Второй клиент не может подключиться к серверу, пока не завершится сессия первого клиента.
+
+
 ## Сервер, обслуживающий несколько клиентов
 
+```
+  def wait_for_client(listening_socket) do
+    IO.puts("#{inspect self()} waits for client")
+    {:ok, socket} = :gen_tcp.accept(listening_socket)
+    IO.puts("#{inspect self()} got client connection #{inspect socket}")
+    start_acceptor(listening_socket) # Run the next acceptor
+    loop(listening_socket)
+  end
+```
+
+Теперь сервер работает с несколькими клиентами одновременно:
+
+```
+iex(1)> GoodServer.start
+Start TCP Server at port 1234
+Listening socket: #Port<0.6>
+#PID<0.118.0> waits for client
+#PID<0.118.0> got client connection #Port<0.7>
+#PID<0.118.0> is waiting for data from client
+#PID<0.120.0> waits for client
+#PID<0.118.0> got data from client qqq
+#PID<0.118.0> is waiting for data from client
+#PID<0.120.0> got client connection #Port<0.8>
+#PID<0.120.0> is waiting for data from client
+#PID<0.121.0> waits for client
+#PID<0.120.0> got data from client erer
+...
+#PID<0.120.0> connection closed
+#PID<0.122.0> waits for client
+...
+#PID<0.118.0> connection closed
+#PID<0.123.0> waits for client
+```
+
 ## Сервер с acceptor pool
+
+- GenServer для listener process 
+- Запустить под супервизором сразу.
+- GenServer дял acceptor processes.
+- Запустить под супервизором из Listener, чтобы передать listening_socket
+
+В чём преимущество пула?
 
 ## Бинарный протокол и TCP-клиент
 
