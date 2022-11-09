@@ -53,7 +53,7 @@ defmodule LRU_GenerationCache do
     num_tables = Map.get(options, :num_tables, 5)
     key_lifetime = Map.get(options, :key_lifetime, 60000) # 1 min
     rotate_time = div(key_lifetime, num_tables)
-    :erlang.send_after(rotate_time, self(), :rotate)
+    Process.send_after(self(), :rotate, rotate_time)
 
     tables = create_tables(num_tables)
 
@@ -111,7 +111,7 @@ defmodule LRU_GenerationCache do
   def handle_info(:rotate, %{tables: tables, rotate_time: rotate_time} = state) do
     tables = rotate_tables(tables)
     state = %{state | tables: tables}
-    :erlang.send_after(rotate_time, self(), :rotate)
+    Process.send_after(self(), :rotate, rotate_time)
     {:noreply, state}
   end
   

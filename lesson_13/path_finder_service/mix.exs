@@ -1,11 +1,11 @@
-defmodule MyCoolProject.MixProject do
+defmodule PathFinderService.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :my_cool_project,
+      app: :path_finder_service,
       version: "0.1.0",
-      elixir: "~> 1.11",
+      elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
@@ -15,14 +15,15 @@ defmodule MyCoolProject.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {MyCoolProject.App, []}
+      mod: {PathFinderService, :no_args}
     ]
   end
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:distillery, "~> 2.1"}
+      # {:dep_from_hexpm, "~> 0.3.0"},
+      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
   end
 end

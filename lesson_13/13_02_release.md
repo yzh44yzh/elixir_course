@@ -42,23 +42,23 @@ TODO проект из одного приложения или из неско�
 ![Federation](./img/federation.png)
 
 
-## Инструменты сборки
+## Практика
 
-### Distillery — The Elixir Release Manager
-
-https://hexdocs.pm/distillery/introduction/understanding_releases.html
-
-Releases enable simplified deployment: they are self-contained, and provide everything needed to boot the release; 
-they are easily administered via the provided shell script 
-- start/stop/restart the release, 
-- start in the background, 
-- to open up a remote console, 
-- send remote commands, 
-- and more. 
-In addition, they are archivable artifacts, meaning you can restore an old release from its tarball at any point in the future 
-The use of releases is also a prerequisite of performing hot upgrades and downgrades, one of the most powerful features of the Erlang VM.
-
-you only need to build the artifact once, and can then deploy it many times
+- Подготовить приложение
+  - скопировать PathFinder2 из lesson 11, переименовать exs в ex
+  - скопировать cities.csv в priv
+  - создать app-модуль и root sup
+  - запустить PathFinder из root sup
+  - использовать Logger
+  - передавать полный путь к cities.csv 
+  - скопировать ShardingManager из lesson 11
+  - запустить 2 из root sup с разными именами и стейтами
+  - вынести конфигурацию в config/config.exs
+- собирать релиз
+- показать, из чего он состоит
+- скрипт запуска, что он умеет
+- запустить, пингануть, подключиться remote_console, остановить.
+- compile-time and run-time configuration, переменные окружения
 
 
 ### разница между mix run и bin/proj start
@@ -125,67 +125,7 @@ Overlay:
 When a release is constructed, and prior to it being archived, additional files or directories may be desired in the release, and overlays are used to accomplish that. They consist of a few primitive operations: mkdir, copy, link, and template, and allow you to do one of those four operations to extend the contents of the release as desired.
 
 
-### Erlang/OTP tools
-
-В составе OTP есть приложения **systool** и **reltool**. Они низкоуровневые, и пользоваться ими трудно. Зато они позволяют собрать кастомизированые релизы под узкие задачи.
-
-
 ### Прочее
-
-сборка на машине разработчика и сборка в CI
-
-
-Поэтично:
-Every alchemist requires good tools, and one of the greatest tools in the alchemist's disposal is the distillery. The purpose of the distillery is to take something and break it down to its component parts, reassembling it into something better, more powerful. That is exactly what this project does - it takes your Mix project and produces an Erlang/OTP release, a distilled form of your raw application's components; a single package which can be deployed anywhere, independently of an Erlang/Elixir installation. 
-
-Distillery produces an artifact, a tarball, which contains your application and everything needed to run it.
-
-This artifact also contains scripts which allow you to run the application in three different modes (console, foreground, and daemonized), as well as a variety of utility commands, such as remote_console which provides an easy way to connect an IEx session to your running application.
-
-Distillery is a layer of abstraction on top of this complexity.
-Normally it manages to hide it, but sometimes the lower levels leak out
-and you get to see how the sausage is made.
-
-```
-defp deps do
-  [
-    {:distillery, "~> 2.0", runtime: false},
-  ]
-end
-
-$ mix distillery.init # generates rel/config.exs
-```
-
-rel/config.exs
-```
-release :myapp do
-  set version: current_version(:myapp)
-end
-
-environment :prod do
-  set include_erts: true
-  set vm_args: "rel/prod.vm.args"
-end
-```
-There are a large number of options you can set in either the release or environment definition. 
-
-```
-$ mix distillery.release --env=prod
-...
-==> Release successfully built!
-You can run it in one of the following ways:
-Interactive: _build/dev/rel/sequence/bin/sequence console
-Foreground: _build/dev/rel/sequence/bin/sequence foreground
-Daemon: _build/dev/rel/sequence/bin/sequence start
-```
-
-rel/sequence/releases/0.0.1/sequence.tar.gz
-This is the file we deploy to our servers.
-
-Release doesn't contain source code, documentation files, test etc.
-
-You can build the system on your development machine or the build server and ship only binary artifacts.
-The host machine doesn't need to have any tools installed.
 
 You can embed the minimum erlang runtime into release. Then you don't need Elixir and Erlang installed on host machine. Whatever is required to run the system will be part of your release package.
 
