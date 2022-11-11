@@ -23,11 +23,11 @@ defmodule Server do
         socket: nil
       }
       IO.puts("Acceptor starts with state #{inspect state}")
-      {:ok, state, {:continue, :delayed_init}}
+      {:ok, state, {:continue, :wait_for_client}}
     end
 
     @impl true
-    def handle_continue(:delayed_init, state) do
+    def handle_continue(:wait_for_client, state) do
       %{listening_socket: listening_socket} = state
       IO.puts("Acceptor #{inspect self()} waits for client")
       {:ok, socket} = :gen_tcp.accept(listening_socket)
@@ -36,7 +36,34 @@ defmodule Server do
       {:noreply, state}
     end
 
-    # TODO handle msgs
+    @impl true
+    def handle_info({:tcp_closed, _socket}, state) do
+      %{socket: socket} = state
+      IO.puts("Acceptor #{inspect self()} client has closed the connection")
+      :gen_tcp.close(socket)
+      {:noreply, state, {:continue, :wait_for_client}}
+    end
+
+    def handle_info({:tcp, _socket, "quit\r\n"}, state) do
+      %{socket: socket} = state
+      IO.puts("Acceptor #{inspect self()} closes connection")
+      :gen_tcp.close(socket)
+      {:noreply, state, {:continue, :wait_for_client}}
+    end
+
+    def handle_info({:tcp, _socket, data}, state) do
+      %{socket: socket} = state
+      IO.puts("Acceptor #{inspect self()} got data from client #{inspect data}")
+      :gen_tcp.send(socket, "ECHO #{data}")
+      {:noreply, state}
+    end
+    
+    # catch all
+    def handle_info(msg, state) do
+      IO.puts("unknown info #{inspect msg}")
+      {:noreply, state}
+    end
+    
   end
   
   defmodule AcceptorSup do
@@ -69,8 +96,13 @@ defmodule Server do
     def init(options) do
       port = Keyword.get(options, :port, 1234)
       pool_size = Keyword.get(options, :pool_size, 10)
-      
-      {:ok, listening_socket} = :gen_tcp.listen(port, [:binary, {:active, true}])
+
+      options = [
+        :binary,
+        {:active, true},
+        {:reuseaddr, true}
+      ]
+      {:ok, listening_socket} = :gen_tcp.listen(port, options)
 
       state = %{
         port: port,

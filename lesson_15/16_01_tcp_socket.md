@@ -133,6 +133,26 @@ Listening socket: #Port<0.6>
 
 В чём преимущество пула?
 
+```
+** (EXIT from #PID<0.128.0>) shell process exited with reason: shutdown: failed to start child: Server.Listener
+    ** (EXIT) an exception was raised:
+        ** (MatchError) no match of right hand side value: {:error, :eaddrinuse}
+            acceptor_pool.exs:79: Server.Listener.init/1
+            (stdlib 4.0.1) gen_server.erl:848: :gen_server.init_it/2
+            (stdlib 4.0.1) gen_server.erl:811: :gen_server.init_it/6
+            (stdlib 4.0.1) proc_lib.erl:240: :proc_lib.init_p_do_apply/3
+```
+
+reuseaddr:
+```
+      options = [
+        :binary,
+        {:active, true},
+        {:reuseaddr, true}
+      ]
+      {:ok, listening_socket} = :gen_tcp.listen(port, options)
+```
+
 ## Бинарный протокол и TCP-клиент
 
 Пассивный режим
