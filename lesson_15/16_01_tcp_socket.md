@@ -133,6 +133,11 @@ Listening socket: #Port<0.6>
 
 В чём преимущество пула?
 
+
+### reuseaddr
+
+Если сервис завершается аварийно, то ОС не сразу освобождает порт. Из-за этого при рестарте сервис не может занять свой порт.
+
 ```
 ** (EXIT from #PID<0.128.0>) shell process exited with reason: shutdown: failed to start child: Server.Listener
     ** (EXIT) an exception was raised:
@@ -143,18 +148,79 @@ Listening socket: #Port<0.6>
             (stdlib 4.0.1) proc_lib.erl:240: :proc_lib.init_p_do_apply/3
 ```
 
-reuseaddr:
+Проблема решается настройкой reuseaddr:
+
 ```
-      options = [
-        :binary,
-        {:active, true},
-        {:reuseaddr, true}
-      ]
-      {:ok, listening_socket} = :gen_tcp.listen(port, options)
+  options = [
+    :binary,
+    {:active, true},
+    {:reuseaddr, true}
+  ]
+  {:ok, listening_socket} = :gen_tcp.listen(port, options)
 ```
 
-## Бинарный протокол и TCP-клиент
 
-Пассивный режим
+## Бинарный протокол
 
-## Текстовые протоколы
+### Работа с бинарными данными
+
+Кодирование в бинарник:
+
+```
+iex(8)> val1 = 100
+100
+iex(9)> val2 = 300
+300
+iex(10)> <<val1 :: 16, val2 :: 16>>
+<<0, 100, 1, 44>>
+```
+
+Декодирование из бинарника:
+```
+iex(13)> data = <<0, 100, 1, 44>>
+<<0, 100, 1, 44>>
+iex(14)> <<val1 :: 16, _ :: binary>> = data
+<<0, 100, 1, 44>>
+iex(15)> val1
+100
+iex(16)> <<_ :: 16, val2 :: 16>> = data
+<<0, 100, 1, 44>>
+iex(17)> val2
+300
+```
+
+### Заголовок пакета
+
+```
+Msg = <<"Hello">>,
+Size = byte_size(Msg),
+Header = <<Size:16/integer>>,
+
+iex(1)> msg = "Hello"
+iex(2)> size = byte_size(msg)
+iex(3)> header = <<size::16>>
+<<0, 5>>
+iex(4)> header = <<size::32>>
+<<0, 0, 0, 5>>
+iex(5)> header <> msg
+<<0, 0, 0, 5, 72, 101, 108, 108, 111>>
+
+:gen_tcp.send(socket, header <> msg)
+```
+
+### Пассивный режим
+
+### TCP-клиент
+
+Использовать Telnet не получится, нужно реализовать TCP клиент.
+
+
+## Текстовый протокол
+
+Кроме варианта со служебным заголовком, есть и другой подход. Можно читать из сокета по одному байту, пока не встретится специальный байт, символизирующий конец пакета. Это может быть нулевой байт, или символ перевода строки.
+
+Такой вариант характерен для текстовых протоколов (SMTP, POP3, FTP).
+
+Писать свою реализацию чтения из сокета нет необходимости, все уже реализовано в gen_tcp. Нужно только указать в настройках сокета вместо `{:packet, 2}` опцию `{:packet, :line}`.
+
+Можно вернутся к Telnet.

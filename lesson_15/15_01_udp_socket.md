@@ -11,6 +11,11 @@ User Datagram Protocol
 Для работы с UDP используется эрланговский модуль gen_udp.
 https://www.erlang.org/doc/man/gen_udp.html
 
+Примеры: 
+- передача видео и звука в реальном времени (live streaming)
+
+TODO ещё примеры
+
 
 ## Отправка и получение данных
 
