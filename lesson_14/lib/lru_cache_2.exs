@@ -45,6 +45,10 @@ defmodule LRU_GenerationCache do
     GenServer.cast(__MODULE__, {:delete, key})
   end
 
+  def introspect() do
+    GenServer.call(__MODULE__, :introspect)
+  end
+
   # GenServer Behavior
   
   @impl true
@@ -85,6 +89,12 @@ defmodule LRU_GenerationCache do
     {:reply, :ok, state}
   end
 
+  def handle_call(:introspect, _from, state) do
+    %{tables: tables} = state
+    Enum.each(tables, &show_table/1)
+    {:reply, :ok, state}
+  end
+
   def handle_call(:stop, _from, state) do
     IO.puts("Stop #{__MODULE__}")
     {:stop, :shutdown, state}
@@ -110,6 +120,7 @@ defmodule LRU_GenerationCache do
   @impl true
   def handle_info(:rotate, %{tables: tables, rotate_time: rotate_time} = state) do
     tables = rotate_tables(tables)
+    # Enum.each(new_tables, &show_table/1) 
     state = %{state | tables: tables}
     Process.send_after(self(), :rotate, rotate_time)
     {:noreply, state}
@@ -130,10 +141,8 @@ defmodule LRU_GenerationCache do
   end
 
   defp rotate_tables(tables) do
-    # Logger.info("rotate_tables #{inspect tables}")
     [last_table | rest] = Enum.reverse(tables)
     table_name = :ets.info(last_table, :name)
-    # Logger.info("drop #{table_name}")
     :ets.delete(last_table)
     new_table = :ets.new(table_name, [:set, :private])
     [new_table | Enum.reverse(rest)]
@@ -149,6 +158,12 @@ defmodule LRU_GenerationCache do
             [{^key, value}] -> {:ok, value}
           end
       end)
+  end
+
+  defp show_table(tid) do
+    table_name = :ets.info(tid, :name)
+    data = :ets.tab2list(tid)
+    IO.puts("Table #{table_name} with data: #{inspect data}")
   end
 
 end

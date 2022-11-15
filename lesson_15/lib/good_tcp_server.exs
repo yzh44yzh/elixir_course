@@ -28,7 +28,6 @@ defmodule GoodServer do
         loop(listening_socket)
       {:tcp_closed, _socket} -> 
         IO.puts("#{inspect self()} connection closed")
-        start_acceptor(listening_socket)
     end
   end
   
