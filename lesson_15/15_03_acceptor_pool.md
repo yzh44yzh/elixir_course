@@ -9,6 +9,10 @@
 
 TODO В чём преимущество пула?
 
+TODO: на базе acceptor pool реализовать варианты:
+- [X] text protocol, active:true
+- [X] text protocol, active:false
+
 
 ## reuseaddr
 

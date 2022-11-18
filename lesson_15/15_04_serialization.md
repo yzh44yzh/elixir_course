@@ -109,6 +109,11 @@ iex(5)> header <> msg
 
 Использовать Telnet не получится, нужно реализовать TCP клиент.
 
+TODO: на базе acceptor pool реализовать варианты:
+- [ ] binary protocol, active:true
+- [ ] binary protocol, active:false
+- [ ] binary protocol, packet:2
+
 
 ## Текстовые протоколы
 
