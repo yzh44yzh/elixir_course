@@ -14,22 +14,13 @@ defmodule PlanningPoker.Model do
 
   defmodule User do
     @type t() :: %__MODULE__{
+      id: integer(),
       user_name: String.t(),
       role: Model.role()
     }
 
-    @enforce_keys [:user_name, :role]
-    defstruct [:user_name, :role]
-  end
-
-  defmodule Session do
-    @type t() :: %__MODULE__{
-      handler: pid(),
-      user: User.t()
-    }
-
-    @enforce_keys [:handler, :user]
-    defstruct [:handler, :user]
+    @enforce_keys [:id, :user_name, :role]
+    defstruct [:id, :user_name, :role]
   end
 
 end
