@@ -16,6 +16,28 @@ https://www.erlang.org/doc/man/gen_udp.html
 
 TODO ещё примеры
 
+  IP 
+  Internet Protocol (IP + Port)
+
+  UDP 
+  User Datagram Protocol
+  - Datagram -- short msg 1.5Kb
+  - no client/server, all nodes are the same
+  - fast
+  - no garanties (devilery, ordering)
+  Live Streaming (video & audio)
+
+  TCP 
+  Transmission Control Protocol
+  - Any size data. 
+  - strict garanties (devilery, ordering) ack acknowledge
+  - client/server roles
+  - persistent connection (session)
+  - handshake
+
+  HTTP over TCP
+  cowboy | ranch
+
 
 ## Отправка и получение данных
 

@@ -12,28 +12,59 @@ defmodule Server do
   defmodule Acceptor do
     use GenServer
 
-    def start_link(listening_socket) do
-      GenServer.start_link(__MODULE__, listening_socket)
+    def start_link(args) do
+      GenServer.start_link(__MODULE__, args)
     end
 
     @impl true
-    def init(listening_socket) do
+    def init({id, listening_socket}) do
       state = %{
+        id: id,
         listening_socket: listening_socket,
         socket: nil
       }
-      IO.puts("Acceptor starts with state #{inspect state}")
+      IO.puts("Start Acceptor #{id} with state #{inspect state}")
       {:ok, state, {:continue, :wait_for_client}}
     end
 
     @impl true
     def handle_continue(:wait_for_client, state) do
       %{listening_socket: listening_socket} = state
-      IO.puts("Acceptor #{inspect self()} waits for client")
+      IO.puts("Acceptor #{inspect self()} is waiting for client")
       {:ok, socket} = :gen_tcp.accept(listening_socket)
-      IO.puts("Acceptor #{inspect self()} got client connection #{inspect socket}")
+      IO.puts("Acceptor #{state.id} #{inspect self()} has got client connection #{inspect socket}")
       state = %{state | socket: socket}
-      {:noreply, state}
+      {:noreply, state, {:continue, :receive_data}}
+      # {:noreply, state}
+    end
+
+    # TODO this blocks GenServer from processing calls and casts
+    # need different implementation
+    def handle_continue(:receive_data, state) do
+      IO.puts("Acceptor #{state.id} is waiting for data")
+      case :gen_tcp.recv(state.socket, 0, 2000) do
+        {:ok, data} ->
+          data = :erlang.binary_to_term(data)
+          IO.puts("Acceptor #{state.id} has got data #{inspect data}")
+
+          response = %{
+            susccess: true,
+            request: data
+          }
+          response_bin = :erlang.term_to_binary(response)
+          size = byte_size(response_bin)
+          response_bin = <<size :: 16>> <> response_bin
+          
+          :gen_tcp.send(state.socket, response_bin)
+          {:noreply, state, {:continue, :receive_data}}
+        {:error, :timeout} ->
+          IO.puts("timeout")
+          {:noreply, state, {:continue, :receive_data}}
+        {:error, error} ->
+          IO.puts("Start Acceptor #{state.id} has got #{inspect error}")
+          :gen_tcp.close(state.socket)
+          {:noreply, state, {:continue, :wait_for_client}}
+      end          
     end
 
     @impl true
@@ -69,13 +100,15 @@ defmodule Server do
   defmodule AcceptorSup do
     use DynamicSupervisor
 
+    @name :acceptor_sup
+
     def start_link(:no_args) do
-      DynamicSupervisor.start_link(__MODULE__, :no_args, name: __MODULE__)
+      DynamicSupervisor.start_link(__MODULE__, :no_args, name: @name)
     end
 
-    def start_acceptor(listening_socket) do
-      spec = {Acceptor, listening_socket}
-      DynamicSupervisor.start_child(__MODULE__, spec)
+    def start_acceptor(id, listening_socket) do
+      spec = {Acceptor, {id, listening_socket}}
+      DynamicSupervisor.start_child(@name, spec)
     end
 
     @impl true
@@ -99,7 +132,9 @@ defmodule Server do
 
       options = [
         :binary,
-        {:active, true},
+        # {:active, true},
+        {:active, false},
+        {:packet, 2},
         {:reuseaddr, true}
       ]
       {:ok, listening_socket} = :gen_tcp.listen(port, options)
@@ -117,8 +152,8 @@ defmodule Server do
     def handle_continue(:delayed_init, state) do
       %{listening_socket: listening_socket, pool_size: pool_size} = state
       
-      Enum.each(1..pool_size, fn(_) -> 
-        AcceptorSup.start_acceptor(listening_socket)
+      Enum.each(1..pool_size, fn(id) -> 
+        AcceptorSup.start_acceptor(id, listening_socket)
       end)
       
       {:noreply, state}
@@ -139,7 +174,7 @@ defmodule Server do
         {AcceptorSup, :no_args}, # should be started before Listener
         {Listener, [port: 1234, pool_size: 5]}
       ]
-      Supervisor.init(spec, strategy: :one_for_one)
+      Supervisor.init(spec, strategy: :rest_for_one)
     end
   end
 

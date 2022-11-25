@@ -8,26 +8,29 @@ defmodule GoodServer do
   end
 
   def start_acceptor(listening_socket) do
-    spawn(__MODULE__, :wait_for_client, [listening_socket])
+    spawn(__MODULE__, :wait_for_clients, [listening_socket])
   end
-
-  def wait_for_client(listening_socket) do
-    IO.puts("#{inspect self()} waits for client")
+  
+  def wait_for_clients(listening_socket) do
+    IO.puts("Process #{inspect self()} is waiting for clients")
     {:ok, socket} = :gen_tcp.accept(listening_socket)
-    IO.puts("#{inspect self()} got client connection #{inspect socket}")
-    start_acceptor(listening_socket) # Run the next acceptor
-    loop(listening_socket)
+    IO.puts("Process #{inspect self()} got client connection #{inspect socket}")
+    start_acceptor(listening_socket)
+    state = %{listening_socket: listening_socket}
+    loop(state)
   end
 
-  def loop(listening_socket) do
-    IO.puts("#{inspect self()} is waiting for data from client")
+  def loop(state) do
+    IO.puts("Process #{inspect self()} is waiting data from client")
     receive do
       {:tcp, socket, data} ->
-        IO.puts("#{inspect self()} got data from client #{data}")
-        :gen_tcp.send(socket, "ECHO #{data}")
-        loop(listening_socket)
-      {:tcp_closed, _socket} -> 
-        IO.puts("#{inspect self()} connection closed")
+        IO.puts("Process #{inspect self()} got data #{data}")
+        :gen_tcp.send(socket, "ECHO: #{data}")
+        loop(state)
+      {:tcp_closed, _socket} ->
+        IO.puts("Client close connection")
+      msg ->
+        IO.puts("Unknown msg #{inspect msg}")
     end
   end
   
