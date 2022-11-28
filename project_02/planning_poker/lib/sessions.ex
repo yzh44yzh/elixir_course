@@ -6,6 +6,7 @@ defmodule PlanningPoker.Sessions do
     use GenServer
 
     alias PlanningPoker.Rooms.{RoomManager, Room}
+    alias PlanningPoker.Protocol
 
     defmodule State do
       defstruct [
@@ -41,29 +42,9 @@ defmodule PlanningPoker.Sessions do
       {:ok, socket} = :gen_tcp.accept(state.listening_socket)
       state = %State{state | socket: socket}
       IO.puts("Session #{state.session_id} got client connection #{inspect socket}")
-      {:noreply, state, {:continue, :receive_data}}
+      send(self(), :receive_data)
+      {:noreply, state}
     end    
-
-    def handle_continue(:receive_data, state) do
-      # IO.puts("Session #{inspect self()} #{state.session_id} is waiting for data #{inspect state}")
-      case :gen_tcp.recv(state.socket, 0, 1000) do
-        {:ok, data} ->
-          IO.puts("Session #{state.session_id} has got data #{inspect data}")
-          {response, state} =
-            data
-            |> String.trim()
-            |> handle_request(state)
-          :gen_tcp.send(state.socket, response <> "\n")
-          {:noreply, state, {:continue, :receive_data}}
-        {:error, :timeout} ->
-          {:noreply, state, {:continue, :receive_data}}
-        {:error, error} ->
-          IO.puts("Session #{state.session_id} has got #{inspect error}")
-          :gen_tcp.close(state.socket)
-          state = on_client_disconnect(state)
-          {:noreply, state, {:continue, :wait_for_client}}
-      end          
-    end
 
     @impl true
     def handle_cast({:send_event, event}, state) do
@@ -73,15 +54,37 @@ defmodule PlanningPoker.Sessions do
       {:noreply, state}
     end
 
+    @impl true
+    def handle_info(:receive_data, state) do
+      # IO.puts("Session #{inspect self()} #{state.session_id} is waiting for data #{inspect state}")
+      case :gen_tcp.recv(state.socket, 0, 1000) do
+        {:ok, data} ->
+          IO.puts("Session #{state.session_id} has got data #{inspect data}")
+          {response, state} =
+            data
+            |> String.trim()
+            |> handle_request(state)
+          :gen_tcp.send(state.socket, response <> "\n")
+          send(self(), :receive_data)
+          {:noreply, state}
+        {:error, :timeout} ->
+          send(self(), :receive_data)
+          {:noreply, state}
+        {:error, error} ->
+          IO.puts("Session #{state.session_id} has got #{inspect error}")
+          :gen_tcp.close(state.socket)
+          state = on_client_disconnect(state)
+          {:noreply, state, {:continue, :wait_for_client}}
+      end
+    end
+
     # catch all
-    def handle_cast(msg, state) do
-      Logger.error("Session #{inspect self()} unknown call #{inspect msg}")
+    def handle_info(msg, state) do
+      Logger.error("Session #{inspect self()} unknown info #{inspect msg}")
       {:noreply, state}
     end
 
-    def handle_request(request, state) do
-      alias PlanningPoker.Protocol
-      
+    defp handle_request(request, state) do      
       case Protocol.deserialize(request) do
         {:error, error} ->
           {Protocol.serialize({:error, error}), state}
@@ -91,7 +94,7 @@ defmodule PlanningPoker.Sessions do
       end
     end
 
-    def handle_event({:login, name}, state) do
+    defp handle_event({:login, name}, state) do
       alias PlanningPoker.UsersDatabase
 
       case UsersDatabase.get_by_name(name) do
@@ -105,11 +108,11 @@ defmodule PlanningPoker.Sessions do
       end
     end
 
-    def handle_event({:join_room, _room_name}, %State{user: nil} = state) do
+    defp handle_event({:join_room, _room_name}, %State{user: nil} = state) do
       {{:error, :forbidden}, state}
     end
     
-    def handle_event({:join_room, room_name}, state) do
+    defp handle_event({:join_room, room_name}, state) do
       response = case RoomManager.find_room(room_name) do
                    {:ok, room_pid} -> Room.join(room_pid, state.user)
                    error -> error
@@ -118,18 +121,18 @@ defmodule PlanningPoker.Sessions do
     end
 
     # catch all
-    def handle_event(event, state) do
+    defp handle_event(event, state) do
       Logger.error("Unknown event #{inspect event}")
       result = {:error, :unknown_error} # status 500
       {result, state}
     end
 
-    def on_client_disconnect(state) do
+    defp on_client_disconnect(state) do
       Registry.unregister(:sessions_registry, state.user.id)
       {:ok, room_pid} = RoomManager.find_room("Room 1")
       Room.leave(room_pid, state.user)
       # RoomManager.leave_all_rooms(state.user)
-      state = %State{state | user: nil}
+      %State{state | user: nil}
     end
   end
 
