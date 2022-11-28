@@ -83,7 +83,7 @@ defmodule PlanningPoker.Rooms do
     use DynamicSupervisor
 
     @sup_name :room_sup
-    @registry_name :room_registry
+    @registry_name :room_registry # TODO leaked into RoomManager
     
     def start_link(_) do
       Registry.start_link(keys: :unique, name: @registry_name)

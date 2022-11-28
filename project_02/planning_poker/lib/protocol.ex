@@ -6,6 +6,7 @@ defmodule PlanningPoker.Protocol do
   def deserialize("join " <> room_name), do: {:join_room, room_name}
   def deserialize("topic " <> description), do: {:topic, description}
   def deserialize("vote " <> points) do
+    # TODO validation
     {points, _} = Integer.parse(points)
     {:vote, points}
   end
@@ -17,13 +18,15 @@ defmodule PlanningPoker.Protocol do
     {:error, :unknown_msg}
   end
 
+  def serialize({:logged_in, user_name, role}),
+    do: "logged in, name: #{user_name} role: #{role}" # TODO use
   def serialize({:joined, user, room_name}),
     do: "#{user.name} #{user.role} has joined to the room #{room_name}"
   def serialize({:topic, description}), do: "Topic: #{description}"
   def serialize({:voted, user}), do: "#{user.name} has voted"
   def serialize({:show, results}), do: "Vote results: #{inspect results}"
   def serialize({:leaved, user, room_name}),
-    do: "#{user.name} #{user.role} has leaved from the room #{room_name}"
+    do: "#{user.name} has left the room #{room_name}"
   def serialize(:ok), do: "OK"
   def serialize({:error, error}), do: "ERROR: #{inspect error}"
   
