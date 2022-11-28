@@ -23,29 +23,31 @@ defmodule Server do
         listening_socket: listening_socket,
         socket: nil
       }
-      IO.puts("Start Acceptor #{id} with state #{inspect state}")
+      IO.puts("Start #{acceptor_info(state)} with state #{inspect state}")
       {:ok, state, {:continue, :wait_for_client}}
     end
 
     @impl true
     def handle_continue(:wait_for_client, state) do
-      %{listening_socket: listening_socket} = state
-      IO.puts("Acceptor #{inspect self()} is waiting for client")
-      {:ok, socket} = :gen_tcp.accept(listening_socket)
-      IO.puts("Acceptor #{state.id} #{inspect self()} has got client connection #{inspect socket}")
+      info = acceptor_info(state)
+      IO.puts("#{info} is waiting for client")
+      {:ok, socket} = :gen_tcp.accept(state.listening_socket)
+      IO.puts("#{info} has got client connection #{inspect socket}")
       state = %{state | socket: socket}
-      {:noreply, state, {:continue, :receive_data}}
-      # {:noreply, state}
+      send(self(), :receive_data)
+      {:noreply, state}
     end
 
-    # TODO this blocks GenServer from processing calls and casts
-    # need different implementation
-    def handle_continue(:receive_data, state) do
-      IO.puts("Acceptor #{state.id} is waiting for data")
-      case :gen_tcp.recv(state.socket, 0, 2000) do
-        {:ok, data} ->
+    @impl true
+    def handle_info(:receive_data, state) do
+      info = acceptor_info(state)
+      IO.puts("#{info} is waiting for data")
+      case :gen_tcp.recv(state.socket, 2, 2000) do
+        {:ok, header} ->
+          <<header_size :: 16>> = header
+          {:ok, data} = :gen_tcp.recv(state.socket, header_size)
           data = :erlang.binary_to_term(data)
-          IO.puts("Acceptor #{state.id} has got data #{inspect data}")
+          IO.puts("#{info} has got data #{inspect data}")
 
           response = %{
             susccess: true,
@@ -56,43 +58,48 @@ defmodule Server do
           response_bin = <<size :: 16>> <> response_bin
           
           :gen_tcp.send(state.socket, response_bin)
-          {:noreply, state, {:continue, :receive_data}}
+          send(self(), :receive_data)
+          {:noreply, state}
         {:error, :timeout} ->
           IO.puts("timeout")
-          {:noreply, state, {:continue, :receive_data}}
+          send(self(), :receive_data)
+          {:noreply, state}
         {:error, error} ->
-          IO.puts("Start Acceptor #{state.id} has got #{inspect error}")
+          IO.puts("#{info} has got #{inspect error}")
           :gen_tcp.close(state.socket)
           {:noreply, state, {:continue, :wait_for_client}}
       end          
     end
 
-    @impl true
     def handle_info({:tcp_closed, _socket}, state) do
       %{socket: socket} = state
-      IO.puts("Acceptor #{inspect self()} client has closed the connection")
+      IO.puts("#{acceptor_info(state)} client has closed the connection")
       :gen_tcp.close(socket)
       {:noreply, state, {:continue, :wait_for_client}}
     end
 
     def handle_info({:tcp, _socket, "quit\r\n"}, state) do
       %{socket: socket} = state
-      IO.puts("Acceptor #{inspect self()} closes connection")
+      IO.puts("#{acceptor_info(state)} closes connection")
       :gen_tcp.close(socket)
       {:noreply, state, {:continue, :wait_for_client}}
     end
 
     def handle_info({:tcp, _socket, data}, state) do
       %{socket: socket} = state
-      IO.puts("Acceptor #{inspect self()} got data from client #{inspect data}")
+      IO.puts("#{acceptor_info(state)} got data from client #{inspect data}")
       :gen_tcp.send(socket, "ECHO #{data}")
       {:noreply, state}
     end
     
     # catch all
     def handle_info(msg, state) do
-      IO.puts("unknown info #{inspect msg}")
+      IO.puts("#{acceptor_info(state)} got unknown msg #{inspect msg}")
       {:noreply, state}
+    end
+
+    defp acceptor_info(state) do
+      "Acceptor #{state.id} #{inspect self()}"
     end
     
   end
@@ -134,7 +141,8 @@ defmodule Server do
         :binary,
         # {:active, true},
         {:active, false},
-        {:packet, 2},
+        # {:packet, 2},
+        {:packet, :raw},
         {:reuseaddr, true}
       ]
       {:ok, listening_socket} = :gen_tcp.listen(port, options)
