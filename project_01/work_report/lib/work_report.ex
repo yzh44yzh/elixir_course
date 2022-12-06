@@ -22,10 +22,13 @@ defmodule WorkReport do
     ]
   end
 
-  defp parse(params, report_file) do
+  defp parse(params, file) do
     month = Map.get(params, :month, :erlang.date() |> elem(1))
     day = Map.get(params, :day, :erlang.date() |> elem(2))
-    show(report_file, month, day)
+
+    file
+    |> WorkReport.Parser.parse()
+    |> show(month, day)
   end
 
   defp help() do
@@ -44,7 +47,24 @@ defmodule WorkReport do
     IO.puts(@name <> " v" <> @version)
   end
 
-  defp show(_report_file, _month_num, _day_num) do
-    IO.puts("not implemented")
+  alias WorkReport.Model, as: M
+  alias WorkReport.Formatter
+
+  @spec show(M.TotalReport.t(), integer, integer) :: :ok
+  defp show(total_report, month_num, day_num) do
+    case Enum.find(total_report.months, fn m -> m.month_num == month_num end) do
+      nil ->
+        IO.puts("month #{month_num} not found")
+
+      month_report ->
+        case Enum.find(month_report.days, fn d -> d.day_num == day_num end) do
+          nil ->
+            IO.puts("day #{day_num} not found")
+
+          day_report ->
+            Formatter.format_day(day_report) |> IO.puts()
+            Formatter.format_month(month_report) |> IO.puts()
+        end
+    end
   end
 end
