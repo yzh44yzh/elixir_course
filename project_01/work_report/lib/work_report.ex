@@ -47,5 +47,4 @@ defmodule WorkReport do
   defp show(_report_file, _month_num, _day_num) do
     IO.puts("not implemented")
   end
-
 end

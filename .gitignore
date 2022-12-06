@@ -7,3 +7,6 @@
 *.toc
 *.pdf
 *.out
+
+# Emacs
+\#*
