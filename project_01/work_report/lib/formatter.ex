@@ -57,12 +57,9 @@ defmodule WorkReport.Formatter do
     end
   end
 
-  # TODO move to model
-  @categories ["COMM", "DEV", "OPS", "DOC", "WS", "EDU"]
-
   @spec format_category_stat(WrStat.category_stat()) :: IO.chardata()
   def format_category_stat(stat) do
-    Enum.map(@categories, fn category ->
+    Enum.map(M.categories(), fn category ->
       [
         " - #{category}: ",
         Map.get(stat, category, 0) |> format_time(),

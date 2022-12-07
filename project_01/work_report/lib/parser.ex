@@ -1,4 +1,5 @@
 defmodule WorkReport.Parser do
+  alias WorkReport.Model
   alias WorkReport.Model.{DayReport, MonthReport, Task}
 
   def parse(file) do
@@ -21,14 +22,14 @@ defmodule WorkReport.Parser do
     if not String.starts_with?(first_line, marker),
       do: raise("data should start from marker '#{marker}'")
 
-    first_line = trim_marker(first_line, marker)
+    first_line = trim_prefix(first_line, marker)
     first_group = %{header: first_line, items: []}
     acc = {first_group, []}
 
     {last_group, groups} =
       Enum.reduce(rest, acc, fn line, {curr_group, groups} ->
         if String.starts_with?(line, marker) do
-          line = trim_marker(line, marker)
+          line = trim_prefix(line, marker)
           new_group = %{header: line, items: []}
           groups = [curr_group | groups]
           {new_group, groups}
@@ -43,8 +44,8 @@ defmodule WorkReport.Parser do
     |> Enum.reverse()
   end
 
-  def trim_marker(str, marker) do
-    String.slice(str, String.length(marker), String.length(str))
+  def trim_prefix(str, prefix) do
+    String.slice(str, String.length(prefix), String.length(str))
   end
 
   def split_to_months_and_days(data) do
@@ -58,13 +59,23 @@ defmodule WorkReport.Parser do
   end
 
   def get_category(data) do
-    # TODO full list of categories
-    case data do
-      "[DEV] " <> rest -> {"DEV", rest}
-      "[COMM] " <> rest -> {"COMM", rest}
-      "[DOC] " <> rest -> {"DOC", rest}
-      "[OPS] " <> rest -> {"OPS", rest}
-    end
+    Enum.reduce(
+      Model.categories(),
+      :not_found,
+      fn
+        category, :not_found ->
+          prefix = "[#{category}] "
+
+          if String.starts_with?(data, prefix) do
+            {category, trim_prefix(data, prefix)}
+          else
+            :not_found
+          end
+
+        _, found ->
+          found
+      end
+    )
   end
 
   def map_to_model(map) do
