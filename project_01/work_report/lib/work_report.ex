@@ -50,9 +50,9 @@ defmodule WorkReport do
   alias WorkReport.Model, as: M
   alias WorkReport.Formatter
 
-  @spec show(M.TotalReport.t(), integer, integer) :: :ok
-  defp show(total_report, month_num, day_num) do
-    case Enum.find(total_report.months, fn m -> m.month_num == month_num end) do
+  @spec show([M.MonthReport.t()], integer, integer) :: :ok
+  defp show(month_reports, month_num, day_num) do
+    case Enum.find(month_reports, fn m -> m.month_num == month_num end) do
       nil ->
         IO.puts("month #{month_num} not found")
 

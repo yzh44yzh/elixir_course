@@ -25,7 +25,7 @@ defmodule WorkReport.Formatter do
   def format_day(report) do
     [
       "Day: #{report.day}\n",
-      Enum.map(report.tasks, &format_task/1) |> Enum.reverse(),
+      Enum.map(report.tasks, &format_task/1),
       "   Total: ",
       Stat.day_stat(report.tasks) |> format_time
     ]

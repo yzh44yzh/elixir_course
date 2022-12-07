@@ -93,18 +93,4 @@ defmodule WorkReport.Model do
       end
     end
   end
-
-  defmodule TotalReport do
-    @type t :: %__MODULE__{
-            months: [MonthReport.t()]
-          }
-    @enforce_keys []
-    defstruct months: []
-
-    def new(), do: %__MODULE__{}
-
-    def add_month(report, month) do
-      %__MODULE__{report | months: [month | report.months]}
-    end
-  end
 end
