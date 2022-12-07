@@ -1,4 +1,25 @@
 defmodule WorkReport.Model do
+  def monthes do
+    [
+      {1, "January"},
+      {2, "February"},
+      {3, "March"},
+      {4, "April"},
+      {5, "May"},
+      {6, "June"},
+      {7, "July"},
+      {8, "August"},
+      {9, "September"},
+      {10, "October"},
+      {11, "November"},
+      {12, "December"}
+    ]
+  end
+
+  def categories do
+    ["COMM", "DEV", "OPS", "DOC", "WS", "EDU"]
+  end
+
   defmodule Task do
     @type t :: %__MODULE__{
             category: String.t(),
@@ -22,7 +43,13 @@ defmodule WorkReport.Model do
     @enforce_keys [:day]
     defstruct day_num: 0, day: nil, tasks: []
 
-    def new(day), do: %__MODULE__{day: day, day_num: get_day_num(day)}
+    def new(day, tasks \\ []) do
+      %__MODULE__{
+        day: day,
+        day_num: get_day_num(day),
+        tasks: tasks
+      }
+    end
 
     def add_task(report, task) do
       %__MODULE__{report | tasks: [task | report.tasks]}
@@ -45,27 +72,25 @@ defmodule WorkReport.Model do
     @enforce_keys [:month]
     defstruct month_num: 0, month: nil, days: []
 
-    def new(month), do: %__MODULE__{month: month, month_num: get_month_num(month)}
+    def new(month, days \\ []) do
+      %__MODULE__{
+        month: month,
+        month_num: get_month_num(month),
+        days: days
+      }
+    end
 
     def add_day(report, day) do
       %__MODULE__{report | days: [day | report.days]}
     end
 
-    defp get_month_num("January"), do: 1
-    defp get_month_num("February"), do: 2
-    defp get_month_num("March"), do: 3
-    defp get_month_num("April"), do: 4
-    defp get_month_num("May"), do: 5
-    defp get_month_num("June"), do: 6
-    defp get_month_num("July"), do: 7
-    defp get_month_num("August"), do: 8
-    defp get_month_num("September"), do: 9
-    defp get_month_num("October"), do: 10
-    defp get_month_num("November"), do: 11
-    defp get_month_num("December"), do: 12
-
     defp get_month_num(month) do
-      raise("unknown month #{inspect(month)}")
+      WorkReport.Model.monthes()
+      |> List.keyfind(month, 1, :not_found)
+      |> case do
+        {num, ^month} -> num
+        :not_found -> raise("unknown month #{inspect(month)}")
+      end
     end
   end
 

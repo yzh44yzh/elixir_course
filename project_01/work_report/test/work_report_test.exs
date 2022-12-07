@@ -1,6 +1,8 @@
 defmodule WorkReportTest do
   use ExUnit.Case
 
+  alias WorkReport.Model.{DayReport, MonthReport, Task}
+
   alias WorkReport.Parser
   alias WorkReport.Formatter
 
@@ -108,7 +110,7 @@ defmodule WorkReportTest do
 
     result = [
       %{
-        header: "## 09 tue",
+        header: "09 tue",
         items: [
           "[DEV] TASK-15 implement feature - 42m",
           "[COMM] Daily Meeting - 24m",
@@ -116,20 +118,20 @@ defmodule WorkReportTest do
         ]
       },
       %{
-        header: "## 10 wed",
+        header: "10 wed",
         items: [
           "[DEV] Review Pull Requests - 17m",
           "[COMM] Sprint Planning - 1h"
         ]
       },
       %{
-        header: "## 15 thu",
+        header: "15 thu",
         items: [
           "[COMM] Daily Meeting - 19m"
         ]
       },
       %{
-        header: "## 16 fri",
+        header: "16 fri",
         items: [
           "[DEV] TASK-20 implementation - 17m",
           "[COMM] Daily Meeting - 22m",
@@ -162,10 +164,10 @@ defmodule WorkReportTest do
 
     result = [
       %{
-        header: "# March",
+        header: "March",
         items: [
           %{
-            header: "## 09 tue",
+            header: "09 tue",
             items: [
               "[DEV] TASK-15 implement feature - 42m",
               "[COMM] Daily Meeting - 24m",
@@ -173,7 +175,7 @@ defmodule WorkReportTest do
             ]
           },
           %{
-            header: "## 10 wed",
+            header: "10 wed",
             items: [
               "[DEV] Review Pull Requests - 17m",
               "[COMM] Sprint Planning - 1h"
@@ -182,16 +184,16 @@ defmodule WorkReportTest do
         ]
       },
       %{
-        header: "# April",
+        header: "April",
         items: [
           %{
-            header: "## 15 thu",
+            header: "15 thu",
             items: [
               "[COMM] Daily Meeting - 19m"
             ]
           },
           %{
-            header: "## 16 fri",
+            header: "16 fri",
             items: [
               "[DEV] TASK-20 implementation - 17m",
               "[COMM] Daily Meeting - 22m",
@@ -205,8 +207,6 @@ defmodule WorkReportTest do
     assert Parser.split_to_months_and_days(data) == result
   end
 
-  alias WorkReport.Model.Task
-
   test "parse task" do
     data = "[DEV] TASK-20 implementation - 17m"
     result = %Task{category: "DEV", description: "TASK-20 implementation", time: 17}
@@ -216,10 +216,10 @@ defmodule WorkReportTest do
   test "map to model" do
     data = [
       %{
-        header: "# March",
+        header: "March",
         items: [
           %{
-            header: "## 10 wed",
+            header: "10 wed",
             items: [
               "[DEV] Review Pull Requests - 17m",
               "[COMM] Sprint Planning - 1h"
@@ -228,16 +228,16 @@ defmodule WorkReportTest do
         ]
       },
       %{
-        header: "# April",
+        header: "April",
         items: [
           %{
-            header: "## 15 thu",
+            header: "15 thu",
             items: [
               "[COMM] Daily Meeting - 19m"
             ]
           },
           %{
-            header: "## 16 fri",
+            header: "16 fri",
             items: [
               "[COMM] Daily Meeting - 22m",
               "[DEV] TASK-19 investigate bug - 43m"
@@ -248,30 +248,35 @@ defmodule WorkReportTest do
     ]
 
     result = [
-      %{
-        header: "# March",
-        items: [
-          %{
-            header: "## 10 wed",
-            items: [
+      %MonthReport{
+        month: "March",
+        month_num: 3,
+        days: [
+          %DayReport{
+            day: "10 wed",
+            day_num: 10,
+            tasks: [
               %Task{category: "DEV", description: "Review Pull Requests", time: 17},
               %Task{category: "COMM", description: "Sprint Planning", time: 60}
             ]
           }
         ]
       },
-      %{
-        header: "# April",
-        items: [
-          %{
-            header: "## 15 thu",
-            items: [
+      %MonthReport{
+        month: "April",
+        month_num: 4,
+        days: [
+          %DayReport{
+            day: "15 thu",
+            day_num: 15,
+            tasks: [
               %Task{category: "COMM", description: "Daily Meeting", time: 19}
             ]
           },
-          %{
-            header: "## 16 fri",
-            items: [
+          %DayReport{
+            day: "16 fri",
+            day_num: 16,
+            tasks: [
               %Task{category: "COMM", description: "Daily Meeting", time: 22},
               %Task{category: "DEV", description: "TASK-19 investigate bug", time: 43}
             ]

@@ -1,18 +1,11 @@
 defmodule WorkReport.Parser do
-  @spec parse_time(String.t()) :: integer
-  def parse_time(time_str) do
-    time_str
-    |> String.split(" ")
-    |> Enum.map(&parse_time_item/1)
-    |> Enum.sum()
-  end
+  alias WorkReport.Model.{DayReport, MonthReport, Task}
 
-  def parse_time_item(item) do
-    case Integer.parse(item) do
-      {i, "h"} -> i * 60
-      {i, "m"} -> i
-      _ -> 0
-    end
+  def parse(file) do
+    File.read!(file)
+    |> prepare_file_content()
+    |> split_to_months_and_days()
+    |> map_to_model()
   end
 
   def prepare_file_content(file_content) do
@@ -28,12 +21,14 @@ defmodule WorkReport.Parser do
     if not String.starts_with?(first_line, marker),
       do: raise("data should start from marker '#{marker}'")
 
+    first_line = trim_marker(first_line, marker)
     first_group = %{header: first_line, items: []}
     acc = {first_group, []}
 
     {last_group, groups} =
       Enum.reduce(rest, acc, fn line, {curr_group, groups} ->
         if String.starts_with?(line, marker) do
+          line = trim_marker(line, marker)
           new_group = %{header: line, items: []}
           groups = [curr_group | groups]
           {new_group, groups}
@@ -48,6 +43,10 @@ defmodule WorkReport.Parser do
     |> Enum.reverse()
   end
 
+  def trim_marker(str, marker) do
+    String.slice(str, String.length(marker), String.length(str))
+  end
+
   def split_to_months_and_days(data) do
     group_by_marker(data, "# ")
     |> Enum.map(&split_month_to_days/1)
@@ -58,20 +57,13 @@ defmodule WorkReport.Parser do
     %{header: header, items: days}
   end
 
-  alias WorkReport.Model.Task
-
-  def parse_task(data) do
-    {category, rest} = get_category(data)
-    [description, time_str] = String.split(rest, " - ")
-    time = parse_time(time_str)
-    Task.new(category, description, time)
-  end
-
   def get_category(data) do
     # TODO full list of categories
     case data do
       "[DEV] " <> rest -> {"DEV", rest}
       "[COMM] " <> rest -> {"COMM", rest}
+      "[DOC] " <> rest -> {"DOC", rest}
+      "[OPS] " <> rest -> {"OPS", rest}
     end
   end
 
@@ -81,13 +73,34 @@ defmodule WorkReport.Parser do
 
   def month_to_model(%{header: header, items: days}) do
     days = Enum.map(days, &day_to_model/1)
-    # TODO create Month object
-    %{header: header, items: days}
+    MonthReport.new(header, days)
   end
 
   def day_to_model(%{header: header, items: tasks}) do
     tasks = Enum.map(tasks, &parse_task/1)
-    # TODO create Day object
-    %{header: header, items: tasks}
+    DayReport.new(header, tasks)
+  end
+
+  def parse_task(data) do
+    {category, rest} = get_category(data)
+    [description, time_str] = String.split(rest, " - ")
+    time = parse_time(time_str)
+    Task.new(category, description, time)
+  end
+
+  @spec parse_time(String.t()) :: integer
+  def parse_time(time_str) do
+    time_str
+    |> String.split(" ")
+    |> Enum.map(&parse_time_item/1)
+    |> Enum.sum()
+  end
+
+  def parse_time_item(item) do
+    case Integer.parse(item) do
+      {i, "h"} -> i * 60
+      {i, "m"} -> i
+      _ -> 0
+    end
   end
 end
