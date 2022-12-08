@@ -55,7 +55,7 @@ defmodule WorkReport.Model do
       %__MODULE__{report | tasks: [task | report.tasks]}
     end
 
-    defp get_day_num(day) do
+    def get_day_num(day) do
       case Integer.parse(day) do
         {num, _} when num >= 1 and num <= 31 -> num
         _ -> raise "unknown day #{inspect(day)}"

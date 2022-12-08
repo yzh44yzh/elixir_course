@@ -6,6 +6,7 @@ defmodule IntegrationTest do
     :ok
   end
 
+  @tag :integration
   test "report-1" do
     report_1 = get_report_path("report-1")
     call_and_check_response(["--month=5", "--day=3", report_1], "response-1-1")
@@ -13,6 +14,7 @@ defmodule IntegrationTest do
     call_and_check_response(["--month=5", "--day=5", report_1], "response-1-3")
   end
 
+  @tag :integration
   test "report-2" do
     report_2 = get_report_path("report-2")
     call_and_check_response(["--month=3", "--day=9", report_2], "response-2-1")
@@ -21,6 +23,7 @@ defmodule IntegrationTest do
     call_and_check_response(["--month=4", "--day=16", report_2], "response-2-4")
   end
 
+  @tag :integration
   test "invalid month or day" do
     report_1 = get_report_path("report-1")
     call_and_check_response(["--month=1", "--day=1", report_1], "response-month-not-found")
