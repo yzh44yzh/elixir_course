@@ -12,7 +12,7 @@ defmodule WorkReport.Formatter do
       "Month: ",
       report.month,
       "\n",
-      Stat.category_stat_per_month(report) |> format_category_stat(),
+      Stat.category_stat(report) |> format_category_stat(),
       "   Total: ",
       total_time |> format_time,
       ", Days: ",

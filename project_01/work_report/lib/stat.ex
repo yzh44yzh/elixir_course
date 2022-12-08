@@ -16,22 +16,26 @@ defmodule WorkReport.Stat do
     |> Enum.sum()
   end
 
-  @spec category_stat_per_day(DayReport.t()) :: category_stat
-  def category_stat_per_day(report) do
-    Enum.reduce(report.tasks, %{}, fn task, acc ->
-      Map.update(acc, task.category, task.time, fn old_val -> old_val + task.time end)
-    end)
-  end
-
-  @spec category_stat_per_month(MonthReport.t()) :: category_stat
-  def category_stat_per_month(report) do
-    Enum.reduce(report.days, %{}, fn day, acc ->
+  @spec category_stat(MonthReport.t() | DayReport.t()) :: category_stat
+  def category_stat(%MonthReport{days: days}) do
+    Enum.reduce(days, %{}, fn day, acc ->
       Map.merge(
         acc,
-        category_stat_per_day(day),
+        category_stat(day),
         fn _category, acc_val, day_val ->
           acc_val + day_val
         end
+      )
+    end)
+  end
+
+  def category_stat(%DayReport{tasks: tasks}) do
+    Enum.reduce(tasks, %{}, fn task, acc ->
+      Map.update(
+        acc,
+        task.category,
+        task.time,
+        fn time -> time + task.time end
       )
     end)
   end

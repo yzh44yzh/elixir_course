@@ -23,22 +23,46 @@ defmodule StatTest do
       ]
     }
 
-    context = %{day_10: day_10, day_16: day_16}
+    month_report = %MonthReport{
+      month: "April",
+      month_num: 4,
+      days: [day_10, day_16]
+    }
+
+    context = %{
+      day_10: day_10,
+      day_16: day_16,
+      month_report: month_report
+    }
+
     {:ok, context}
   end
 
-  test "day total time", context do
+  test "total time for day", context do
     assert Stat.total_time(context.day_10) == 77
     assert Stat.total_time(context.day_16) == 65
   end
 
-  test "month total time", context do
-    report = %MonthReport{
-      month: "April",
-      month_num: 4,
-      days: [context.day_10, context.day_16]
-    }
+  test "total time for month", context do
+    assert Stat.total_time(context.month_report) == 142
+  end
 
-    assert Stat.total_time(report) == 142
+  test "category stat for day", context do
+    assert Stat.category_stat(context.day_10) == %{
+             "DEV" => 17,
+             "COMM" => 60
+           }
+
+    assert Stat.category_stat(context.day_16) == %{
+             "DEV" => 43,
+             "COMM" => 22
+           }
+  end
+
+  test "category stat for month", context do
+    assert Stat.category_stat(context.month_report) == %{
+             "DEV" => 60,
+             "COMM" => 82
+           }
   end
 end
