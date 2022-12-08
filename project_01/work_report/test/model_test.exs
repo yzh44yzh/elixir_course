@@ -20,4 +20,15 @@ defmodule ModelTest do
       Model.DayReport.get_day_num("mon")
     end
   end
+
+  test "get month num" do
+    assert Model.MonthReport.get_month_num("January") == 1
+    assert Model.MonthReport.get_month_num("May") == 5
+    assert Model.MonthReport.get_month_num("October") == 10
+    assert Model.MonthReport.get_month_num("December") == 12
+
+    assert_raise RuntimeError, "unknown month \"Oct\"", fn ->
+      Model.MonthReport.get_month_num("Oct")
+    end
+  end
 end

@@ -84,7 +84,7 @@ defmodule WorkReport.Model do
       %__MODULE__{report | days: [day | report.days]}
     end
 
-    defp get_month_num(month) do
+    def get_month_num(month) do
       WorkReport.Model.monthes()
       |> List.keyfind(month, 1, :not_found)
       |> case do

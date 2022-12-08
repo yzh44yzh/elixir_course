@@ -1,10 +1,11 @@
 defmodule WorkReport.Formatter do
-  alias WorkReport.Model, as: M
+  alias WorkReport.Model
+  alias WorkReport.Model.{DayReport, MonthReport, Task}
   alias WorkReport.Stat
 
-  @spec format_month(M.MonthReport.t()) :: IO.chardata()
+  @spec format_month(MonthReport.t()) :: IO.chardata()
   def format_month(report) do
-    total_time = Stat.month_stat(report.days)
+    total_time = Stat.total_time(report)
     num_days = length(report.days)
 
     [
@@ -21,17 +22,17 @@ defmodule WorkReport.Formatter do
     ]
   end
 
-  @spec format_day(M.DayReport.t()) :: IO.chardata()
+  @spec format_day(DayReport.t()) :: IO.chardata()
   def format_day(report) do
     [
       "Day: #{report.day}\n",
       Enum.map(report.tasks, &format_task/1),
       "   Total: ",
-      Stat.day_stat(report.tasks) |> format_time
+      Stat.total_time(report) |> format_time
     ]
   end
 
-  @spec format_task(M.Task.t()) :: IO.chardata()
+  @spec format_task(Task.t()) :: IO.chardata()
   def format_task(task) do
     [
       " - ",
@@ -57,9 +58,9 @@ defmodule WorkReport.Formatter do
     end
   end
 
-  @spec format_category_stat(WrStat.category_stat()) :: IO.chardata()
+  @spec format_category_stat(Stat.category_stat()) :: IO.chardata()
   def format_category_stat(stat) do
-    Enum.map(M.categories(), fn category ->
+    Enum.map(Model.categories(), fn category ->
       [
         " - #{category}: ",
         Map.get(stat, category, 0) |> format_time(),
