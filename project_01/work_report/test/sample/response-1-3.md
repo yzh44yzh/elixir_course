@@ -8,6 +8,7 @@ Day: 5 wed
  - COMM: Task-44 discuss with BA - 21m
  - DEV: Task-44 Implement - 52m
    Total: 4h 43m
+
 Month: May
  - COMM: 2h 58m
  - DEV: 7h 56m
@@ -16,3 +17,4 @@ Month: May
  - WS: 0
  - EDU: 0
    Total: 13h 29m, Days: 3, Avg: 4h 29m
+

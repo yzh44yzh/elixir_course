@@ -8,6 +8,7 @@ Day: 4 tue
  - DEV: TASK-42 Test - 22m
  - DEV: TASK 42 Fix and test - 37m
    Total: 4h 36m
+
 Month: May
  - COMM: 2h 58m
  - DEV: 7h 56m
@@ -16,3 +17,4 @@ Month: May
  - WS: 0
  - EDU: 0
    Total: 13h 29m, Days: 3, Avg: 4h 29m
+
