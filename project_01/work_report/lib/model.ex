@@ -1,4 +1,8 @@
 defmodule WorkReport.Model do
+  @type month() :: String.t()
+  @type category() :: String.t()
+
+  @spec monthes() :: [{integer(), month()}]
   def monthes do
     [
       {1, "January"},
@@ -16,6 +20,7 @@ defmodule WorkReport.Model do
     ]
   end
 
+  @spec categories() :: [category()]
   def categories do
     ["COMM", "DEV", "OPS", "DOC", "WS", "EDU"]
   end

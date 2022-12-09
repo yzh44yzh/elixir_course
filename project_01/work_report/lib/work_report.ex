@@ -6,23 +6,24 @@ defmodule WorkReport do
   @name "Work Report"
   @version "1.0.0"
 
+  @spec main([String.t()]) :: :ok
   def main(args) do
     case OptionParser.parse(args, options()) do
       {[help: true], [], []} -> help()
       {[version: true], [], []} -> version()
-      {params, [file], []} -> parse(Map.new(params), file)
+      {params, [file], []} -> do_report(Map.new(params), file)
       _ -> help()
     end
   end
 
-  defp options() do
+  def options do
     [
       strict: [day: :integer, month: :integer, version: :boolean, help: :boolean],
       aliases: [d: :day, m: :month, v: :version, h: :help]
     ]
   end
 
-  defp parse(params, file) do
+  def do_report(params, file) do
     month = Map.get(params, :month, :erlang.date() |> elem(1))
     day = Map.get(params, :day, :erlang.date() |> elem(2))
 
@@ -31,7 +32,7 @@ defmodule WorkReport do
     |> show(month, day)
   end
 
-  defp help() do
+  def help() do
     IO.puts("""
     USAGE:
         work_report [OPTIONS] <path/to/report.md>
@@ -43,14 +44,14 @@ defmodule WorkReport do
     """)
   end
 
-  defp version() do
+  def version() do
     IO.puts(@name <> " v" <> @version)
   end
 
   alias WorkReport.Model, as: M
   alias WorkReport.Formatter
 
-  @spec show([M.MonthReport.t()], integer, integer) :: :ok
+  @spec show([M.MonthReport.t()], integer(), integer()) :: :ok
   defp show(month_reports, month_num, day_num) do
     case Enum.find(month_reports, fn m -> m.month_num == month_num end) do
       nil ->

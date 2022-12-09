@@ -2,6 +2,7 @@ defmodule WorkReport.Parser do
   alias WorkReport.Model
   alias WorkReport.Model.{DayReport, MonthReport, Task}
 
+  @spec parse(Path.t()) :: [MonthReport.t()]
   def parse(file) do
     File.read!(file)
     |> prepare_file_content()
@@ -9,6 +10,7 @@ defmodule WorkReport.Parser do
     |> map_to_model()
   end
 
+  @spec prepare_file_content(String.t()) :: [String.t()]
   def prepare_file_content(file_content) do
     file_content
     |> String.split("\n")
@@ -16,6 +18,7 @@ defmodule WorkReport.Parser do
     |> Enum.filter(fn str -> str != "" end)
   end
 
+  @spec group_by_marker([String.t()], String.t()) :: [map()]
   def group_by_marker(data, marker) do
     [first_line | rest] = data
 
@@ -44,20 +47,24 @@ defmodule WorkReport.Parser do
     |> Enum.reverse()
   end
 
+  @spec trim_prefix(String.t(), String.t()) :: String.t()
   def trim_prefix(str, prefix) do
     String.slice(str, String.length(prefix), String.length(str))
   end
 
+  @spec split_to_months_and_days([String.t()]) :: [map()]
   def split_to_months_and_days(data) do
     group_by_marker(data, "# ")
     |> Enum.map(&split_month_to_days/1)
   end
 
+  @spec split_month_to_days(map()) :: map()
   def split_month_to_days(%{header: header, items: items}) do
     days = group_by_marker(items, "## ")
     %{header: header, items: days}
   end
 
+  @spec get_category(String.t()) :: {Model.category(), String.t()} | :not_found
   def get_category(data) do
     Enum.reduce(
       Model.categories(),
@@ -78,20 +85,24 @@ defmodule WorkReport.Parser do
     )
   end
 
+  @spec map_to_model([map()]) :: [MonthReport.t()]
   def map_to_model(map) do
     Enum.map(map, &month_to_model/1)
   end
 
+  @spec month_to_model(map()) :: MonthReport.t()
   def month_to_model(%{header: header, items: days}) do
     days = Enum.map(days, &day_to_model/1)
     MonthReport.new(header, days)
   end
 
+  @spec day_to_model(map()) :: DayReport.t()
   def day_to_model(%{header: header, items: tasks}) do
     tasks = Enum.map(tasks, &parse_task/1)
     DayReport.new(header, tasks)
   end
 
+  @spec parse_task(String.t()) :: Task.t()
   def parse_task(data) do
     {category, rest} = get_category(data)
     [description, time_str] = String.split(rest, " - ")
@@ -99,7 +110,7 @@ defmodule WorkReport.Parser do
     Task.new(category, description, time)
   end
 
-  @spec parse_time(String.t()) :: integer
+  @spec parse_time(String.t()) :: integer()
   def parse_time(time_str) do
     time_str
     |> String.split(" ")
@@ -107,7 +118,8 @@ defmodule WorkReport.Parser do
     |> Enum.sum()
   end
 
-  def parse_time_item(item) do
+  @spec parse_time_item(String.t()) :: integer()
+  defp parse_time_item(item) do
     case Integer.parse(item) do
       {i, "h"} -> i * 60
       {i, "m"} -> i

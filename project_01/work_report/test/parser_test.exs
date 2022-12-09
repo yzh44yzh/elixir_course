@@ -7,20 +7,20 @@ defmodule ParserTest do
   test "prepare file content" do
     str = """
     # March
-    
+
     ## 09 tue
     [DEV] TASK-15 implement feature - 42m
     [COMM] Daily Meeting - 24m
     [DEV] TASK-15 implement - 25m
-    
+
     ## 10 wed
     [DEV] Review Pull Requests - 17m
     [COMM] Sprint Planning - 1h
     # April
-    
+
     ## 15 thu
     [COMM] Daily Meeting - 19m
-    
+
     ## 16 fri
     [DEV] TASK-20 implementation - 17m
     [COMM] Daily Meeting - 22m
@@ -280,5 +280,4 @@ defmodule ParserTest do
     assert Parser.parse_time("0m 0h") == 0
     assert Parser.parse_time("whatever") == 0
   end
-
 end
