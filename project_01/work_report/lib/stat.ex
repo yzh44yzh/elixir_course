@@ -1,7 +1,7 @@
 defmodule WorkReport.Stat do
   alias WorkReport.Model.{DayReport, MonthReport}
 
-  @type category_stat() :: Map.t(String.t(), integer())
+  @type category_stat() :: %{String.t() => integer()}
 
   @spec total_time(MonthReport.t() | DayReport.t()) :: integer()
   def total_time(%MonthReport{days: days}) do
