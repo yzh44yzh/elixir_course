@@ -1,5 +1,4 @@
 defmodule PlanningPoker.Rooms do
-
   require Logger
 
   defmodule Room do
@@ -18,7 +17,7 @@ defmodule PlanningPoker.Rooms do
     def leave(room_pid, user) do
       GenServer.call(room_pid, {:leave, user})
     end
-   
+
     def broadcast(room_pid, event) do
       GenServer.call(room_pid, {:broadcast, event})
     end
@@ -29,7 +28,8 @@ defmodule PlanningPoker.Rooms do
         name: room_name,
         participants: []
       }
-      Logger.info("#{inspect state} has started")
+
+      Logger.info("#{inspect(state)} has started")
       {:ok, state}
     end
 
@@ -40,7 +40,7 @@ defmodule PlanningPoker.Rooms do
       else
         participants = [user | state.participants]
         state = %Room{state | participants: participants}
-        Logger.info("user has joined the room #{inspect state}")
+        Logger.info("user has joined the room #{inspect(state)}")
         state = do_broadcast({:joined, user, state.name}, state)
         {:reply, :ok, state}
       end
@@ -49,7 +49,7 @@ defmodule PlanningPoker.Rooms do
     def handle_call({:leave, user}, _from, state) do
       participants = List.delete(state.participants, user)
       state = %Room{state | participants: participants}
-      Logger.info("user has left the room #{inspect state}")
+      Logger.info("user has left the room #{inspect(state)}")
       state = do_broadcast({:leaved, user, state.name}, state)
       {:reply, :ok, state}
     end
@@ -61,30 +61,34 @@ defmodule PlanningPoker.Rooms do
 
     # catch all
     def handle_call(msg, _from, state) do
-      Logger.error("Room unknown call #{inspect msg}")
+      Logger.error("Room unknown call #{inspect(msg)}")
       {:reply, :error, state}
     end
 
     defp do_broadcast(event, state) do
-      Logger.info("Room.do_broadcast #{inspect event}")
-      Enum.each(state.participants,
-        fn(user) ->
+      Logger.info("Room.do_broadcast #{inspect(event)}")
+
+      Enum.each(
+        state.participants,
+        fn user ->
           case Registry.lookup(:sessions_registry, user.id) do
             [] -> Logger.error("Session for user #{user.id} is not found")
             [{session_pid, _}] -> PlanningPoker.Sessions.Session.send_event(session_pid, event)
           end
-        end)
+        end
+      )
+
       state
     end
-   
   end
 
   defmodule Sup do
     use DynamicSupervisor
 
     @sup_name :room_sup
-    @registry_name :room_registry # TODO leaked into RoomManager
-    
+    # TODO leaked into RoomManager
+    @registry_name :room_registry
+
     def start_link(_) do
       Registry.start_link(keys: :unique, name: @registry_name)
       DynamicSupervisor.start_link(__MODULE__, :no_args, name: @sup_name)
@@ -132,7 +136,8 @@ defmodule PlanningPoker.Rooms do
       state = %State{
         rooms: []
       }
-      Logger.info("RoomManager has started, #{inspect state}")
+
+      Logger.info("RoomManager has started, #{inspect(state)}")
       {:ok, state}
     end
 
@@ -140,12 +145,10 @@ defmodule PlanningPoker.Rooms do
     def handle_call({:start_room, room_name}, _from, %State{rooms: rooms} = state) do
       {:ok, _} = Sup.start_room(room_name)
       state = %State{state | rooms: [room_name | rooms]}
-      Logger.info("RoomManager has started room #{inspect state}")
+      Logger.info("RoomManager has started room #{inspect(state)}")
       {:reply, :ok, state}
     end
 
     # TODO catch all
-   
   end
-  
 end

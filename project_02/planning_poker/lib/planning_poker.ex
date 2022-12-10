@@ -21,15 +21,15 @@ defmodule PlanningPoker do
     def init(_) do
       port = 1234
       pool_size = 5
-      
+
       spec = [
         {PlanningPoker.Rooms.Sup, :no_args},
         {PlanningPoker.Rooms.RoomManager, :no_args},
         {PlanningPoker.Sessions.SessionSup, :no_args},
         {PlanningPoker.Sessions.SessionManager, {port, pool_size}}
       ]
+
       Supervisor.init(spec, strategy: :rest_for_one)
     end
   end
-  
 end
