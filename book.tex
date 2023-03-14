@@ -15,18 +15,33 @@
 \onehalfspacing
 %% \doublespacing
 
+%% https://latex-tutorial.com/color-latex/
+\usepackage[x11names]{xcolor}
+
 \usepackage{hyperref}
 
 \usepackage{listings}
+\lstdefinelanguage{Elixir}{
+    morekeywords={case,catch,def,do,else,false,%
+        use,alias,receive,timeout,defmacro,defp,%
+        for,if,import,defmodule,defprotocol,%
+        nil,defmacrop,defoverridable,defimpl,%
+        super,fn,raise,true,try,end,with,%
+        unless,@spec,@type},
+    otherkeywords={<-,->, |>, \%\{, \}, \{, \, (, )},
+    sensitive=true,
+    morecomment=[l]{\#},
+    morecomment=[n]{/*}{*/},
+	basicstyle=\ttfamily,
+	breaklines,
+	showstringspaces=false,
+	frame=trbl
+}
 \lstset{
-  language=ML,
-  %% keywordstyle=\color{violet},
-  %% identifierstyle=\color{blue},
-  %% backgroundcolor=\color{gray},
-  frame=single,
-  showspaces=false,
-  showstringspaces=false,
-  showtabs=false
+  language=Elixir,
+  keywordstyle=\color{SteelBlue4},
+  identifierstyle=\color{DeepSkyBlue3},
+  backgroundcolor=\color{Ivory1}
 }
 
 
