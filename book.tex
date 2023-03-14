@@ -6,7 +6,9 @@
 \setmonofont{Ubuntu Mono}
 
 \usepackage[russian]{babel}
-%% \usepackage{parskip} % space between paragraphs
+
+\usepackage[fontsize=9pt]{fontsize}
+\usepackage[skip=5pt plus1pt, indent=20pt]{parskip} % setup paragraphs
 
 \usepackage{setspace}
 %% \singlespacing
@@ -17,9 +19,14 @@
 
 \usepackage{listings}
 \lstset{
-  %% language=Elixir,
-  %% keywordstyle=\color{blue},
-  %% backgroundcolor=\color{gray}
+  language=ML,
+  %% keywordstyle=\color{violet},
+  %% identifierstyle=\color{blue},
+  %% backgroundcolor=\color{gray},
+  frame=single,
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false
 }
 
 
