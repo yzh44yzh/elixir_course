@@ -1,0 +1,273 @@
+\chapter{Интерактивная консоль}
+
+Посмотрим на интерактивную консоль \textbf{iex} -- второй по важности, после редактора, инструмент разработчика.
+
+Многие языки программирования имеют \textbf{REPL} консоль. Она дает возможность работать интеративно: запускать небольшие куски кода и сразу же видеть результ. REPL означает \textit{Read}, \textit{Eval}, \textit{Print}, \textit{Loop}. То есть, консоль читает код, выполняет его, выводит результат, и опять читает код.
+
+Мы уже начали активно пользоваться консолью когда реализовывали FizzBuzz. Теперь познакомимся с ней поближе:
+
+\begin{lstlisting}
+$ iex
+Erlang/OTP 24 [erts-12.2.1] [source] [64-bit] [smp:12:12] [ds:12:12:10] [async-threads:1] [jit]
+
+Interactive Elixir (1.13.3) - press Ctrl+C to exit (type h() ENTER for help)
+iex(1)> 
+\end{lstlisting}
+
+Мы видим версию Эрланг: \texttt{Erlang/OTP 24}, версию Erlang Runtime System: \texttt{erts-12.2.1} и версию Эликсир: \texttt{Elixir (1.13.3)}.
+
+\section{Компиляция}
+
+iex-консоль имеет много встроенных функций. Самые популярные из них имеют однобуквенные называния. 
+
+Например, функция \textbf{c} компилирует и загружает код:
+
+\begin{lstlisting}
+iex(1)> c "lib/fizz_buzz_02.exs"
+[FizzBuzz02]
+B>
+\end{lstlisting}
+
+Другая популярная функция -- это \textbf{h}, которая показывает справку по функциям и модулям Эликсир. Посмотрим справку по функции \textbf{c}:
+
+\begin{lstlisting}
+iex(2)> h c
+def c(files, path \\ :in_memory)                         
+
+Compiles the given files.
+...
+\end{lstlisting}
+
+Мы видим, что функция \textbf{c} компилирует один или несколько файлов, загружает их в память консоли, или сохраняет сгенерированный байт-код по указаному пути. 
+
+Если мы вносим изменения в код, то с помощью функции \textbf{r} мы можем перекомпилировать модуль заново и загрузить свежую версию.
+
+\begin{lstlisting}
+iex(3)> r FizzBuzz02
+warning: redefining module FizzBuzz02 (current version defined in memory)
+  lib/fizz_buzz_02.exs:1
+
+{:reloaded, [FizzBuzz02]}
+\end{lstlisting}
+
+Таким образом удобно вести интерактивную разработку -- писать код и тут же проверять в консоли, как он работает. 
+
+Для больших проектов неудобно перекомпилировать по-отдельности каждый измененный модуль. Поэтому в консоли есть функция \textbf{recompile}, которая пересобирает весь проект. Однако, для этого нужно иметь полноценный проект с правильной структурой кода, а не просто несколько модулей.
+
+\section{Автодополнение}
+
+Для кода, который скомпилирован и загружен в консоль, работает автодополнение модулей и функций:
+
+\begin{lstlisting}
+iex(4)> Fizz.<tab>
+iex(5)> FizzBuzz02.<tab>
+iex(6)> FizzBuzz02.m<tab>
+iex(7)> FizzBuzz02.main
+\end{lstlisting}
+
+\section{Интроспекция}
+
+Еще одна полезная функция, \textbf{i} -- это интроспеция, которая показывает информацию о значениях и переменных:
+
+\begin{lstlisting}
+iex(4)> i 42
+Term
+  42
+Data type
+  Integer
+...
+
+iex(5)> i 3.14
+Term
+  3.14
+Data type
+  Float
+...
+
+iex(6)> my_str = "Hello"
+iex(7)> i my_str
+Term
+  "Hello"
+Data type
+  BitString
+Byte size
+  5
+Description
+  This is a string: a UTF-8 encoded binary ...
+
+iex(8)> my_list = [1, 2, 3]
+iex(9)> i my_list
+Term
+  [1, 2, 3]
+Data type
+  List
+...
+\end{lstlisting}
+
+\section{История}
+
+Как и большинство других консолей, iex-консоль сохраняет историю команд и позволяет перемещатсья по ней с помощью горячих клавиш \texttt{Ctrl-p} и \texttt{Ctrl-n} или стрелками.
+
+Также консоль позволяет обратиться к результатам предыдущих команд с помощью функции \textbf{v}. Она принимает номер строки и возвращает результат команды из этой строки. Её также можно вызвать без аргументов, тогда она вернет результат предыдущей команды:
+
+\begin{lstlisting}
+iex(9)> 42 * 2
+84
+iex(10)> v
+84
+iex(11)> v 9
+84
+iex(12)> 20 + 30
+50
+iex(13)> v
+50
+iex(14)> v 12
+50
+iex(15)> v 9
+84
+\end{lstlisting}
+
+\section{Справка}
+
+Рассмотрим подробнее функцию \textbf{h}. Если вызывать ее без аргументов, то мы увидим справку по самой консоли iex. 
+
+Аргументом можно передать имя модуля, функции или макроса. Тогда консоль покажет справку по ним:
+\begin{lstlisting}
+iex(16)> h
+iex(17)> h Map
+iex(18)> h Map.get
+iex(19)> h Map.<tab>
+iex(20)> h Map.fetch
+\end{lstlisting}
+
+В каждый модуль при компиляции автоматически добавляется функция \texttt{module\_info}, которая возращает некоторые метаданные об этом модуле. Это справедливо как для библиотечных модулей, так и для модулей, которые мы создаем сами:
+
+\begin{lstlisting}
+iex(22)> Map.module_info
+[
+  module: Map,
+  exports: [
+    __info__: 1,
+    delete: 2,
+    equal?: 2,
+    fetch: 2,
+    fetch!: 2,
+...
+
+iex(23)> FizzBuzz02.module_info
+[
+  module: FizzBuzz02,
+  exports: [__info__: 1, fizzbuzz: 1, main: 0, module_info: 0, module_info: 1],
+  attributes: [vsn: [19328415140430776990959847375304151410]],
+  compile: [
+...
+\end{lstlisting}
+
+
+\section{Справка по собственным модулям}
+
+Мы можем добавить документацию в собственные модули, и эта документация будет доступна в iex-консоли. 
+
+Документация для модуля задаётся с помощью аттрибута \texttt{@moduledoc}, а для функции с помощью аттрибута \texttt{@doc}:
+
+\begin{lstlisting}
+defmodule FizzBuzz04 do
+
+  @moduledoc """
+  FizzBuzz is a simple task to show basic usage of Elixir.
+  """
+  ...
+
+  @doc "Produces list of strings for numbers from 1 to 100."
+  @spec fizzbuzz_100() :: [String.t]
+  def fizzbuzz_100() do
+    1..100
+    |> Enum.map(&fizzbuzz/1)
+  end
+  ...
+\end{lstlisting}
+Однако это не работает, если модуль просто скомпилирован из консоли:
+
+\begin{lstlisting}
+iex(25)> c "lib/fizz_buzz_04.exs"
+iex(26)> h FizzBuzz04
+FizzBuzz04 was not compiled with docs
+\end{lstlisting}
+
+Нужно, чтобы скомпилированный байткод был сохранён на диске. Для этого функцию \textbf{c} вызываем с двумя аргументами, кроме файла исходников ещё указываем путь, куда сохранять beam-файл:
+
+\begin{lstlisting}
+iex(27)> c("lib/fizz_buzz_04.exs", ".")
+iex(28)> h FizzBuzz04
+FizzBuzz04
+
+FizzBuzz is a simple task to show basic usage of Elixir.
+
+iex(29)> h FizzBuzz04.fizzbuzz_100
+
+def fizzbuzz_100()
+
+@spec fizzbuzz_100() :: [String.t()]
+
+Produces list of strings for numbers from 1 to 100.
+
+iex(30)> h FizzBuzz04.fizzbuzz
+
+ def fizzbuzz(n)
+
+@spec fizzbuzz(integer()) :: String.t()
+
+Produces string result for a single number.
+\end{lstlisting}
+
+\section{runtime\_info}
+
+Рассмотрим еще функцию \texttt{runtime\_info}. Длинное название этой функции подразумевает, что она не используется так же часто, как \textbf{c}, \textbf{h}, \textbf{i} или \textbf{v}.
+
+Функция выводит полезную информацию о текущем состоянии виртуальной машины: версии Эликсир и Эрлаг, количество планировщиков, потребление памяти, количество процессов и др.
+
+\begin{lstlisting}
+iex(28)> runtime_info
+## System and architecture
+
+Elixir version:     1.13.4
+Erlang/OTP version: 23
+...
+
+## Memory
+
+Total:              20 MB
+Atoms:              328 KB
+...
+
+## Statistics / limits
+
+Uptime:             1 minutes and 40 seconds
+...
+
+iex(29)> runtime_info :system
+
+## System and architecture
+
+Elixir version:     1.13.4
+Erlang/OTP version: 23
+ERTS version:       11.1
+Compiled for:       x86_64-unknown-linux-gnu
+Schedulers:         8
+Schedulers online:  8
+...
+
+iex(30)> runtime_info :memory
+
+## Memory
+
+Total:              20 MB
+Atoms:              328 KB
+Binaries:           111 KB
+Code:               7 MB
+ETS:                510 KB
+Processes:          4 MB
+...
+\end{lstlisting}
+
+Как видно, iex-консоль очень полезна. Опытные разработчики активно ей пользуются.
