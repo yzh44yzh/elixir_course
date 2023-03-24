@@ -1,4 +1,8 @@
 \documentclass[oneside]{book}
+\pagestyle{plain}
+
+\usepackage{geometry}
+\geometry{a4paper, portrait, margin=1.5in, top=1in, bottom=1in}
 
 \usepackage{fontspec}
 % https://fonts.google.com/specimen/IBM+Plex+Serif
@@ -18,11 +22,10 @@
 %% https://latex-tutorial.com/color-latex/
 \usepackage[x11names]{xcolor}
 
-\usepackage{hyperref}
-
 \usepackage{graphicx}
 
 \usepackage{listings}
+
 \lstdefinelanguage{Elixir}{
     morekeywords={case,catch,def,do,else,false,%
         use,alias,receive,timeout,defmacro,defp,%
@@ -32,19 +35,37 @@
         unless,@spec,@type},
     otherkeywords={<-,->, |>, \%\{, \}, \{, \, (, )},
     sensitive=true,
-    morecomment=[l]{\#},
-    morecomment=[n]{/*}{*/},
-	basicstyle=\ttfamily,
-	breaklines,
-	showstringspaces=false,
-	frame=trbl
+    morecomment=[l]{\#}
+    % TODO: define string
 }
 \lstset{
   language=Elixir,
-  keywordstyle=\color{SteelBlue4},
+  frame=trbl,
+  basicstyle=\ttfamily\small,
+  commentstyle=\ttfamily,
+  breaklines,
+  showtabs=false,
+  showspaces=false,
+  showstringspaces=false,
+  numbers=left,
+  numberstyle=\tiny,
+  keywordstyle=\color{SteelBlue4}\bfseries,
   identifierstyle=\color{DeepSkyBlue3},
+  stringstyle=\color{green},
+  commentstyle=\color{gray},
   backgroundcolor=\color{Ivory1}
 }
+
+%% it has to be the last package to be imported
+\usepackage{hyperref}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue
+    }
+
+\urlstyle{same}
 
 
 \title{Язык программирования Эликсир}

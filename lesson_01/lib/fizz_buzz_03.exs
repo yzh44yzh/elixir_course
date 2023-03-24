@@ -1,23 +1,21 @@
 defmodule FizzBuzz03 do
-
   def main() do
     fizzbuzz_100()
     |> Enum.join(" ")
     |> IO.puts()
   end
 
-
-  @spec fizzbuzz_100() :: [String.t]
+  @spec fizzbuzz_100() :: [String.t()]
   def fizzbuzz_100() do
     1..100
     |> Enum.map(&fizzbuzz/1)
   end
 
-
-  @spec fizzbuzz(integer) :: String.t
+  @spec fizzbuzz(integer) :: String.t()
   def fizzbuzz(n) do
     divisible_by_3 = rem(n, 3) == 0
     divisible_by_5 = rem(n, 5) == 0
+
     cond do
       divisible_by_3 and divisible_by_5 -> "FizzBuzz"
       divisible_by_3 -> "Fizz"
@@ -25,7 +23,6 @@ defmodule FizzBuzz03 do
       true -> to_string(n)
     end
   end
-
 end
 
 ExUnit.start()
@@ -55,6 +52,8 @@ defmodule FizzBuzzTest do
   test "fizzbuzz_100" do
     res = fizzbuzz_100()
     assert Enum.take(res, 5) == ["1", "2", "Fizz", "4", "Buzz"]
-    assert res |> Enum.drop(9) |> Enum.take(6) == ["Buzz", "11", "Fizz", "13", "14", "FizzBuzz"]
+
+    assert res |> Enum.drop(9) |> Enum.take(6) ==
+             ["Buzz", "11", "Fizz", "13", "14", "FizzBuzz"]
   end
 end

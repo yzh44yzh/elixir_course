@@ -1,9 +1,7 @@
 defmodule FizzBuzz01 do
-
   def main() do
     Enum.each(1..100, &fizzbuzz/1)
   end
-
 
   def fizzbuzz(n) do
     cond do
@@ -13,5 +11,4 @@ defmodule FizzBuzz01 do
       true -> IO.puts(n)
     end
   end
-
 end

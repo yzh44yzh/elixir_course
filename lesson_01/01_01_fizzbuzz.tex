@@ -69,7 +69,7 @@
 
 На втором шаге у нас появилась чистая функция \texttt{fizzbuzz}, которая принимает одно число, и возвращает строку. Но вся задача в целом, fizzbuzz для 100 чисел, пока не представлена чистой функцией. Давайте это исправим:
 
-\lstinputlisting[firstline=3, lastline=14, caption=FizzBuzz03]{./lesson_01/lib/fizz_buzz_03.exs}
+\lstinputlisting[firstline=2, lastline=12, firstnumber=2, caption=FizzBuzz03]{./lesson_01/lib/fizz_buzz_03.exs}
 
 Функция \texttt{fizzbuzz\_100} не принимает аргументов и возвращает список строк. Дальше этот список мы, как и прежде, склеиваем в одну строку и выводим на консоль. 
 
@@ -79,7 +79,7 @@
 
 Сделаем отдельные тесты для \texttt{fizzbuzz} и для \texttt{fizzbuzz\_100}:
 
-\lstinputlisting[firstline=31, lastline=59, caption=FizzBuzzTest]{./lesson_01/lib/fizz_buzz_03.exs}
+\lstinputlisting[firstline=28, lastline=58, firstnumber=28, caption=FizzBuzzTest]{./lesson_01/lib/fizz_buzz_03.exs}
 
 Как видим, \texttt{fizzbuzz} тестируется легко. А вот \texttt{fizzbuzz\_100} возвращает слишком большой список. Проверять его весь нерационально. Поэтому тест проверяет отдельные части этого списка.
 
