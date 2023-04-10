@@ -25,36 +25,7 @@
 \usepackage{graphicx}
 
 \usepackage{listings}
-
-\lstdefinelanguage{Elixir}{
-    morekeywords={case,catch,def,do,else,false,%
-        use,alias,receive,timeout,defmacro,defp,%
-        for,if,import,defmodule,defprotocol,%
-        nil,defmacrop,defoverridable,defimpl,%
-        super,fn,raise,true,try,end,with,%
-        unless,@spec,@type},
-    otherkeywords={<-,->, |>, \%\{, \}, \{, \, (, )},
-    sensitive=true,
-    morecomment=[l]{\#}
-    % TODO: define string
-}
-\lstset{
-  language=Elixir,
-  frame=trbl,
-  basicstyle=\ttfamily\small,
-  commentstyle=\ttfamily,
-  breaklines,
-  showtabs=false,
-  showspaces=false,
-  showstringspaces=false,
-  numbers=left,
-  numberstyle=\tiny,
-  keywordstyle=\color{SteelBlue4}\bfseries,
-  identifierstyle=\color{DeepSkyBlue3},
-  stringstyle=\color{green},
-  commentstyle=\color{gray},
-  backgroundcolor=\color{Ivory1}
-}
+\include{./book/elixir-definition}
 
 %% it has to be the last package to be imported
 \usepackage{hyperref}

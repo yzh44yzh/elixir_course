@@ -1,0 +1,43 @@
+\lstdefinelanguage{Elixir}{
+    morekeywords={case,catch,def,do,else,false,%
+        use,alias,receive,timeout,defmacro,defp,%
+        for,if,import,defmodule,defprotocol,%
+        nil,defmacrop,defoverridable,defimpl,%
+        super,fn,raise,true,try,end,with, unless},
+    morekeywords={[2]@spec, @type, assert, test},
+    %% otherkeywords={<-,->, |>, \%\{, \}, \{, \, (, )},
+    sensitive=true,
+    morecomment=[l]{\#},
+    morestring=[b]',
+    morestring=[b]"
+}
+
+\lstset{
+  language=Elixir,
+  %% frame=trbl,
+  frame=l,
+  basicstyle=\ttfamily\small,
+  commentstyle=\ttfamily,
+  breaklines,
+  showtabs=false,
+  showspaces=false,
+  showstringspaces=false,
+  numbers=left,
+  numberstyle=\tiny,
+  keywordstyle=\color{SteelBlue4}\bfseries,
+  keywordstyle=[2]\color{SteelBlue4},
+  identifierstyle=\color{DeepSkyBlue3},
+  stringstyle=\color{SeaGreen4},
+  commentstyle=\color{gray},
+  backgroundcolor=\color{Ivory1}
+}
+
+\lstdefinestyle{elixir-shell}{
+  numbers=none,
+  frame=l,
+  keywordstyle=\color{black}\bfseries,
+  keywordstyle=[2]\color{black},
+  identifierstyle=\color{black},
+  stringstyle=\color{SeaGreen4},
+  backgroundcolor=\color{Cornsilk1}
+}
