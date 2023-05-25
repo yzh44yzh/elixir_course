@@ -1,6 +1,6 @@
-iex(1)> c "lib/fizz_buzz_01.exs"
+iex> c "lib/fizz_buzz_01.exs"
 [FizzBuzz01]
-iex(2)> FizzBuzz01.main()
+iex> FizzBuzz01.main()
 1
 2
 Fizz

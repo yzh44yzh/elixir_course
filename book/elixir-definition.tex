@@ -1,3 +1,7 @@
+%% https://texdoc.org/serve/listings.pdf/0
+%% 3.1 Style definitions
+%% 3.2 Language definitions
+
 \lstdefinelanguage{Elixir}{
     morekeywords={case,catch,def,do,else,false,%
         use,alias,receive,timeout,defmacro,defp,%
@@ -12,8 +16,7 @@
     morestring=[b]"
 }
 
-\lstset{
-  language=Elixir,
+\lstdefinestyle{elixir}{
   %% frame=trbl,
   frame=l,
   basicstyle=\ttfamily\small,
@@ -32,11 +35,24 @@
   backgroundcolor=\color{Ivory1}
 }
 
+\lstdefinelanguage{ElixirShell}{
+    otherkeywords={iex>},
+    sensitive=true,
+    morecomment=[l]{\#},
+    morestring=[b]',
+    morestring=[b]"
+}
+
 \lstdefinestyle{elixir-shell}{
   numbers=none,
   frame=l,
-  keywordstyle=\color{black}\bfseries,
-  keywordstyle=[2]\color{black},
+  basicstyle=\ttfamily\small,
+  commentstyle=\ttfamily,
+  breaklines,
+  showtabs=false,
+  showspaces=false,
+  showstringspaces=false,
+  keywordstyle=\color{SteelBlue4}\bfseries,
   identifierstyle=\color{black},
   stringstyle=\color{SeaGreen4},
   backgroundcolor=\color{Cornsilk1}

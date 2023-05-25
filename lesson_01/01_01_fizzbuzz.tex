@@ -20,7 +20,7 @@
 
 Создаем модуль \textbf{FizzBuzz01} и в нем две функции \texttt{main} и \texttt{fizzbuzz}.
 
-\lstinputlisting[caption=FizzBuzz01]{./lesson_01/lib/fizz_buzz_01.exs}
+\lstinputlisting[caption=FizzBuzz01, language=Elixir, style=elixir]{./lesson_01/lib/fizz_buzz_01.exs}
 
 В функции \texttt{main} мы генерируем последовательность от 1 до 100. Конструкция \texttt{1..100} -- это генератор последовательности, он называется \textbf{Range}. Затем с помощью \texttt{Enum.each} мы применяем функцию \texttt{fizzbuzz} к каждому элементу.
 
@@ -31,7 +31,7 @@
 \texttt{cond do} проверяет выражения по очереди, и выполняет только одну ветку кода, соответствующую первому истинному выражению. \texttt{IO.puts} выводит нужное значение на стандартный вывод.
 
 Соберем и запустим наш код:
-\lstinputlisting[caption=Сессия 1,style=elixir-shell]{./lesson_01/lib/session_01.txt}
+\lstinputlisting[caption=Сессия 1, language=ElixirShell, style=elixir-shell]{./lesson_01/lib/session_01.txt}
 
 \section{Шаг 2. Отделяем вывод на консоль от логики.}
 
@@ -41,7 +41,7 @@
 
 2. Вывести результат на консоль.
 
-\lstinputlisting[caption=FizzBuzz02]{./lesson_01/lib/fizz_buzz_02.exs}
+\lstinputlisting[caption=FizzBuzz02, language=Elixir, style=elixir]{./lesson_01/lib/fizz_buzz_02.exs}
 
 Функция \texttt{fizzbuzz} теперь стала \textbf{чистой функцией}. Её результат зависит только от входного значения, и она не делает ничего, кроме вычисления результата. Чистые функции легко понять и протестировать. А так же их легко компоновать друг с другом.
 
@@ -59,7 +59,7 @@
 
 Результат выполнения кода немного изменился:
 
-\lstinputlisting[caption=Сессия 2,style=elixir-shell]{./lesson_01/lib/session_02.txt}
+\lstinputlisting[caption=Сессия 2, language=ElixirShell, style=elixir-shell]{./lesson_01/lib/session_02.txt}
 
 Теперь все значения склеены в одну строку, а не выводятся каждое отдельной строкой.
 
@@ -69,7 +69,7 @@
 
 На втором шаге у нас появилась чистая функция \texttt{fizzbuzz}, которая принимает одно число, и возвращает строку. Но вся задача в целом, fizzbuzz для 100 чисел, пока не представлена чистой функцией. Давайте это исправим:
 
-\lstinputlisting[firstline=2, lastline=12, firstnumber=2, caption=FizzBuzz03]{./lesson_01/lib/fizz_buzz_03.exs}
+\lstinputlisting[firstline=2, lastline=12, firstnumber=2, caption=FizzBuzz03, language=Elixir, style=elixir]{./lesson_01/lib/fizz_buzz_03.exs}
 
 Функция \texttt{fizzbuzz\_100} не принимает аргументов и возвращает список строк. Дальше этот список мы, как и прежде, склеиваем в одну строку и выводим на консоль. 
 
@@ -79,7 +79,7 @@
 
 Сделаем отдельные тесты для \texttt{fizzbuzz} и для \texttt{fizzbuzz\_100}:
 
-\lstinputlisting[firstline=28, lastline=58, firstnumber=28, caption=FizzBuzzTest]{./lesson_01/lib/fizz_buzz_03.exs}
+\lstinputlisting[firstline=28, lastline=58, firstnumber=28, caption=FizzBuzzTest, language=Elixir, style=elixir]{./lesson_01/lib/fizz_buzz_03.exs}
 
 Как видим, \texttt{fizzbuzz} тестируется легко. А вот \texttt{fizzbuzz\_100} возвращает слишком большой список. Проверять его весь нерационально. Поэтому тест проверяет отдельные части этого списка.
 
@@ -87,4 +87,4 @@
 
 Запускаем тесты:
 
-\lstinputlisting[caption=Сессия 3,style=elixir-shell]{./lesson_01/lib/session_03.txt}
+\lstinputlisting[caption=Сессия 3, language=ElixirShell, style=elixir-shell]{./lesson_01/lib/session_03.txt}
