@@ -12,20 +12,18 @@ _Напишите программу, которая выводит на экр�
 - охранные выражения (guards);
 - вывод на консоль;
 - оператор pipe;
-- и юнит-тесты.
-
-Пока что мы не будем углубляться в суть этих элементов, а посмотрим на них беглым взглядом.
+- и модульные тесты (unit tests).
 
 
 ## Шаг 1. Простая реализация задачи.
 
+Создаем модуль **FizzBuzz01** и в нем две функции `main` и `fizzbuzz`. 
+
 ```elixir
 defmodule FizzBuzz01 do
-
   def main() do
     Enum.each(1..100, &fizzbuzz/1)
   end
-
 
   def fizzbuzz(n) do
     cond do
@@ -35,11 +33,8 @@ defmodule FizzBuzz01 do
       true -> IO.puts(n)
     end
   end
-
 end
 ```
-
-Создаем модуль `FizzBuzz01` и в нем две функции `main` и `fizzbuzz`. 
 
 В функции `main` мы генерируем последовательность от 1 до 100. Конструкция `1..100` -- это генератор последовательности, он называется **Range**. Затем с помощью `Enum.each` мы применяем функцию `fizzbuzz` к каждому элементу.
 
@@ -51,8 +46,8 @@ end
 
 Соберем и запустим наш код:
 
-```
-iex(1)> c "lib/fizz_buzz_01.exs"
+```elixir-iex
+iex> c "lib/fizz_buzz_01.exs"
 [FizzBuzz01]
 iex(2)> FizzBuzz01.main()
 1
@@ -83,7 +78,6 @@ Buzz
 
 ```elixir
 defmodule FizzBuzz02 do
-
   def main() do
     1..100
     |> Enum.map(&fizzbuzz/1)
@@ -91,11 +85,11 @@ defmodule FizzBuzz02 do
     |> IO.puts()
   end
 
-
-  @spec fizzbuzz(integer) :: String.t
+  @spec fizzbuzz(integer) :: String.t()
   def fizzbuzz(n) do
     divisible_by_3 = rem(n, 3) == 0
     divisible_by_5 = rem(n, 5) == 0
+
     cond do
       divisible_by_3 and divisible_by_5 -> "FizzBuzz"
       divisible_by_3 -> "Fizz"
@@ -103,7 +97,6 @@ defmodule FizzBuzz02 do
       true -> to_string(n)
     end
   end
-
 end
 ```
 
@@ -123,8 +116,8 @@ end
 
 Результат выполнения кода немного изменился:
 
-```
-iex(1)> c "lib/fizz_buzz_02.exs"
+```elixir-iex
+iex> c "lib/fizz_buzz_02.exs"
 [FizzBuzz02]
 iex(2)> FizzBuzz02.main()
 1 2 Fizz 4 Buzz Fizz 7 8 Fizz Buzz 11 Fizz 13 14 FizzBuzz 16 17 Fizz
@@ -147,18 +140,22 @@ Buzz
 На втором шаге у нас появилась чистая функция `fizzbuzz`, которая принимает одно число, и возвращает строку. Но вся задача в целом, fizzbuzz для 100 чисел, пока не представлена чистой функцией. Давайте это исправим:
 
 ```elixir
-def main() do
+defmodule FizzBuzz03 do
+  def main() do
     fizzbuzz_100()
     |> Enum.join(" ")
     |> IO.puts()
   end
 
-
-  @spec fizzbuzz_100() :: [String.t]
+  @spec fizzbuzz_100() :: [String.t()]
   def fizzbuzz_100() do
     1..100
     |> Enum.map(&fizzbuzz/1)
   end
+
+  @spec fizzbuzz(integer) :: String.t()
+  def fizzbuzz(n) do
+    ...
 ```
 
 Функция `fizzbuzz_100` не принимает аргументов и возвращает список строк. Дальше этот список мы, как и прежде, склеиваем в одну строку и выводим на консоль. 
@@ -197,7 +194,9 @@ defmodule FizzBuzzTest do
   test "fizzbuzz_100" do
     res = fizzbuzz_100()
     assert Enum.take(res, 5) == ["1", "2", "Fizz", "4", "Buzz"]
-    assert res |> Enum.drop(9) |> Enum.take(6) == ["Buzz", "11", "Fizz", "13", "14", "FizzBuzz"]
+
+    assert res |> Enum.drop(9) |> Enum.take(6) ==
+             ["Buzz", "11", "Fizz", "13", "14", "FizzBuzz"]
   end
 end
 ```
@@ -208,7 +207,7 @@ end
 
 Запускаем тесты:
 
-```
+```shell
 $ elixir lib/fizz_buzz_03.exs
 ...
 
