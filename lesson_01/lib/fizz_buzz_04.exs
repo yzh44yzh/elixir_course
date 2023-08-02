@@ -1,6 +1,6 @@
 defmodule FizzBuzz04 do
   @moduledoc """
-  FizzBuzz is a simple task to show basic usage of Elixir.
+  FizzBuzz is a simple module to show basic usage of Elixir.
   """
 
   def main() do

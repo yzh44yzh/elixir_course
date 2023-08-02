@@ -65,11 +65,9 @@ end
 `with` реализует специальный способ обработки ошибок, известный как **Railway programming** (в функциональном мире известный как **do-notation**):
 
 ```elixir
-with(
-  a = func1(),
-  b = func2(),
-  c = func3()
-) do
+with {:ok, a} <- func1(),
+     {:ok, b} <- func2(),
+     {:ok, c} <- func3() do
   a + b + c
 end
 ```
