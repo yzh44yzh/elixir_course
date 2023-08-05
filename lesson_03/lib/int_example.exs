@@ -1,11 +1,9 @@
-defmodule Lesson_03.Task_03_01_Int do
-
+defmodule IntExample do
   # ignore sign
   def gcd(a, b) when a < 0, do: gcd(-a, b)
   def gcd(a, b) when b < 0, do: gcd(a, -b)
 
   # deal with 0
-  def gcd(0, b), do: b
   def gcd(a, 0), do: a
 
   def gcd(a, b) do
@@ -14,14 +12,13 @@ defmodule Lesson_03.Task_03_01_Int do
       c -> gcd(b, c)
     end
   end
-
 end
 
 ExUnit.start()
 
-defmodule Task_03_01_Test do
+defmodule IntExample_Test do
   use ExUnit.Case
-  import Lesson_03.Task_03_01_Int
+  import IntExample
 
   test "gcd" do
     assert gcd(12, 9) == 3
