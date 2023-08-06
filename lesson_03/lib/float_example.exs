@@ -1,16 +1,14 @@
-defmodule Lesson_03.Task_03_02_Float do
-
+defmodule FloatExample do
   def is_equal(f1, f2, precision \\ 0.01) do
     abs(f1 - f2) < precision
   end
-
 end
 
 ExUnit.start()
 
-defmodule Task_03_02_Test do
+defmodule FloatExampleTest do
   use ExUnit.Case
-  import Lesson_03.Task_03_02_Float
+  import FloatExample
 
   test "is_equal" do
     assert is_equal(3.5, 3.5)
