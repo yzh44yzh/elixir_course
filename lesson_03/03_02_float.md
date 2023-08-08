@@ -27,7 +27,7 @@ iex(5)> 12.15 / 1.5
 
 ## Упражнение
 
-Реализуем функцию `is_equal/3`, которая сравнивает два float значения на равенство с допустимой погрешностью. Погрешность передается 3-м аргументом.
+Реализуем функцию `equal?/3`, которая сравнивает два float значения на равенство с допустимой погрешностью. Погрешность передается 3-м аргументом.
 
 ```elixir
 defmodule FloatExample do
@@ -37,20 +37,59 @@ defmodule FloatExample do
 end
 ```
 
-Запуск:
-```
-iex(1)> c "lib/lesson_03/task_03_02_float.exs"
-iex(2)> alias Lesson_03.Task_03_02_Float, as: TF
-Lesson_03.Task_03_02_Float
-iex(3)> TF.is_equal(0.1, 0.2)
+Компилируем и проверяем:
+
+```elixir-iex
+iex(1)> c "lib/float_example.exs"
+[FloatExample, FloatExampleTest]
+iex(2)> FloatExample.equal?(0.1, 0.2)
 false
-iex(4)> TF.is_equal(0.1, 0.11)
+iex(3)> FloatExample.equal?(0.1, 0.11)
 true
-iex(5)> TF.is_equal(0.1, 0.11, 0.001)
+iex(4)> FloatExample.equal?(0.1, 0.11, 0.001)
 false
 ```
 
-Запуск тестов:
+Добавим тесты на разные случаи, какие сможем придумать:
+
+```elixir
+ExUnit.start()
+
+defmodule FloatExampleTest do
+  use ExUnit.Case
+  import FloatExample
+
+  test "equal?" do
+    assert equal?(3.5, 3.5)
+    assert equal?(3.51, 3.51)
+    assert not equal?(3.51, 3.53)
+  end
+
+  test "equal? with precision" do
+    assert equal?(3.5, 3.5, 0.01)
+    assert equal?(3.51, 3.51, 0.01)
+    assert not equal?(3.51, 3.53, 0.01)
+    assert equal?(3.51, 3.53, 0.1)
+    assert not equal?(3.501, 3.503, 0.001)
+    assert equal?(3.501, 3.503, 0.01)
+  end
+
+  test "equal? with negative numbers" do
+    assert equal?(-7.77, -7.75, 0.1)
+    assert equal?(-10.95, -11.0, 0.2)
+    assert equal?(-10.95, -11.0, 0.06)
+    assert not equal?(-10.95, -11.0, 0.02)
+  end
+end
 ```
-elixir lib/lesson_03/task_03_02_float.exs
+
+Запускаем тесты:
+
+```shell
+$ elixir lib/float_example.exs
+...
+Finished in 0.2 seconds (0.2s on load, 0.00s async, 0.03s sync)
+3 tests, 0 failures
+
+Randomized with seed 479648
 ```
