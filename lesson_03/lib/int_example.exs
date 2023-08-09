@@ -16,7 +16,7 @@ end
 
 ExUnit.start()
 
-defmodule IntExample_Test do
+defmodule IntExampleTest do
   use ExUnit.Case
   import IntExample
 

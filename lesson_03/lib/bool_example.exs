@@ -1,4 +1,4 @@
-defmodule Lesson_03.Task_03_03_Bool do
+defmodule BoolExample do
   @moduledoc """
   Таблицы истинности для троичной логики Стивена Клини
   https://ru.wikipedia.org/wiki/%D0%A2%D1%80%D0%BE%D0%B8%D1%87%D0%BD%D0%B0%D1%8F_%D0%BB%D0%BE%D0%B3%D0%B8%D0%BA%D0%B0
@@ -8,11 +8,10 @@ defmodule Lesson_03.Task_03_03_Bool do
   """
 
   defmodule Step1 do
-    
     def sk_not(false), do: true
     def sk_not(nil), do: nil
     def sk_not(true), do: false
-    
+
     def sk_and(false, false), do: false
     def sk_and(false, nil), do: false
     def sk_and(false, true), do: false
@@ -32,14 +31,12 @@ defmodule Lesson_03.Task_03_03_Bool do
     def sk_or(true, false), do: true
     def sk_or(true, nil), do: true
     def sk_or(true, true), do: true
-    
   end
 
   defmodule Step2 do
-    
     def sk_not(nil), do: nil
     def sk_not(arg), do: not arg
-    
+
     def sk_and(false, _), do: false
     def sk_and(nil, false), do: false
     def sk_and(nil, _), do: nil
@@ -49,17 +46,15 @@ defmodule Lesson_03.Task_03_03_Bool do
     def sk_or(nil, true), do: true
     def sk_or(nil, _), do: nil
     def sk_or(false, second_arg), do: second_arg
-    
   end
-
 end
 
 ExUnit.start()
 
-defmodule Task_03_03_Test do
+defmodule BoolExampleTest do
   use ExUnit.Case
-  # import Lesson_03.Task_03_03_Bool.Step1
-  import Lesson_03.Task_03_03_Bool.Step2
+  # import BoolExample.Step1
+  import BoolExample.Step2
 
   test "Stephen Kleene, not" do
     assert sk_not(true) == false
@@ -90,5 +85,4 @@ defmodule Task_03_03_Test do
     assert sk_or(true, nil) == true
     assert sk_or(true, true) == true
   end
-
 end
