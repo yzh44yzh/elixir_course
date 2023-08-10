@@ -1,5 +1,4 @@
-defmodule Lesson_03.Task_03_04_AtomTuple do
-
+defmodule AtomTupleExample do
   def distance({:point, x1, y1}, {:point, x2, y2}) do
     x_dist = abs(x1 - x2)
     y_dist = abs(y1 - y2)
@@ -15,14 +14,13 @@ defmodule Lesson_03.Task_03_04_AtomTuple do
     {:point, right_x, bottom_y} = right_bottom
     x >= left_x and x <= right_x and y <= top_y and y >= bottom_y
   end
-
 end
 
 ExUnit.start()
 
-defmodule Task_03_04_Test do
+defmodule AtomTupleExampleTest do
   use ExUnit.Case
-  import Lesson_03.Task_03_04_AtomTuple
+  import AtomTupleExampleTest
 
   test "distance" do
     assert 5.0 == distance({:point, 0, 0}, {:point, 0, 5})
@@ -33,10 +31,10 @@ defmodule Task_03_04_Test do
   end
 
   test "bigger distance" do
-    assert 12.806248474865697 == distance({:point, 2, 2},   {:point, 10, 12})
+    assert 12.806248474865697 == distance({:point, 2, 2}, {:point, 10, 12})
     assert 21.213203435596427 == distance({:point, -5, -5}, {:point, 10, 10})
-    assert 21.400934559032695 == distance({:point, -5, 5},  {:point, 8, -12})
-    assert 17.26267650163207  == distance({:point, -5, 5},  {:point, -8, -12})
+    assert 21.400934559032695 == distance({:point, -5, 5}, {:point, 8, -12})
+    assert 17.26267650163207 == distance({:point, -5, 5}, {:point, -8, -12})
   end
 
   test "invalid arguments" do
@@ -54,5 +52,4 @@ defmodule Task_03_04_Test do
     assert point_inside_figure?(point, {:rect, {:point, -20, 30}, {:point, 20, 10}})
     assert not point_inside_figure?(point, {:rect, {:point, 0, 0}, {:point, 10, 10}})
   end
-
 end
