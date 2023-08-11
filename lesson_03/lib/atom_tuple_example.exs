@@ -20,7 +20,7 @@ ExUnit.start()
 
 defmodule AtomTupleExampleTest do
   use ExUnit.Case
-  import AtomTupleExampleTest
+  import AtomTupleExample
 
   test "distance" do
     assert 5.0 == distance({:point, 0, 0}, {:point, 0, 5})

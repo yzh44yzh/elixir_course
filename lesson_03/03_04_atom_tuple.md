@@ -86,7 +86,7 @@ iex(6)> elem(my_point, 2)
 
 Но на практике эту функцию используют крайне редко, потому что сопоставление с образцом удобнее.
 
-## Упражнение
+## Упражнение №1
 
 Реализуем функцию `distance/2`, которая вычисляет расстояние между двумя точками:
 
@@ -122,42 +122,79 @@ defmodule AtomTupleExample do
 end
 ```
 
-Результат работы функции:
+Запускаем:
+
+```elixir-iex
+iex(1)> c "lib/atom_tuple_example.exs"
+[AtomTupleExample, AtomTupleExampleTest]
+iex(2)> AtomTupleExample.distance({:point, 0, 0}, {:point, 0, 5})
+5.0
+iex(3)> AtomTupleExample.distance({:point, 10, 10}, {:point, 5, 5})
+7.0710678118654755
+iex(4)> AtomTupleExample.distance({:point, 0, 4}, {:point, 3, 0})
+5.0
+```
+
+Добавим тесты:
 
 ```elixir
-distance({:point, 0, 0}, {:point, 0, 5})  # 5.0
-distance({:point, 2, 2}, {:point, 10, 12})  # 12.806248474865697
-distance({:point, -5, -5}, {:point, 10, 10})  # 21.213203435596427
+defmodule AtomTupleExampleTest do
+  use ExUnit.Case
+  import AtomTupleExample
+
+  test "distance" do
+    assert 5.0 == distance({:point, 0, 0}, {:point, 0, 5})
+    assert 5.0 == distance({:point, 5, 0}, {:point, 0, 0})
+    assert 0.0 == distance({:point, 5, 5}, {:point, 5, 5})
+    assert 5.0 == distance({:point, 0, 0}, {:point, 3, 4})
+    assert 5.0 == distance({:point, 0, 0}, {:point, -3, -4})
+  end
+end
 ```
 
-```
-iex(6)> c "lib/lesson_03/task_03_04_atom_tuple.exs"
-[Lesson_03.Task_03_04_AtomTuple]
-iex(7)> import Lesson_03.Task_03_04_AtomTuple
-Lesson_03.Task_03_04_AtomTuple
-iex(8)> p1 = {:point, 1, 1}
-{:point, 1, 1}
-iex(9)> p2 = {:point, 10, 10}
-{:point, 10, 10}
-iex(10)> distance(p1, p2)
-12.727922061357855
+и проверим:
+
+```elixir-iex
+$ elixir lib/atom_tuple_example.exs
+.....
+Finished in 0.1 seconds (0.1s on load, 0.00s async, 0.00s sync)
+1 test, 0 failures
+
+Randomized with seed 19174
 ```
 
+## Упражнение №2
+
+Сделаем ещё одно упражнение, реализуем функцию `point_inside_cirle?/2`, которая проверяет, что точка попадает внутрь окружности.
+
+Определим, что точка представлена кортежем `{:point, x, y}`. Окружность представлена кортежем `{:circle, center, radius}`, где `center` — это кортеж `:point`, а `radius` -- положительное целое число. 
+
+Определить это не сложно, нужно проверить, что расстояние от точки до центра окружности меньше, чем радиус. При этом мы можем использовать уже существующую функцию `distance/2`:
+
+```elixir
+  def point_inside_cicle?(point, {:circle, center, radius}) do
+    distance(point, center) <= radius
+  end
 ```
-elixir lib/lesson_03/task_03_04_atom_tuple.exs
+
+Проверяем:
+
+```elixir-iex
+iex(3)> r AtomTupleExample
+iex(4)> AtomTupleExample.point_inside_circle?({:point, 3, 3}, {:circle, {:point, 0, 0}, 10})
+true
+iex(5)> AtomTupleExample.point_inside_circle?({:point, 13, 3}, {:circle, {:point, 0, 0}, 10})
+false
 ```
 
-Реализовать функцию is_point_inside_figure для прямоугольника и круга.
+Теперь сделаем аналогичную функцию `point_inside_rect?/2` для прямоугольника. Прямоугольник представлен кортежем `{:rect, left_top, right_bottom}`, где `left_top` и `right_bottom` — это кортежи `:point`.
 
+TODO: code
+TODO: run
 
-Точка представлена кортежем `{:point, x, y}`.
+Обобщить до `point_inside_figure?`. Объяснить клозы функций.
 
-Окружность представлена кортежем `{:circle, center, radius}`, где center — это кортеж `:point`.
+TODO: code
+TODO: run
 
-Прямоугольник представлен кортежем `{:rect, left_top, right_bottom}`, где left_top и right_bottom — это кортежи `:point`.
-
-TODO: в скринкасте я использовал @type и @spec. Стоит ли их вводить на данном этапе? Собственно, @spec уже был на самом первом занятии. А @type удобный способ формально описать, что такое point, circle, rect.
-
-TODO: я сперва сделал `point_inside_cirle?` и `point_inside_rect?`, а потом обобщил до `point_inside_figure?`. Есть смысл это сохранить.
-
-TODO: code and sessions from templates
+TODO: tests
