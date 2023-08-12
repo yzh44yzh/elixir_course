@@ -189,12 +189,122 @@ false
 
 Теперь сделаем аналогичную функцию `point_inside_rect?/2` для прямоугольника. Прямоугольник представлен кортежем `{:rect, left_top, right_bottom}`, где `left_top` и `right_bottom` — это кортежи `:point`.
 
-TODO: code
-TODO: run
+```elixir
+  def point_inside_rect?({:point, x, y}, {:rect, left_top, right_bottom}) do
+    {:point, left_x, top_y} = left_top
+    {:point, right_x, bottom_y} = right_bottom
+    x >= left_x and x <= right_x and y <= top_y and y >= bottom_y
+  end
+```
 
-Обобщить до `point_inside_figure?`. Объяснить клозы функций.
+Здесь несколько раз применили сопоставление с образцом, чтобы извлечь сперва точки прямоугольника, а потом координаты этих точек.
 
-TODO: code
-TODO: run
+Проверяем:
 
-TODO: tests
+```elixir-iex
+iex(6)> r AtomTupleExample
+iex(7)> AtomTupleExample.point_inside_rect?({:point, 5, 5}, {:rect, {:point, 0, 10}, {:point, 10, 0}})
+true
+iex(8)> AtomTupleExample.point_inside_rect?({:point, 5, 15}, {:rect, {:point, 0, 10}, {:point, 10, 0}})
+false
+```
+
+Следущий шаг -- обобщим проверку для круга и для прямоугольника. На самом деле нам не нужны две разные функции для этого, мы может реализовать одну `point_inside_figure?/2`.
+
+Мы опять немного забегаем вперед, в тему сопоставления с образцом. В Эликсир одна функция может иметь несколько реализаций (они называются "тело функции", по-английски "clause"). При вызове срабатывает только одно "тело функции", которое совпадёт по шаблону с переданными агрументами.
+
+```elixir
+  def point_inside_figure?(point, {:circle, center, radius}) do
+    distance(point, center) <= radius
+  end
+
+  def point_inside_figure?({:point, x, y}, {:rect, left_top, right_bottom}) do
+    {:point, left_x, top_y} = left_top
+    {:point, right_x, bottom_y} = right_bottom
+    x >= left_x and x <= right_x and y <= top_y and y >= bottom_y
+  end
+```
+
+Здесь функция `point_inside_figure?`, имеет два тела. Первое сработает, если вторым аргументом передать круг. Второе тело сработает, если вторым аргументом передать прямоугольник:
+
+```elixir-iex
+iex(5)> AtomTupleExample.point_inside_figure?({:point, 3, 3}, {:circle, {:point, 0, 0}, 20})
+true
+iex(6)> AtomTupleExample.point_inside_figure?({:point, 3, 3}, {:rect, {:point, 0, 10}, {:point, 10, 0}})
+true
+```
+
+Именно для этого сопоставление с образцом пишут прямо в агрументах функции. Оно служит шаблоном, который определяет, какое тело функции будет вызвано.
+
+Если передать агрумент, который не сопадёт ни с одним шаблоном, то возникнет исключение:
+
+```elixir-eix
+iex(7)> AtomTupleExample.point_inside_figure?({:point, 3, 3}, {:triangle, {:point, 0, 0}, {:point, 5, 5}, {:point, 0, 5}})
+** (FunctionClauseError) no function clause matching in AtomTupleExample.point_inside_figure?/2
+```
+
+Полная реализация выглядит так:
+
+```elixir
+defmodule AtomTupleExample do
+  def distance({:point, x1, y1}, {:point, x2, y2}) do
+    x_dist = abs(x1 - x2)
+    y_dist = abs(y1 - y2)
+    :math.sqrt(:math.pow(x_dist, 2) + :math.pow(y_dist, 2))
+  end
+
+  def point_inside_figure?(point, {:circle, center, radius}) do
+    distance(point, center) <= radius
+  end
+
+  def point_inside_figure?({:point, x, y}, {:rect, left_top, right_bottom}) do
+    {:point, left_x, top_y} = left_top
+    {:point, right_x, bottom_y} = right_bottom
+    x >= left_x and x <= right_x and y <= top_y and y >= bottom_y
+  end
+end
+```
+
+Добавим тесты:
+
+```elixir
+ExUnit.start()
+
+defmodule AtomTupleExampleTest do
+  use ExUnit.Case
+  import AtomTupleExample
+
+  test "distance" do
+    assert 5.0 == distance({:point, 0, 0}, {:point, 0, 5})
+    assert 5.0 == distance({:point, 5, 0}, {:point, 0, 0})
+    assert 0.0 == distance({:point, 5, 5}, {:point, 5, 5})
+    assert 5.0 == distance({:point, 0, 0}, {:point, 3, 4})
+    assert 5.0 == distance({:point, 0, 0}, {:point, -3, -4})
+  end
+
+  test "point inside circle" do
+    point = {:point, 50, 50}
+    assert point_inside_figure?(point, {:circle, {:point, 10, 10}, 100})
+    assert not point_inside_figure?(point, {:circle, {:point, -10, -10}, 20})
+  end
+
+  test "point inside rect" do
+    point = {:point, -10, 20}
+    assert point_inside_figure?(point, {:rect, {:point, -20, 30}, {:point, 20, 10}})
+    assert not point_inside_figure?(point, {:rect, {:point, 0, 0}, {:point, 10, 10}})
+  end
+end
+```
+
+И запустим их:
+
+```shell
+$ elixir lib/atom_tuple_example.exs
+.....
+Finished in 0.2 seconds (0.1s on load, 0.00s async, 0.04s sync)
+3 tests, 0 failures
+
+Randomized with seed 709925
+```
+
+TODO negative tests
