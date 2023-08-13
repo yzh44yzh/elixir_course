@@ -307,4 +307,52 @@ Finished in 0.2 seconds (0.1s on load, 0.00s async, 0.04s sync)
 Randomized with seed 709925
 ```
 
-TODO negative tests
+Полезно так же иметь негативные тесты. Если функция возвращает ошибку, или бросает исключение, то негативный тест проверяет, что это нужна ошибка и нужное исключение.
+
+В нашем случае функция `distance/2` сгененирует исключение, если мы передадим данные неправильного типа:
+
+```elixir-iex
+iex(2)> AtomTupleExample.distance({:point, 0, 0}, {:point, "5", "5"})
+** (ArithmeticError) bad argument in arithmetic expression: 0 - "5"
+```
+
+Или если передадим агрументы, которые не совпадают по шаблону:
+
+```elixir-iex
+iex(2)> AtomTupleExample.distance({0, 0}, {5, 5})
+** (FunctionClauseError) no function clause matching in AtomTupleExample.distance/2
+```
+
+Так же будет себя вести и функция `point_inside_figure?/2`, мы это уже видели:
+
+```elixir-iex
+iex(2)> AtomTupleExample.point_inside_figure?({:point, 3, 3}, {:triangle, {:point, 0, 0}, {:point, 5, 5}, {:point, 0, 5}})
+** (FunctionClauseError) no function clause matching in AtomTupleExample.point_inside_figure?/2
+```
+
+Добавим такие тесты:
+
+```elixir
+  test "invalid arguments for distance" do
+    assert_raise FunctionClauseError, fn -> distance({0, 0}, {0, 5}) end
+  end
+
+  test "invalid arguments for inside figure" do
+    assert_raise ArithmeticError, fn ->
+      point_inside_figure?({:point, 1, 1}, {:circle, {:point, "5", "5"}, 10})
+    end
+  end
+```
+
+В этих тестах используются анонимные функции. Мы будем изучать их позже. Пока что важно знать, что это позволяет тесту перехватить исключение и проверить его тип.
+
+Запустим все тесты:
+
+```shell
+$ elixir lib/atom_tuple_example.exs
+.....
+Finished in 0.1 seconds (0.1s on load, 0.00s async, 0.02s sync)
+5 tests, 0 failures
+
+Randomized with seed 242184
+```
