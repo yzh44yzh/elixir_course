@@ -10,7 +10,8 @@ Recursive data structure, consists of:
 Useful for incrementally building output that will be forwarded to an IO device (socket or file).
 
 Не эффективно:
-```
+
+```elixir-iex
 iex(8)> header = "<html><body>"
 "<html><body>"
 iex(9)> footer = "</body></html>"
@@ -27,7 +28,8 @@ iex(15)> IO.puts page
 Здесь много операций по копированию строк из одной области памяти в другую, чтобы в итоге результат разместился в одной непрерывной области памяти.
 
 Эффективно:
-```
+
+```elixir-iex
 iex(8)> header = "<html><body>"
 "<html><body>"
 iex(9)> footer = "</body></html>"
@@ -44,7 +46,6 @@ iex(16)> IO.puts page_io
 ```
 
 Здесь нет копирования, а результат представляет собой дерево из ссылок на разные области памяти.
-
 
 ## Keyword List
 
@@ -65,7 +66,6 @@ TODO примеры
 [a: 42, b: 50]
 
 в отличие от map сохраняют порядок ключей
-
 
 ## Range
 
