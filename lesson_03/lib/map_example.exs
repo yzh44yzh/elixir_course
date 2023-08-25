@@ -1,4 +1,4 @@
-defmodule MapExapmle do
+defmodule MapExample do
   @moduledoc """
   Посчитать, сколько раз встречается каждое слово в строке.
   """
@@ -30,9 +30,9 @@ end
 
 ExUnit.start()
 
-defmodule MapExapmleTest do
+defmodule MapExampleTest do
   use ExUnit.Case
-  import MapExapmle
+  import MapExample
 
   test "count words" do
     assert %{"Hello" => 1, "world" => 1} == count_words("Hello world")
