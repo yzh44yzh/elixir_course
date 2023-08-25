@@ -1,4 +1,4 @@
-defmodule Lesson_03.Task_03_07_String do
+defmodule StringExample do
 
   def sample_words() do
     ["aa", "bbbb", "dddddd", "eee"]
@@ -32,9 +32,9 @@ end
 
 ExUnit.start()
 
-defmodule Task_03_07_Test do
+defmodule StringExampleTest do
   use ExUnit.Case
-  import Lesson_03.Task_03_07_String
+  import StringExample
 
   test "make padding" do
     assert make_padding(0) == ""

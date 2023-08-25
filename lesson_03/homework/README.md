@@ -9,11 +9,11 @@
 
 Пример:
 
-```elixir
-> QuadraticEquation.solve(1, -2, -3)
+```elixir-iex
+iex(2)> QuadraticEquation.solve(1, -2, -3)
 {:roots, 3.0, -1.0}
 
-> QuadraticEquation.solve(3, 5, 10)
+iex(3)> QuadraticEquation.solve(3, 5, 10)
 :no_roots
 ```
 
@@ -21,10 +21,9 @@
 
 Чтобы проверить решение, нужно скомпилировать модуль, а затем запустить тесты:
 
-```bash
+```shell
 elixirc quadratic_equation.ex && elixir quadratic_equation_test.exs
 ```
-
 
 ## Пересечение прямоугольников
 
@@ -39,10 +38,9 @@ elixirc quadratic_equation.ex && elixir quadratic_equation_test.exs
 В файле **rect_test.exs** есть готовые юнит-тесты. Можно добавить больше тестов.
 
 Чтобы проверить решение, нужно скомпилировать модуль, а затем запустить тесты:
-```bash
+```shell
 elixirc rect.ex && elixir rect_test.exs
 ```
-
 
 ## Подсчет количества строк, слов и символов в файле
 
@@ -50,8 +48,8 @@ elixirc rect.ex && elixir rect_test.exs
 
 Пример:
 
-```elixir
-> WordCount.count("hello here\nand there")
+```elixir-iex
+iex(10)> WordCount.count("hello here\nand there")
 {2, 4, 20}
 ```
 
@@ -63,6 +61,6 @@ elixirc rect.ex && elixir rect_test.exs
 
 Чтобы проверить решение, нужно скомпилировать модуль, а затем запустить тесты:
 
-```bash
+```shell
 elixirc word_count.ex && elixir word_count_test.exs
 ```
