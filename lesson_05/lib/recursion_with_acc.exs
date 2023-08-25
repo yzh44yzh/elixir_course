@@ -13,7 +13,6 @@ defmodule RecurtionWithAcc do
 
   def filter_adults(users), do: filter_adults(users, [])
 
-
   defp filter_adults([], acc), do: Enum.reverse(acc)
 
   defp filter_adults([user | users], acc) do
