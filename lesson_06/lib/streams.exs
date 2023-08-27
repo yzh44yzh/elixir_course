@@ -1,14 +1,14 @@
 defmodule StreamExamples do
 
   def enum_example() do
-    list = [1,2,3,4,5]
+    list = [1, 2, 3, 4, 5]
     Enum.map(list, fn(i) -> i * 2 end)
     |> Enum.zip([:a, :b, :c, :d, :e])
     |> Enum.filter(fn({a, _b}) -> a > 2 end)
   end
 
   def stream_example() do
-    list = [1,2,3,4,5]
+    list = [1, 2, 3, 4, 5]
     Stream.map(list, fn(i) -> i * 2 end)
     |> Stream.zip([:a, :b, :c, :d, :e])
     |> Stream.filter(fn({a, _b}) -> a > 2 end)
