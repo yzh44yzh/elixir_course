@@ -5,12 +5,12 @@ defmodule CodeStatTest do
 
   setup do
     tmp_dir = "./tmp"
-    if File.exists?(tmp_dir), do: raise "#{tmp_dir} is already exists"
+    if File.exists?(tmp_dir), do: raise("#{tmp_dir} is already exists")
 
     File.mkdir(tmp_dir)
     make_test_dirs_and_files(tmp_dir)
 
-    on_exit(fn() ->
+    on_exit(fn ->
       File.rm_rf!(tmp_dir)
       :ok
     end)
@@ -32,6 +32,7 @@ defmodule CodeStatTest do
       "Docs" => %{files: 2, lines: 4, size: 32},
       "Other" => %{files: 1, lines: 1, size: 12}
     }
+
     assert expected == CodeStat.analyze(tmp_dir)
   end
 
@@ -50,5 +51,4 @@ defmodule CodeStatTest do
     File.write!(tmp_dir <> "/cc5.png", "binary image")
     File.write!(tmp_dir <> "/cc6.log", "some log record")
   end
-
 end
