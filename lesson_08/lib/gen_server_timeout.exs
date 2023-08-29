@@ -1,9 +1,8 @@
-defmodule Lesson_08.GenServerTimeout do
-
+defmodule GenServerTimeoutExample do
   def start_server() do
     {:ok, _} = GenServer.start_link(MyServer, [], name: MyServer)
   end
-  
+
   def normal_request() do
     GenServer.call(MyServer, :normal_request)
   end
@@ -12,7 +11,7 @@ defmodule Lesson_08.GenServerTimeout do
     try do
       GenServer.call(MyServer, :long_request)
     rescue
-      error -> IO.puts("Got error #{inspect error}")
+      error -> IO.puts("Got error #{inspect(error)}")
     end
   end
 
@@ -20,12 +19,10 @@ defmodule Lesson_08.GenServerTimeout do
     try do
       GenServer.call(MyServer, :long_request)
     catch
-      err_type, error -> IO.puts("Got error #{err_type} #{inspect error}")
+      err_type, error -> IO.puts("Got error #{err_type} #{inspect(error)}")
     end
   end
-
 end
-
 
 defmodule MyServer do
   use GenServer
@@ -46,6 +43,4 @@ defmodule MyServer do
     response = {:ok, 42}
     {:reply, response, state}
   end
-
-  
 end

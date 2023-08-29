@@ -1,17 +1,16 @@
-defmodule Lesson08.CustomExceptions do
-
+defmodule CustomExceptionExample do
   alias Model, as: M
-  
+
   def request1(), do: %{token: "aaa", data: %{a: 42}}
 
   def request2(), do: %{token: "bbb", data: %{a: 42}}
-  
+
   def request3(), do: %{token: "aaa", data: %{b: 42}}
-  
+
   def request4(), do: %{token: "ccc", data: %{a: 42}}
-  
+
   def request5(), do: %{token: "aaa", data: %{a: 100}}
-  
+
   def handle(request) do
     try do
       authorize(request)
@@ -22,8 +21,10 @@ defmodule Lesson08.CustomExceptions do
     rescue
       error in [M.AuthenticationError, M.AuthorizationError] ->
         {403, Exception.message(error)}
+
       error in [M.SchemaValidationError] ->
         {409, Exception.message(error)}
+
       error ->
         IO.puts(Exception.format(:error, error, __STACKTRACE__))
         {500, "internal server error"}
@@ -55,15 +56,13 @@ defmodule Lesson08.CustomExceptions do
   def do_something_useful(%{data: %{a: 100}}) do
     raise "something happened"
   end
-  
+
   def do_something_useful(request) do
     request.data.a
   end
-  
 end
 
 defmodule Model do
-
   defmodule AuthenticationError do
     defexception [:type, :token, :login]
 
@@ -83,7 +82,7 @@ defmodule Model do
       end
     end
   end
-  
+
   defmodule AuthorizationError do
     defexception [:role, :action]
 
@@ -111,5 +110,4 @@ defmodule Model do
       "data is not match to schema '#{error.schema_name}'"
     end
   end
-
 end
