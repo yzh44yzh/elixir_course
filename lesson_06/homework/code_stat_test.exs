@@ -39,6 +39,8 @@ defmodule CodeStatTest do
   def make_test_dirs_and_files(tmp_dir) do
     File.mkdir!(tmp_dir <> "/aa")
     File.write!(tmp_dir <> "/.formatter.exs", "settings")
+    File.mkdir!(tmp_dir <> "/log")
+    File.write!(tmp_dir <> "/log/nginx.md", "start server\nstop server")
     File.write!(tmp_dir <> "/aa/aa1.ex", "word1 word2\nword3 word4")
     File.write!(tmp_dir <> "/aa/aa2.erl", "word1 word2 word3\nword4 word5\nword6 word7")
     File.write!(tmp_dir <> "/aa/aa3.exs", "word1 word2\nword3\nword4\nword5\nword6")
