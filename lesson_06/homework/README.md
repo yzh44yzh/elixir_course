@@ -11,7 +11,7 @@
 Где players -- это список игроков. Игрок представлен кортежем:
 
 ```elixir
-{player, name, age, rating, health}
+{:player, name, age, rating, health}
 ```
 
 В целом структура данных, описывающая чемпионат, выглядит так:
