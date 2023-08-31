@@ -10,7 +10,7 @@
 
 Реализация тоже проста: 
 
-```
+```elixir
 def pipeline(state, fun_list) do
   Enum.reduce(
     fun_list,

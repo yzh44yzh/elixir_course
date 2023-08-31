@@ -10,7 +10,7 @@
 
 Нужно реализовать функцию:
 
-```
+```elixir
 @spec join_room(user_name :: String.t, room_name :: String.t) :: :ok | {:error, atom}
 ```
 
@@ -21,7 +21,8 @@
 - :room_reached_limit
 
 Объекты **Room** и **User** описаны в chat_room_model.ex:
-```
+
+```elixir
 defmodule ChatRoomModel do
 
   defmodule User do
@@ -31,9 +32,9 @@ defmodule ChatRoomModel do
   ...
 ```
 
-
 В chat_room.ex описаны валидные пользователи и комнаты:
-```
+
+```elixir
   @users [
     %M.User{name: "User 1"},
     %M.User{name: "User 2"},
@@ -49,7 +50,7 @@ defmodule ChatRoomModel do
 
 И реализованы функции валидации:
 
-```
+```elixir
 @spec get_user(String.t) :: {:ok, M.User.t} | {:error, :not_found}
 @spec get_room(String.t) :: {:ok, M.Room.t} | {:error, :not_found}
 @spec public?(M.Room.t) :: boolean
