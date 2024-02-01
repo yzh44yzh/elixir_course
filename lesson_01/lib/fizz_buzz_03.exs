@@ -50,10 +50,17 @@ defmodule FizzBuzzTest do
   end
 
   test "fizzbuzz_100" do
-    res = fizzbuzz_100()
-    assert Enum.take(res, 5) == ["1", "2", "Fizz", "4", "Buzz"]
-
-    assert res |> Enum.drop(9) |> Enum.take(6) ==
-             ["Buzz", "11", "Fizz", "13", "14", "FizzBuzz"]
+    result = fizzbuzz_100()
+    assert Enum.take(result, 5) == ["1", "2", "Fizz", "4", "Buzz"]
+    assert Enum.at(result, 10) == "11"
+    assert Enum.at(result, 15) == "16"
+    assert Enum.at(result, 25) == "26"
+    assert Enum.at(result, 50) == "Fizz"
+    assert Enum.at(result, 70) == "71"
+    assert Enum.at(result, 89) == "FizzBuzz"
+    assert Enum.at(result, 90) == "91"
+    assert Enum.at(result, 94) == "Buzz"
+    assert Enum.at(result, 96) == "97"
+    assert Enum.at(result, 99) == "Buzz"
   end
 end
