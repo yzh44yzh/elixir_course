@@ -12,11 +12,11 @@
 
 \beamertemplatenavigationsymbolsempty
 
-\lstset{
-  language=ML,
-  keywordstyle=\color{blue},
-  backgroundcolor=\color{lightgray}
-}
+%% \lstset{
+%%   language=ML,
+%%   keywordstyle=\color{blue},
+%%   backgroundcolor=\color{lightgray}
+%% }
 
 \title{Немного истории}
 
@@ -35,9 +35,9 @@
 \begin{frame}
   \frametitle{Предыстория: начало ХХ века.}
   \begin{textblock*}{70pt}(30pt,60pt)
-    \includegraphics{agner_krarup_erlang}
+    \includegraphics[scale=1.3]{agner_krarup_erlang}
   \end{textblock*}
-  \begin{textblock*}{220pt}(120pt,65pt)
+  \begin{textblock*}{220pt}(140pt,65pt)
     \textbf{Агнер Краруп Эрланг}
     \par \bigskip
     Датский математик, статистик и инженер.
@@ -57,7 +57,7 @@
 
 \begin{frame}
   \frametitle{Теория массового обслуживания}
-  применяется в телекоммуникационных системах,
+  Применяется в телекоммуникационных системах,
   \par \bigskip
   а также:
   \begin{itemize}
@@ -72,7 +72,9 @@
   \frametitle{Эрланг}
   Язык Эрланг родился в шведской компании \textbf{Эрикссон} (\textbf{Ericsson}).
   \par \bigskip
-  Крупный поставщик телекомуникационного оборудования и~услуг.
+  Крупный поставщик
+  \par \bigskip
+  телекомуникационного оборудования и~услуг.
 \end{frame}
 
 \begin{frame}
@@ -90,7 +92,9 @@
   \frametitle{Ericsson’s Computer Science Laboratory}
   Задача:
   \par \bigskip
-  Найти более эффективные средства разработки софта для железа и сервисов компании.
+  Найти более эффективные средства разработки софта
+  \par \bigskip
+  для железа и сервисов компании.
 \end{frame}
 
 \begin{frame}
@@ -134,9 +138,13 @@
 
 \begin{frame}
   \frametitle{Эрланг}
-  2006 год: поддержка симметричной мультипроцессорности (SMP).
+  2006 год:
   \par \bigskip
-  Эрланг научился эффективно использовать все имеющиеся в~системе процессорные ядра.
+  Поддержка симметричной мультипроцессорности (SMP).
+  \par \bigskip
+  Эрланг научился эффективно использовать все
+  \par \bigskip
+  имеющиеся в системе процессорные ядра.
 \end{frame}
 
 \begin{frame}
@@ -159,10 +167,10 @@
 
 \begin{frame}
   \frametitle{Эликсир}
-  \begin{textblock*}{75pt}(30pt,60pt)
-    \includegraphics[scale=2.9]{elixir_logo}
+  \begin{textblock*}{75pt}(20pt,60pt)
+    \includegraphics[scale=0.1]{jose_valim}
   \end{textblock*}
-  \begin{textblock*}{220pt}(120pt,60pt)
+  \begin{textblock*}{220pt}(155pt,60pt)
     Эликсир создан в 2012 году в компании Plataformatec.
     \par \bigskip
     Его автор -- \textbf{Жозе Валим}.
@@ -174,20 +182,25 @@
 
 \begin{frame}
   \frametitle{Эликсир}
-  Позаимствовал идеи из Ruby, Clojure и Эрланг.
-  \par \bigskip
-  Развивался под влиянием Ruby и Ruby on Rails.
-  \par \bigskip
-  Система макросов заимствована из Clojure.
-  \par \bigskip
-  Унаследовал все возможности Эрланг и его виртуальной машины.
+  \begin{textblock*}{75pt}(30pt,60pt)
+    \includegraphics[scale=2.9]{elixir_logo}
+  \end{textblock*}
+  \begin{textblock*}{220pt}(130pt,60pt)
+    Позаимствовал идеи из Ruby, Clojure и Эрланг.
+    \par \bigskip
+    Развивался под влиянием Ruby и Ruby on Rails.
+    \par \bigskip
+    Система макросов заимствована из Clojure.
+    \par \bigskip
+    Унаследовал все возможности Эрланг и его виртуальной машины.
+  \end{textblock*}
 \end{frame}
 
 \begin{frame}
   \frametitle{Эликсир}
-  2014 год: Эликсир 1.0
+  \textbf{2014 год}: Эликсир 1.0
   \par \bigskip
-  2015 год: Ecto 1.0 и Phoenix 1.0
+  \textbf{2015 год}: Ecto 1.0 и Phoenix 1.0
 \end{frame}
 
 \end{document}
