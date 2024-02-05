@@ -1,4 +1,7 @@
-\documentclass[10pt,xcolor=x11names]{beamer}
+\PassOptionsToPackage{x11names}{xcolor}
+%% https://tex.stackexchange.com/questions/74805/latex-error-option-clash-for-package-xcolor
+
+\documentclass[10pt]{beamer}
 \usepackage{fontspec}
 \setmainfont{Ubuntu}[]
 \setsansfont{Ubuntu}[]
@@ -50,9 +53,13 @@
 
 \begin{frame}
   \frametitle{Система макросов}
-  Работает на уровне абстрактного синтаксического дерева.
+  Работает на уровне абстрактного синтаксического дерева
+  \par
+  Abstract Syntax Tree (\textbf{AST}).
   \par \bigskip
-  Позволяет расширять язык и строить Domain~Specific~Languages.
+  Позволяет расширять язык и строить
+  \par
+  Domain Specific Languages (\textbf{DSL}).
   \par \bigskip
   Примеры: \textbf{Ecto} и \textbf{Phoenix}.
 \end{frame}
@@ -64,7 +71,7 @@
   \item Макрос \textbf{with}
   \item Абстракции Эликсир
   \item Абстракции Эрланг
-  \end{itemize}  
+  \end{itemize}
 \end{frame}
 
 
@@ -92,9 +99,9 @@
   Композиция функций, которые могут вернуть ошибку:
   \begin{lstlisting}
     case func1() do
-      {:ok, a} -> 
+      {:ok, a} ->
         case func2() do
-          {:ok, b} -> 
+          {:ok, b} ->
             case func3() do
               {:ok, c} -> a + b + c
               error -> error
@@ -110,11 +117,9 @@
   \frametitle{Макрос with}
   С макросом \textbf{with}:
   \begin{lstlisting}
-    with(
-      a = func1(),
-      b = func2(),
-      c = func3()
-    ) do
+    with a = func1(),
+         b = func2(),
+         c = func3() do
       a + b + c
     end
   \end{lstlisting}
@@ -148,7 +153,7 @@
   \item Большое и активное сообщество
   \item Много библиотек и инструментов
   \item Язык и экосистема быстро развиваются
-  \item Заимствование идей и инструменов из Эликсир в Эрланг
+  \item Заимствование идей и инструментов из Эликсир в Эрланг
   \end{itemize}
 \end{frame}
 
