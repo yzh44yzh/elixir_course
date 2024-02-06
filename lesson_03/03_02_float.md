@@ -30,7 +30,7 @@ iex(5)> 12.15 / 1.5
 
 ```elixir
 defmodule FloatExample do
-  def is_equal(f1, f2, precision \\ 0.01) do
+  def equal?(f1, f2, precision \\ 0.01) do
     abs(f1 - f2) < precision
   end
 end
