@@ -1,4 +1,5 @@
-\documentclass[10pt,xcolor=x11names]{beamer}
+\PassOptionsToPackage{x11names}{xcolor}
+\documentclass[10pt]{beamer}
 
 \usepackage{fontspec}
 \setmainfont{Ubuntu}[]
@@ -153,7 +154,7 @@
   Однострочный \textit{do..end}:
   \begin{lstlisting}
     my_fun(a, b), do: a + b
-    
+
     my_fun(a, b) do
       a + b
     end
@@ -164,7 +165,7 @@
   \frametitle{Проблемы в дизайне языка}
   Вызов анонимной функции:
   \begin{lstlisting}
-    my_fun = fn(a) -> a * a end 
+    my_fun = fn(a) -> a * a end
     my_fun.(42)
   \end{lstlisting}
 \end{frame}
@@ -176,9 +177,13 @@
 
 \begin{frame}
   \frametitle{Динамическая типизация}
-  Статическая типизация поддерживается~в~некоторой~степени.
+  Жозе Валим активно работает
+  \par
+  над внедрением статической типизации.
   \par \bigskip
-  \textbf{Dialyzer} ограничен в возможностях, и~его~легко~игнорировать.
+  \textbf{Dialyzer} -- статический анализ и проверка типов.
+  \par
+  Ограничен в возможностях, не интегрирован с компилятором.
 \end{frame}
 
 \begin{frame}

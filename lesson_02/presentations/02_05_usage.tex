@@ -1,4 +1,5 @@
-\documentclass[10pt,xcolor=x11names]{beamer}
+\PassOptionsToPackage{x11names}{xcolor}
+\documentclass[10pt]{beamer}
 
 \usepackage{fontspec}
 \setmainfont{Ubuntu}[]
@@ -45,6 +46,12 @@
 \begin{frame}
   \frametitle{Сфера применения BEAM}
   Мессенджеры и многопользовательские чаты.
+  \par \bigskip
+  Базы данных (Riak).
+  \par \bigskip
+  Брокеры сообщений (RabbitMQ).
+  \par \bigskip
+  Ну и, конечно, телеком.
 \end{frame}
 
 \begin{frame}
@@ -53,16 +60,18 @@
   \par \bigskip
   \textbf{450M} активных пользователей.
   \par \bigskip
+  \textbf{500K} сообщений в секунду.
+  \par \bigskip
   \textbf{32} инженера.
 \end{frame}
 
 \begin{frame}
   \frametitle{WhatsUp}
-  \textbf{35M} сообщений в секунду.
+  \textbf{2М} соединений на 1 сервер.
   \par \bigskip
-  \textbf{2M} соединений на один сервер
+  \textbf{24 CPU}.
   \par \bigskip
-  \textbf{24} CPU, \textbf{100GB} RAM.
+  \textbf{100 GB} RAM.
 \end{frame}
 
 \begin{frame}
@@ -86,12 +95,14 @@
 
 \begin{frame}
   \frametitle{Сфера применения Эликсир}
-  Долгоживущие соединения: \textbf{Channels} и \textbf{LiveView}.
+  Веб-сокеты: \textbf{Channels} и \textbf{LiveView}.
 \end{frame}
 
 \begin{frame}
   \frametitle{Сфера применения Эликсир}
-  Эликсир лучше подходит для веб-разработки, чем Эрланг.
+  Может всё, что может Эрланг
+  \par \bigskip
+  Лучше подходит для веб-разработки, чем Эрланг.
 \end{frame}
 
 
