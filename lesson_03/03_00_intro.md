@@ -16,7 +16,8 @@
 - Кортежи (Tuple),
 - Списки (List),
 - Словари (Map),
-- Строки (String), они же бинарные данные (Binary).
+- Строки (String), они же бинарные данные (Binary),
+- Диапазоны (Range).
 
 **Системные типы (System Types)**:
 - Идентификаторы процессов (Pid),
@@ -26,9 +27,8 @@
 
 **Составные типы (Complex Types)**:
 - IO-Списки (IO List),
-- Списки пар ключ-значение (Keyword List),
-- Диапазоны (Range),
-- Специальные строки (Sigil): Date, Time, DateTime, RE.
+- Списки пар ключ-значение (Keyword List).
 
 **Пользовательские типы (Data Model)**:
-- Структуры (Struct).
+- Структуры (Struct),
+- Специальные строки (Sigil): Date, Time, DateTime, RE.
