@@ -1,0 +1,90 @@
+\documentclass[10pt]{beamer}
+
+\usepackage{fontspec}
+\setmainfont{Ubuntu}[]
+\setsansfont{Ubuntu}[]
+\setmonofont{Ubuntu Mono}[]
+
+\usepackage{graphicx}
+\graphicspath{ {../img/} }
+
+\usepackage[absolute,overlay]{textpos} % [showboxes]
+
+\beamertemplatenavigationsymbolsempty
+
+\title{Типы данных}
+
+\begin{document}
+
+\begin{frame}
+  \frametitle{Типы данных}
+  Неофициальная классификация
+  \par \bigskip
+  \begin{itemize}
+    \item Числа (Number)
+    \item Булевые значения (Boolean)
+    \item Атомы (Atom)
+    \item Коллекции (Collections)
+    \item Системные типы (System Types)
+    \item Составные типы (Complex Types)
+    \item Пользовательские типы (Data Model)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Типы данных}
+  Числа (Number):
+  \begin{itemize}
+    \item Целые числа (Integer)
+    \item Числа с плавающей точкой (Float)
+  \end{itemize}
+  \par \bigskip
+  Булевые значения (Boolean):
+  \begin{itemize}
+    \item true, false, nil
+  \end{itemize}
+  \par \bigskip
+  Атомы (Atom):
+  \begin{itemize}
+    \item :ok, :error, MyModule
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Коллекции (Collections)}
+  \begin{itemize}
+    \item Кортежи (Tuple)
+    \item Списки (List)
+    \item Словари (Map)
+    \item Строки (String), они же бинарные данные (Binary)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Системные типы (System Types)}
+  \begin{itemize}
+    \item Идентификаторы процессов (Pid)
+    \item Идентификаторы портов (Port)
+    \item Уникальные идентификаторы (Reference)
+    \item Функции (Function)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Составные типы (Complex Types)}
+  \begin{itemize}
+    \item IO-Списки (IO List)
+    \item Списки пар ключ-значение (Keyword List)
+    \item Диапазоны (Range)
+    \item Специальные строки (Sigil): Date, Time, DateTime, RE
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Пользовательские типы (Data Model)}
+  \begin{itemize}
+    \item Структуры (Struct)
+  \end{itemize}
+\end{frame}
+
+\end{document}
