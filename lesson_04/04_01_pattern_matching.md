@@ -65,7 +65,7 @@ users = [
 {:admin, "Stan", :developer, {:lang, ["Scala", "PHP"]}}
 ]
 
-[{:user, _, _, _}, {:user, name, _, {:lang, [lang1, lang2]}}] = users
+[{:user, _, _, _}, {:user, name, _, {:lang, [lang1, lang2]}}, _] = users
 [
   {:user, "Bob", :developer, {:lang, ["Erlang", "Elixir"]}},
   {:user, "Bill", :developer, {:lang, ["Python", "JavaScript"]}}
