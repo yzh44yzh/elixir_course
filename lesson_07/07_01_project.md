@@ -43,6 +43,7 @@ event
 Соберем наш проект:
 
 ```shell
+cd event
 mix compile
 ```
 
