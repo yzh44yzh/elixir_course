@@ -46,22 +46,44 @@ iex(7)> 'Hello, ' ++ 'World!'
 ~c"Hello, World!"
 ```
 
-Модуль `String` из стандартной библиотеки содержит функции для работы со строками. Например, функцию для определения длины строки `String.length(my_str)`, функцию для разбиения строки на части `String.split(my_str, separator)`, функцию для удаления пробельных символов `String.trim(my_str)` и еще несколько десятков [функций](https://hexdocs.pm/elixir/1.12/String.html#functions).
+Модуль `String` из стандартной библиотеки содержит функции для работы со строками. Например, функцию для определения длины строки `String.length(my_str)`:
 
+```elixir-iex
+iex(1)> String.length("Hello world!")
+12
+iex(2)> String.length("Привет мир!")
+11
 ```
+
+Функцию для разбиения строки на части `String.split(my_str, separator)`:
+
+```elixir-iex
 iex(8)> String.split("aa bb cc")
 ["aa", "bb", "cc"]
 iex(9)> String.split("aa-bb-cc", "-")
 ["aa", "bb", "cc"]
+iex(10)> String.split("aa-bb_cc=dd", ["-", "_", "="])
+["aa", "bb", "cc", "dd"]
 ```
 
-TODO: примеры нескольких функций.
+Функцию для удаления пробельных символов `String.trim(my_str)`:
+
+```elixir-iex
+iex(5)> String.trim(" Hello world!  ")
+"Hello world!"
+iex(6)> String.trim(" Hello world!\n  ")
+"Hello world!"
+iex(7)> String.trim("\t Hello\tworld!\n  ")
+"Hello\tworld!"
+```
+
+И еще несколько десятков [функций](https://hexdocs.pm/elixir/1.12/String.html#functions).
 
 Одна из операций над строками, которая на первый взгляд кажется простой, это перевод строки в верхний или нижний регистр. На самом деле для некоторых алфавитов эта операция должна учитывать контекст, а не просто один символ. А для некоторых других алфавитов она не имеет смысла.
 
 Функция `String.upcase(str, mode)` работает в трех разных режимах. В режиме `:default` она переводит в верхний регистр все символы, для которых это возможно. В режиме `:ascii` она переводит только символы латинского алфавита:
 
-```
+```elixir-iex
 iex(10)> String.upcase("hello, мир!", :default)
 "HELLO, МИР!"
 iex(11)> String.upcase("hello мир!", :ascii)
@@ -72,22 +94,10 @@ iex(11)> String.upcase("hello мир!", :ascii)
 
 два вида строк
 
-## Char list
 
-Single-quoted strings are represented as a list of integer values,
-each value corresponding to a codepoint in the string.
+## Упражнение №1: "align words"
 
-## Binary
-
-Double-Quoted Strings Are Binaries
-
-The binary type represents a sequence of bits.
-A binary literal looks like << term,... >> .
-
-The simplest term is just a number from 0 to 255.
-The numbers are stored as successive bytes in the binary.
-
-## Задача align words:
+В файле lib/string_example.exs рассматривается задача выравнивания слов по центру.
 
 ```elixir-iex
 iex(1)> c "lib/string_example.exs"
@@ -108,3 +118,14 @@ Finished in 0.05 seconds (0.05s on load, 0.00s async, 0.00s sync)
 
 Randomized with seed 312660
 ```
+
+## Упражнение №2: парсинг get-параметров
+
+TODO
+
+foo=bar&token=value&bar=baz
+
+corner cases:
+foo=bar&token&bar=baz
+foo=bar&token=some=value&bar=baz
+token=some=value

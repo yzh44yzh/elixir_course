@@ -3,7 +3,7 @@ defmodule StringExample do
   def sample_words() do
     ["aa", "bbbb", "dddddd", "eee"]
   end
-  
+
   @spec align([String.t]) :: [String.t]
   def align(words) do
     max_length =
@@ -23,7 +23,7 @@ defmodule StringExample do
   end
 
   def make_padding(0), do: ""
-  
+
   def make_padding(length) when length > 0 do
     " " <> make_padding(length - 1)
   end
@@ -42,7 +42,7 @@ defmodule StringExampleTest do
     assert make_padding(2) == "  "
     assert make_padding(5) == "     "
   end
-  
+
   test "align word" do
     assert " bob " == align_word("bob", 5)
     assert " bob  " == align_word("bob", 6)
