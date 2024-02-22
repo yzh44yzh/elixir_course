@@ -2,12 +2,12 @@
 
 ## IO List
 
-Recursive data structure, consists of:
-- byte (integer in range 0-255)
-- String.t (binary)
-- IO List
+Рекурсивный тип данных, который состоит из:
+- byte (число в диапазоне 0-255)
+- String.t (бинарная строка)
+- IO List (включает сам себя)
 
-Useful for incrementally building output that will be forwarded to an IO device (socket or file).
+Такой тип поддерживается во всех операциях ввода-вывода и позволяет избежать дорогостоящей конкатенации строк.
 
 Не эффективно:
 
@@ -49,7 +49,7 @@ iex(16)> IO.puts page_io
 
 ## Keyword List
 
-Легаси со времен, когда BEAM не поддерживала map. 
+Легаси со времен, когда BEAM не поддерживала map.
 
 Список кортежей из двух элементов, где первых элемент -- atom() -- ключ, а второй элемент -- значение.
 
