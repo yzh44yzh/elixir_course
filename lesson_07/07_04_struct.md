@@ -4,7 +4,7 @@
 
 ```elixir-iex
 iex(1)> Event.sample_struct_event()
-%Model.Event.Event{ ...
+%Model.Struct.Event{ ...
 ```
 
 Особенности:
