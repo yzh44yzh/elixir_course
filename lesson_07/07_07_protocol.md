@@ -67,9 +67,9 @@ defimpl Model.CalendarItem, for: Map do
 alias Model.Calendar, as: C
 c = C.new
 
-e1 = TypedStructExample.create
-e2 = StructExample.create
-e3 = SimpleExample.create_map
+e1 = Event.sample_typed_struct_event()
+e2 = Event.sample_struct_event()
+e3 = Event.sample_map_event()
 c = C.add_item(c, e1)
 c = C.add_item(c, e2)
 c = C.add_item(c, e3)
@@ -79,7 +79,7 @@ C.show(c)
 У нас есть еще одна реализация Event, на базе кортежа. Мы не реализовывали протокол CalendarItem для нее. И если мы попробуем добавить в календарь такое событие:
 
 ```elixir-iex
-e4 = SimpleExample.create
+e4 = Event.sample_tuple_event()
 c = C.add_item(c, e4)
 C.show(c)
 
