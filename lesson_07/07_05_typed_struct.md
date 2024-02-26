@@ -22,7 +22,7 @@ $ iex -S mix
 ```
 
 ```elixir-iex
-iex(1)> event = Event.sample_struct_event()
+iex(1)> event = Event.sample_typed_struct_event()
 %Model.TypedEvent.Event{
   agenda: [
     %Model.TypedEvent.Topic{
