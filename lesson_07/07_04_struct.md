@@ -3,8 +3,8 @@
 Конечно, Эликсир предлагает более удобные средства, чем map и tuple.
 
 ```elixir-iex
-iex(1)> Event.sample_struct_event()
-%Model.Struct.Event{ ...
+iex(1)> event = Event.sample_struct_event()
+%Model.Event.Event{ ...
 ```
 
 Особенности:
