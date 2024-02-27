@@ -34,7 +34,7 @@ lib/model/record_event.ex
 
 В iex консоли мы видим кортежи:
 ```
-iex(1)> my_event = RecordExample.create()
+iex(1)> my_event = Event.sample_record_event()
 {:event, "Team Meeting", ~U[2021-03-10 19:40:00.000000Z],
  {:location, {:address, "Belarus", "Minsk", "Partizanskij pr", 178},
   {:room, 6, 610}},
@@ -46,14 +46,14 @@ iex(1)> my_event = RecordExample.create()
 
 Модуль Record автоматически создает макросы, позволяющие извлекать данные по ключу:
 ```
-> alias Model.RecordEvent.Event, as: E
+> alias Model.Record.Event, as: E
 > require E
-> E.event(ev, :title)
+> E.event(my_event, :title)
 "Team Meeting"
 > loc = E.event(my_event, :location)
 {:location, {:address, "Belarus", "Minsk", "Partizanskij pr", 178}, {:room, 6, 610}}
 
-> alias Model.RecordEvent.Location, as: L
+> alias Model.Record.Location, as: L
 > require L
 > L.location(loc, :room)
 {:room, 6, 610}
@@ -66,7 +66,7 @@ iex(1)> my_event = RecordExample.create()
 
 > rm = L.location(loc, :room)
 {:room, 6, 610}
-> alias Model.RecordEvent.Room, as: R
+> alias Model.Record.Room, as: R
 > require R
 > rm = R.room(rm, number: 611)
 {:room, 6, 611}
