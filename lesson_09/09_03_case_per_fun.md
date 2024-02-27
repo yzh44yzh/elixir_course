@@ -1,6 +1,7 @@
 # Решение 2. Каждый case в отдельной функции.
 
 ```elixir-iex
+iex(27)> data = BookShop.test_data()
 iex(28)> Solution2.handle(data)
 {:error, {:book_not_found, "Удовольствие от Х"}}
 iex(29)> Solution2.handle(data)
