@@ -3,13 +3,15 @@
 ```elixir-ex
 $ iex -S mix
 ...
-iex(1)> Solution1.handle(data)
+iex(1)> data = BookShop.test_data()
+...
+iex(2)> Solution1.handle(data)
 {:error, {:book_not_found, "Distributed systems for fun and profit"}}
 
-iex(2)> Solution1.handle(data)
+iex(3)> Solution1.handle(data)
 {:error, :invalid_incoming_data}
 
-iex(3)> Solution1.handle(data)
+iex(4)> Solution1.handle(data)
 %BookShop.Order{
   books: [
     %BookShop.Book{
