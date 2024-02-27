@@ -99,14 +99,14 @@ iex(1)> my_event = RecordExample.create()
 
 
 ```elixir
-> CompareStructRecord.start()
-14272 bytes for %Model.TypedEvent.Event{agenda: [%Model.TypedEvent.Topic{...}, ...], datetime: ~U[2021-03-10 19:40:00.000000Z], ...}
-9472 bytes for {:event, "Team Meeting", ...}
-512 bytes for %{a: 42, b: 1000}
-192 bytes for {42, 1000}
-256 bytes for [42, 1000]
-142400 bytes for [%Model.TypedEvent.Event{agenda: [...], ...}, %Model.TypedEvent.Event{...}, ...]
-137600 bytes for [{:event, ...}, {...}, ...]
+> Event.compare_size()
+1888 bytes for %Model.TypedStruct.Event{title: "Team Meeting", datetime: ~U[2021-12-16 16:00:00.000000Z], ...}
+1184 bytes for {:event, "Team Meeting", ...}
+64 bytes for %{a: 42, b: 1000}
+24 bytes for {42, 1000}
+32 bytes for [42, 1000]
+1905904 bytes for [%Model.TypedStruct.Event{title: "Team Meeting", ...}, %Model.TypedStruct.Event{...}, ...]
+1201200 bytes for [{:event, ...}, {...}, ...]
 ```
 
 ### Особенности Record
