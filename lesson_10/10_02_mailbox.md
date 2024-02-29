@@ -70,7 +70,7 @@ iex(14)> send(self(), 32)
 32
 iex(15)> send(self(), 33)
 33
-iex(16)> T.check_for_42()
+iex(16)> M.check_for_42()
 :ok
 iex(17)> flush()
 31
