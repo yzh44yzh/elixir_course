@@ -1,8 +1,9 @@
 build_pdf:
-	xelatex -halt-on-error book.tex
+	-mkdir _build
+	xelatex -halt-on-error -output-directory=_build book.tex
 
 show:
-	evince book.pdf &
+	evince _build/book.pdf &
 
 clean:
-	rm book.aux book.log book.toc book.pdf book.out *.aux
+	rm -f _build/*

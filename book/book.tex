@@ -5,14 +5,17 @@
 \geometry{a4paper, portrait, margin=1.5in, top=1in, bottom=1in}
 
 \usepackage{fontspec}
-% https://fonts.google.com/specimen/IBM+Plex+Serif
+%% https://fonts.google.com/specimen/IBM+Plex+Serif
 \setmainfont{IBM Plex Serif}
 \setmonofont{Ubuntu Mono}
 
 \usepackage[russian]{babel}
 
-\usepackage[fontsize=9pt]{fontsize}
-\usepackage[skip=5pt plus1pt, indent=20pt]{parskip} % setup paragraphs
+\usepackage[fontsize=10pt]{fontsize}
+
+%% setup paragraphs
+%% https://tug.org/docs/latex/parskip/parskip-code.pdf
+\usepackage[skip=6pt, indent=20pt]{parskip}
 
 \usepackage{setspace}
 %% \singlespacing
@@ -27,18 +30,6 @@
 %% https://texdoc.org/serve/listings.pdf/0
 \usepackage{listings}
 
-%% it has to be the last package to be imported
-\usepackage{hyperref}
-
-\hypersetup{
-    colorlinks=true,
-    linkcolor=blue,
-    urlcolor=blue
-    }
-
-\urlstyle{same}
-
-
 \title{Язык программирования Эликсир}
 \author{Юрий Жлоба}
 \date{Ноябрь 2022}
@@ -47,7 +38,7 @@
 
 \begin{document}
 
-\include{./elixir-definition}
+%% \include{./elixir-definition}
 
 \maketitle
 
@@ -60,10 +51,11 @@
 
 \tableofcontents
 
-\include{./01_01_fizzbuzz}
-\include{./01_02_iex}
-\include{./02_01_history}
-\include{./03_00_intro}
+\include{./fizzbuzz}
+%% \include{./01_01_fizzbuzz}
+%% \include{./01_02_iex}
+%% \include{./02_01_history}
+%% \include{./03_00_intro}
 
 %% \backmatter
 %% \chapter{Bibliography}
