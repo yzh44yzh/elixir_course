@@ -5,9 +5,13 @@
 \geometry{a4paper, portrait, margin=1.5in, top=1in, bottom=1in}
 
 \usepackage{fontspec}
-%% https://fonts.google.com/specimen/IBM+Plex+Serif
-\setmainfont{IBM Plex Serif}
-\setmonofont{Ubuntu Mono}
+\setmainfont{Literata}
+%% Variants:
+%% - IBM Plex Serif
+%% - Lora
+\setmonofont{Roboto Mono}
+%% Variants:
+%% - Ubuntu Mono
 
 \usepackage[russian]{babel}
 
@@ -18,29 +22,27 @@
 \usepackage[skip=6pt, indent=20pt]{parskip}
 
 \usepackage{setspace}
-%% \singlespacing
 \onehalfspacing
+%% Variants:
+%% \singlespacing
 %% \doublespacing
 
 %% https://latex-tutorial.com/color-latex/
 \usepackage[x11names]{xcolor}
 
 \usepackage{graphicx}
+\usepackage{eso-pic} % background image
 
 %% https://texdoc.org/serve/listings.pdf/0
 \usepackage{listings}
-
-\title{Язык программирования Эликсир}
-\author{Юрий Жлоба}
-\date{Ноябрь 2022}
 
 %% rights: Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International Public License
 
 \begin{document}
 
-%% \include{./elixir-definition}
-
-\maketitle
+\include{./book-style}
+\include{./elixir-definition}
+\include{./title-page}
 
 %% \frontmatter
 %% \chapter{Dedication}
@@ -51,11 +53,10 @@
 
 \tableofcontents
 
-\include{./fizzbuzz}
-%% \include{./01_01_fizzbuzz}
-%% \include{./01_02_iex}
-%% \include{./02_01_history}
-%% \include{./03_00_intro}
+\include{./01_01_fizzbuzz}
+\include{./01_02_iex}
+\include{./02_01_history}
+\include{./03_00_intro}
 
 %% \backmatter
 %% \chapter{Bibliography}
