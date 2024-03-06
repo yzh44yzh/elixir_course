@@ -243,17 +243,388 @@ iterate over range
 
 Build on top of map.
 
+
 ## Sigil
 
-TODO
-Список слов
-Регулярное выражение
-Date, Time
-Naive & UTC DateTime
+~~~
+Note sigil - на русский можно перевести как символ-знак-миниатюра.
+Смысл этого слова - некий уникальный знак описывающий некую сущность.
+Например в астрологии этим словом обозначают планету или созвездие.
+Здесь же для лучшего понимания использую оригинальный термин без перевода.
+~~~
 
-d = ~U[]
-d.year
-d.month
-Map.from_struct(d)
+Эликсир задуман как расширяемый язык. Идея в том, чтобы дать разработчикам
+возможность расширять язык под нужды их конкретной предметной области.
+Sigil-ы как раз и обеспечивают фундамент для расширения языка Эликсир,
+позволяя создавать свои собственные представления данных в виде текста.
+Sigil-ы начинаются с символа тильда(`~`) затем указывается либо прописной символ
+(lower-case) либо заглавный(upper-case) и следом за ним разделитель.
+в определении sigil-а разделителя должно быть два. Перед символом и в конце
+текстового представления данных. После последнего разделителя можно
+указывать необязательные(опциональные) модификаторы для данного Sigil-а.
 
-i d
+В языке есть уже встроенные Sigil-ы, позволяющие удобно и быстро представлять
+некие структуры данных через их текстового представление.
+
+Один из таких Sigil-ов(`~w` мы уже использовали в тесте для выравнивания строк):
+```elixir
+assert ["  cat   ", " zebra  ", "elephant"] == align(~w'cat zebra elephant')
+```
+
+### Word lists Список слов.
+
+Sigil `~w` используется для построения списка слов. Слова здесь - это просто
+обычные бинарные строки(BitString) Внтури `~w`-сигила слова разделяются пробелами
+
+```elixir
+iex> ~w'one two three'
+["one", "two", "three"]
+```
+
+Кроме того `~w`-сигилу можно указать тип элементов которые мы хотим построить из
+текстового представления. Делается это через указание модификаторов:
+`c`, `s`, `a` соответственно для charlist-ов, строк и атомов.
+
+```elixir
+iex> ~w'one two three'a
+[:one, :two, :three]
+
+iex> ~w'one two three'c
+[~c"one", ~c"two", ~c"three"]
+```
+
+
+### Регулярные выражения (Regular expressions)
+
+Наиболее часто используемый сигил в Эликсир это `~r`.
+Через него можно создать регулярные выражения:
+
+```elixir
+# Регулярка для сопоставления(matching) строк содержащих "elixir" или "erlang"
+iex> regex = ~r/elixir|erlang/
+~r/elixir|erlang/
+iex> "elixir" =~ regex
+true
+iex> "erlang" =~ regex
+true
+iex> "another_one" =~ regex
+false
+```
+
+Эликсир предоставляет Perl-совместимые регулярные выражения(regexes), которые
+реализуютсяя через библиотеку [PCRE](http://www.pcre.org/)
+Регулярки так же поддерживают модификаторы. Например модификатор `i` делает
+регулярку не чувствительной к регистру:
+
+```elixir
+iex> "ELIXIR" =~ ~r/elixir/
+false
+iex> "ELIXIR" =~ ~r/elixir/i
+true
+```
+
+Посмотреть все возможные модификаторы можно через справку для модуля `Regex`.
+```elixir-iex
+iex> h Regex
+                                     Regex
+
+Provides regular expressions for Elixir.
+
+Regex is based on PCRE (Perl Compatible Regular Expressions) and built on top ..
+```
+
+Создатели Эликсир достаточно неплохо продумали дизайн sigil-ов.
+Для того чтобы сделать код более читаемым и простым, и чтобы избегать
+экранирования некоторых символов можно использовать разные разделители в сегиле.
+В примерах выше для regex мы использовали разделитель в виде слэша `/` в
+примере со списком слов(`~w`) разделителем у нас выступала одинарная ковычка `'`.
+Вообще же разделителей в сигилах существует `8` разных видов:
+Для наглядности пример для регулярки(но это будет работать и со всеми другими
+сигилами тоже):
+
+```elixir
+~r/word/
+~r|word|
+~r"word"
+~r'word'
+~r(word)
+~r[word]
+~r{word}
+~r<word>
+```
+
+Основная идея в таком разнообразии разделителей в сигилах - это предоставить
+возможность описывать литералы избегая использования символов экранирования.
+Без этой возможности пришлось бы часть кода экранировать, а это делает код более
+тяжелым для восприятия и увеличивает вероятность ошибок.
+
+Вот явный тому пример:
+```elixir
+# регулярка перегружена символами экранирования
+iex> "http://domain.org" =~ ~r/^https?:\/\//
+true
+
+iex> "http://domain.org" =~ ~r(^https?://)
+true
+```
+Если же например регулярное выражение содержит слэш и группы, которые
+описываются через круглые скобки(`()`) то можно выбрать любой другой свободный
+разделитель из 8 доступных, чтобы избежать экранирования.
+
+
+### Строки (Strings)
+
+Сигил `~s` используется для создания строк. Тех самых обычных бинарных строк,
+которые обычно мы создаём через двойные кавычки.
+`~s`- может быть полезен когда строка должна содержать кавычки.
+```elixir
+iex> ~s(this is a string with "double" quotes, not 'single' ones)
+"this is a string with \"double\" quotes, not 'single' ones"
+```
+
+### Списки символов (Charlists)
+
+Как мы помним в Эликсир есть два вида строк - бинарные строки(BitString) и
+строки представляемые через список целых чисел(integer).
+В старых версиях Эликсир(Хотя это по-прежнему работает и на последней современной)
+charlist создавался через одинарные кавычки. Ныне же создаётся через `~c`-сигил
+
+```elixir
+iex> ~c"this-is-charlist"
+~c"this-is-charlist"
+
+# Запрашиваем подробный отчёт по значению из предыдущей строки
+iex> i
+Term
+  ~c"this-is-charlist"
+Data type
+  List
+Description
+  This is a list of integers that is printed using the `~c` sigil syntax,
+  defined by the `Kernel.sigil_c/2` macro, because all the integers in it
+  represent printable ASCII characters. Conventionally, a list of Unicode
+  code points is known as a charlist and a list of ASCII characters is a
+  subset of it.
+Raw representation
+  [116, 104, 105, 115, 45, 105, 115, 45, 99, 104, 97, 114, 108, 105, 115, 116]
+```
+
+```elixir
+iex> [?w, ?o, ?r, ?d]
+~c"word"
+
+iex> ~c(this is a charlist with "double" quotes, not 'single' ones)
+~c"this is a charlist with \"double\" quotes, not 'single' ones"
+```
+
+
+### Интерполяция и экранирование в строковых sigil-ах
+
+Эликсир поддерживает разные варианты одного и тогоже сигила,
+для особой обработки символов экранирования и интерполяции данных в строках.
+Так обычно заглавные(uppercase) сигил-символы не выполняют ни интерполяцию ни
+экранирование и выдают строку такой какая она есть.
+Например `~s` и `~S` оба создают бинарную-строку, но `~s` будет выполнять
+интерполяцию и экранирование, а `~S` будет просто выдавать строку как есть:
+
+```elixir
+iex> ~s(String with escape codes \x26 #{"inter" <> "polation"})
+"String with escape codes & interpolation"
+
+iex> ~S(String without escape codes \x26 without #{interpolation})
+"String without escape codes \\x26 without \#{interpolation}"
+```
+
+Так же стоит отметить что heredocs - блоки, которые задаются через пару трёх
+двойных кавычек так же могут быть заданы через строковый сигил `~s`
+```elixir
+iex> ~s"""
+   > this is
+   > a heredoc string
+   > """
+```
+
+Чаще всего это используется в документации.
+Опять таки чтобы не возиться с экранированием.
+```elixir
+@doc ~S"""
+Converts double-quotes to single-quotes.
+
+## Examples
+
+    iex> convert("\"foo\"")
+    "'foo'"
+
+"""
+def convert(...)
+```
+
+Если не использовать здесь строковый сигил(`~S`) пришлось бы экранировать:
+`iex> convert("\\\"foo\\\"")`
+
+
+### Сигилы для даты и времени
+
+В эликсире "сразу из коробки" идут несколько сигилов для работы с разного типа
+данными представляющими время и дату.
+Время и дата хранятся в структурах(struct), о том что такое структуры будет чуть
+позже. Пока же упрощенно можно их воспринимать как обёртку над словарём(Map),
+где ключи-атомы представляют собой поля структуры.
+
+#### Date
+Структура для хранения даты. Для её текстового описания используем sigil `~D`:
+
+```elixir
+iex> d = ~D[2024-03-06]
+~D[2024-03-06]
+
+iex> {d.year, d.month, d.day, d.calendar}
+{2024, 3, 6, Calendar.ISO}
+
+iex> i d
+Term
+  ~D[2024-03-06]
+Data type
+  Date
+Description
+  This is a struct representing a date. It is commonly
+  represented using the `~D` sigil syntax, that is
+  defined in the `Kernel.sigil_D/2` macro.
+Raw representation
+  %Date{year: 2024, month: 3, day: 6, calendar: Calendar.ISO}
+Reference modules
+  Date, Calendar, Map
+Implemented protocols
+  IEx.Info, Inspect, String.Chars
+```
+
+Как видим из вывода функции `i` поля, которые содержит структура легко можно
+узнать из секции `Raw representation`. Здесь это year, month, day и calendar.
+Обращаться к этим полям можно как в обычном словаре(Map) к ключам: `d.day`
+
+
+#### Time
+Для создания времени используем сигил `~T`
+```elixir
+iex> t = ~T[09:50:10]
+~T[09:50:10]
+iex> i t
+  ...
+Raw representation
+  %Time{hour: 9, minute: 50, second: 10, microsecond: {0, 0}, calendar: Calendar.ISO}
+```
+
+#### NaiveDateTime
+
+Эта структура содержит в себе поля из `Date` и `Time`. Создаётся через `~N`:
+```elixir
+iex> ndt = ~N[2024-03-06 09:56:32]
+~N[2024-03-06 09:56:32]
+```
+Наивной эта стуктура называется т.к. не содержит часового пояса (timezone).
+
+
+#### UTC DateTime
+
+Более полноценная структура содержащее и время и дату и часовой пояс.
+Содержит в себе все те же поля что в NaiveDateTime плюс поля для хранения
+временной зоны. Создать эту структуру можно через сигил `~U`:
+
+```elixir
+iex> dt = ~U[2024-03-06 09:56:32Z]
+~U[2024-03-06 09:56:32Z]
+
+iex> %DateTime{minute: min, time_zone: tz} = dt
+~U[2024-03-06 09:56:32Z]
+iex> min
+56
+iex> tz
+"Etc/UTC"
+iex> d.year
+2024
+iex> d.month
+3
+iex> Map.from_struct(dt)
+%{
+  microsecond: {0, 0},
+  second: 32,
+  calendar: Calendar.ISO,
+  month: 3,
+  day: 6,
+  year: 2024,
+  minute: 56,
+  hour: 9,
+  time_zone: "Etc/UTC",
+  zone_abbr: "UTC",
+  utc_offset: 0,
+  std_offset: 0
+}
+iex> i dt
+Term
+  ~U[2024-03-06 09:56:32Z]
+Data type
+  DateTime
+Description
+  This is a struct representing a datetime. It is commonly
+  represented using the `~U` sigil syntax, that is
+  defined in the `Kernel.sigil_U/2` macro.
+Raw representation
+  %DateTime{year: 2024, month: 3, day: 6, hour: 9, minute: 56, second: 32, time_zone: "Etc/UTC", zone_abbr: "UTC", utc_offset: 0, std_offset: 0, microsecond: {0, 0}, calendar: Calendar.ISO}
+Reference modules
+  DateTime, Calendar, Map
+Implemented protocols
+  IEx.Info, Inspect, String.Chars
+```
+
+
+### Custom sigils
+
+Как уже было сказано выше sigil-ы в Эликсир расширяемые.
+Фактически sigil `~r/foo/i` эквивалентен вызову `sigil_r` с двумя аргументами
+бинарной строкой и списком:
+
+```elixir
+iex> sigil_r(<<"foo">>, [?i])
+~r/foo/i
+
+# вот так можно посмотреть документацию для сигила ~r через функцию sigil_r
+iex> h sigil_r
+...
+```
+
+Можно создать свой собственный sigil, реализовав функцию с имя которой будет
+соответствовать шаблону `sigil_{character}`.
+
+Для примера реализуем совой `~i`-sigil, который из текстового представления
+будет создавать целое число (initeger).
+Через необязательный модификатор сделаем возможным делать число отрицательным.
+
+
+```elixir-iex
+iex(1)> defmodule MySigils do
+...(1)>   def sigil_i(string, []), do: String.to_integer(string)
+...(1)>   def sigil_i(string, [?n]), do: -String.to_integer(string)
+...(1)> end
+
+iex(2)> import MySigils
+iex(3)> ~i(42)
+42
+iex(4)> ~i(42)n
+-42
+```
+
+Свои кастомные sigil-ы могут состоять либо из одного прописного символа либо
+из нескольких заглавных символов.
+
+Какие еще есть случаи использования сигилов и особенности их работы?
+
+Sigil-ы cовместно с макросами можно использовать для выполнения некой
+полезной работы которая будет происходить во время компиляции. Например,
+регулярки в Эликсир компилируются в эффиктивное представление во время
+компиляции исходного эликсир-кода в байткод. А это значит что компилировать
+регулярные выражения во время выполнения программы(runtime) будет уже не нужно.
+(А это экономия ресурсов системы).
+
+Если данная тема заинтересовала смотри про макросы и в исходники самого языка.
+(то как sigil-ы реализованы в модуле Kernel.(функции начинающиеся с `sigil_*`))
+
