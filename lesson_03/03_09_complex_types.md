@@ -3,16 +3,23 @@
 ## IO List
 
 Рекурсивный тип данных, который состоит из:
-- byte (число в диапазоне 0-255)
-- [byte] (список таких чисел)
-- String.t (бинарная строка)
-- IO List (включает сам себя)
-
-TODO: пример
+- [byte] -- список байт, числа в диапазоне 0-255
+- String.t -- бинарная строка
+- IO List -- включает сам себя
 
 ```
-> ... |> flatten()
-"Hello world!"
+iex(1)> [0, 127, 255] |> IO.iodata_to_binary
+<<0, 127, 255>>
+iex(2)> [0, 127, 255, 256] |> IO.iodata_to_binary
+** (ArgumentError) errors were found at the given arguments:
+iex(3)> [97, 98, 99] |> IO.iodata_to_binary
+"abc"
+iex(4)> [97, 98, 99, [100, 101]] |> IO.iodata_to_binary
+"abcde"
+iex(5)> [97, 98, 99, [100, 101], " Hello"] |> IO.iodata_to_binary
+"abcde Hello"
+iex(6)> [97, 98, 99, [100, 101], " Hello", [" ", "world", 33]] |> IO.iodata_to_binary
+"abcde Hello world!"
 ```
 
 Такой тип поддерживается во всех операциях ввода-вывода и позволяет избежать дорогостоящей конкатенации строк.
@@ -20,51 +27,38 @@ TODO: пример
 Не эффективно:
 
 ```elixir-iex
-iex(8)> header = "<html><body>"
+iex(1)> header = "<html><body>"
 "<html><body>"
-iex(9)> footer = "</body></html>"
+iex(2)> footer = "</body></html>"
 "</body></html>"
-iex(10)> name = "Bob"
+iex(3)> name = "Bob"
 "Bob"
-iex(11)> body = "hello " <> name <> "!"
-"hello Bob!"
-iex(12)> page = header <> body <> footer
-iex(15)> IO.puts page
-<html><body>hello Bob!</body></html>
+iex(4)> title = "Hello " <> name <> "!"
+"Hello Bob!"
+iex(5)> page = "<h1>" <> title <> "</h1>"
+"<h1>Hello Bob!</h1>"
+iex(6)> html = header <> page <> footer
+"<html><body><h1>Hello Bob!</h1></body></html>"
 ```
-TODO:
-page = title <> body
-html = header <> page <> footer
 
 Здесь много операций по копированию строк из одной области памяти в другую, чтобы в итоге результат разместился в одной непрерывной области памяти.
 
 Эффективно:
 
 ```elixir-iex
-iex(8)> header = "<html><body>"
-"<html><body>"
-iex(9)> footer = "</body></html>"
-"</body></html>"
-iex(10)> name = "Bob"
-"Bob"
-iex(13)> body_io = ["hello ", name, "!"]
-["hello ", "Bob", "!"]
-iex(14)> page_io = [header, body_io, footer]
-["<html><body>", ["hello ", "Bob", "!"], "</body></html>"]
-iex(16)> IO.puts page_io
-<html><body>hello Bob!</body></html>
-:ok
+iex(7)> title = ["Hello", name, "!"]
+["Hello", "Bob", "!"]
+iex(8)> page = ["<h1>", title, "</h1>"]
+["<h1>", ["Hello", "Bob", "!"], "</h1>"]
+iex(9)> html = [header, page, footer]
+["<html><body>", ["<h1>", ["Hello", "Bob", "!"], "</h1>"], "</body></html>"]
+iex(10)> IO.puts(html)
+<html><body><h1>HelloBob!</h1></body></html>
 ```
-TODO:
-page = [title, body]
-html = [header, page, footer]
 
 Здесь нет копирования, а результат представляет собой дерево из ссылок на разные области памяти.
 
 Применяется везде, где есть IO: запись в файл, запись в сокет.
-
-TODO: например.
-запись в файл -- записать IO list, открыть файл, посмотреть
 
 
 ## Keyword List
@@ -125,7 +119,9 @@ iex(5)> IO.inspect([100, 200, 300], [width: 3, limit: 1])
 ```
 
 Конфигурационные файлы тоже по сложившейся традиции.
+
 TODO: пример коннекта к БД
+TODO: примеры из Ecto? Нужно подключать Ecto
 
 
 ## Range
