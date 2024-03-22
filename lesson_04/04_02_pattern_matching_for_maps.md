@@ -51,6 +51,9 @@ iex(13)> %{} = my_map
 %{"a" => 1, "b" => 2, "c" => 3}
 ```
 
+
+## Использование переменных
+
 Переменные можно использовать для извлечения значений, но не для извлечения ключей:
 
 ```elixir-iex
@@ -78,3 +81,52 @@ iex(21)> %{^keyb => _} = my_map
 ```
 
 Вариант `%{"a" => ^value1} = my_map` эквивалентен `%{"a" => 1} = my_map`. То есть, такой шаблон проверяет, что в словаре есть ключ и именно с таким значением.
+
+
+## Извлечение значений из вложенных словарей
+
+Работает так же, как для кортежей и списков.
+
+Создадим структуру из вложенных словарей и списков:
+
+```
+iex(1)> book1 = %{id: 1, title: "Little Ecto Book"}
+%{id: 1, title: "Little Ecto Book"}
+iex(2)> book2 = %{id: 2, title: "Programming Ecto"}
+%{id: 2, title: "Programming Ecto"}
+iex(3)> book3 = %{id: 3, title: "Programming Phoenix"}
+%{id: 3, title: "Programming Phoenix"}
+iex(4)> library = %{topic: "Elixir", books: [book1, book2, book3]}
+%{
+  topic: "Elixir",
+  books: [
+    %{id: 1, title: "Little Ecto Book"},
+    %{id: 2, title: "Programming Ecto"},
+    %{id: 3, title: "Programming Phoenix"}
+  ]
+}
+```
+
+Извлечём название 1й книги:
+
+```
+iex(7)> %{books: [%{title: title} | _]} = library
+iex(8)> title
+"Little Ecto Book"
+```
+
+Извлечём id 2й книги:
+
+```
+iex(9)> %{books: [_, %{id: id}, _]} = library
+iex(10)> id
+2
+```
+
+Извлечём id всех книг:
+
+```
+iex(11)> %{books: [%{id: id1}, %{id: id2}, %{id: id3}]} = library
+iex(12)> {id1, id2, id3}
+{1, 2, 3}
+```
