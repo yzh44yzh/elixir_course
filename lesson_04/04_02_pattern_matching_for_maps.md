@@ -130,3 +130,29 @@ iex(11)> %{books: [%{id: id1}, %{id: id2}, %{id: id3}]} = library
 iex(12)> {id1, id2, id3}
 {1, 2, 3}
 ```
+
+## Использование get_in
+
+В Эликсир есть набор функций и макросов для работы с вложенным структурами данных: `get_in`, `put_in`, `update_in`. Эта тема не относится к сопоставлению с образом, и мы рассмотрим эти функции позже, в 7-м уроке.
+
+Но раз уж у нас под руками есть подходящая структура, то я покажу `get_in`.
+
+```
+iex(5)> get_in(library, [:books])
+[
+  %{id: 1, title: "Little Ecto Book"},
+  %{id: 2, title: "Programming Ecto"},
+  %{id: 3, title: "Programming Phoenix"}
+]
+
+iex(6)> get_in(library, [:books, Access.all(), :title])
+["Little Ecto Book", "Programming Ecto", "Programming Phoenix"]
+
+iex(7)> get_in(library, [:books, Access.at(0), :title])
+"Little Ecto Book"
+
+iex(8)> get_in(library, [:books, Access.at(1), :title])
+"Programming Ecto"
+```
+
+Это как в длинных сериалах открывают новые сюжетные линии, чтобы зритель не терял интерес и хотел посмотреть следущий сезон :)
