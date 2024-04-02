@@ -38,52 +38,91 @@ defmodule ControlFlow do
   def handle3({:dog, name}, :pet), do: IO.puts("pet the dog #{name}")
   def handle3({:cat, name}, :feed), do: IO.puts("feed the cat #{name}")
   def handle3({:cat, name}, :pet), do: IO.puts("pet the cat #{name}")
-  def handle3({animal, name}, action) do
-    IO.puts("do '#{action}' with the #{animal} #{name}")
+  def handle3({:rat, name}, action) do
+    IO.puts("do action '#{action}' with rat #{name}")
   end
-  # def handle4(anything, whatever) do
+  # catch all
+  def handle3({animal_type, name}, action) do
+    IO.puts("do action '#{inspect(action)}' with animal '#{inspect(animal_type)}' #{name}")
+  end
+  # bad catch all
+  # def handle3(anything, whatever) do
   #   IO.puts("do '#{inspect(anything)}' with #{inspect(whatever)}")
   # end
-
-  # guards
-  def handle_({:dog, name, age}, :feed) when age > 10, do: IO.puts("give more food to the dog #{name}")
-  def handle_({:dog, name, _age}, :feed), do: IO.puts("feed the dog #{name}")
-  def handle_({:dog, name, _age}, :pet), do: IO.puts("pet the dog #{name}")
 
   # guards with case
   def handle4(animal) do
     case animal do
-      {:dog, name, age} when age > 10 -> IO.puts("#{name} is a dog older than 10")
-      {:dog, name, _} -> IO.puts("#{name} is a 10 years old or younger dog")
-      {:cat, name, age} when age > 10 -> IO.puts("#{name} is a cat older than 10")
-      {:cat, name, _} -> IO.puts("#{name} is a 10 years old or younger cat")
+      {:dog, name, age} when age <= 2 -> IO.puts("#{name} is a young dog")
+      {:dog, name, _} -> IO.puts("#{name} is an adult dog")
+      {:cat, name, age} when age > 10 -> IO.puts("#{name} is an old cat")
+      {:cat, name, _} -> IO.puts("#{name} is not so old")
     end
   end
 
   # guards with function clauses
-  def handle5({:dog, name, age}) when age > 10 do
-    IO.puts("#{name} is a dog older than 10")
+  def handle5({:dog, name, age}) when age <= 2 do
+    IO.puts("#{name} is a young dog")
   end
   def handle5({:dog, name, _age}) do
-    IO.puts("#{name} is a 10 years old or younger dog")
+    IO.puts("#{name} is an adult dog")
   end
   def handle5({:cat, name, age}) when age > 10 do
-    IO.puts("#{name} is a cat older than 10")
+    IO.puts("#{name} is an old cat")
   end
   def handle5({:cat, name, _age}) do
-    IO.puts("#{name} is a 10 years old or younger cat")
+    IO.puts("#{name} is not so old")
+  end
+
+  # sequence of guards
+  def handle6({:library, rating, books}) when rating > 4 and length(books) > 2 do
+    IO.puts("good library")
+  end
+
+  def handle6({:library, rating, books}) when rating > 4 or length(books) > 2 do
+    IO.puts("not too bad")
+  end
+
+  def handle6({:library, _rating, _books}) do
+    IO.puts("not recommended")
+  end
+
+  # invalid guard
+  # def handle7(a) when handle6(a) > 5 do
+  #   :ok
+  # end
+
+  # macros in guard
+  require Integer
+
+  def handle8(num) when Integer.is_even(num) do
+    IO.puts("#{num} is even")
+  end
+
+  def handle8(num) when Integer.is_odd(num) do
+    IO.puts("#{num} is odd")
   end
 
   # crash in guards
-  def handle6(num) when 10 / num > 2 do
-    IO.puts("clause 1")
+  def handle9(a, b) when 10 / a > 2 do
+    {:clause_1, b}
   end
-  def handle6(_num) do
-    IO.puts("clause 2")
+
+  def handle9(_a, b) do
+    {:clause_2, 10 / b}
+  end
+
+  # def handle10(a) when is_map(a) and map_size(a) > 2 do
+  def handle10(a) when map_size(a) > 2 do
+    IO.puts("a big map")
+  end
+
+  def handle10(_a) do
+    IO.puts("not a big map")
   end
 
   # cond
-  def handle7(num) do
+  def handle11(num) do
     cond do
       num > 10 -> IO.puts("more than 10")
       num > 5 -> IO.puts("more than 5")
