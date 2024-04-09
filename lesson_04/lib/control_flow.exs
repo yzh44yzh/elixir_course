@@ -129,6 +129,63 @@ defmodule ControlFlow do
     end
   end
 
+  # cond catch all
+  def handle12(num) do
+    cond do
+      num > 10 -> IO.puts("more than 10")
+      num > 5 -> IO.puts("more than 5")
+      true -> IO.puts("less or equal to 5")
+    end
+  end
+
+  # order
+  def handle13(num) do
+    cond do
+      num > 5 -> IO.puts("more than 5")
+      num > 10 -> IO.puts("more than 10")
+      true -> IO.puts("less or equal to 5")
+    end
+  end
+
+  # cond to if
+  def handle14(num) do
+    cond do
+      num >= 5 -> IO.puts("more or equal to 5")
+      true -> IO.puts("less than 5")
+    end
+  end
+
+  # if
+  def handle15(num) do
+    if num >= 5 do
+      IO.puts("more or equal to 5")
+    else
+      IO.puts("less than 5")
+    end
+  end
+
+  # one guard cond
+  def handle16(num) do
+    cond do
+      num >= 5 -> IO.puts("more or equal to 5")
+    end
+  end
+
+  # return value
+  def handle17(num) do
+    if num >= 5 do
+      :more_or_equal_to_5
+    else
+      :less_than_5
+    end
+  end
+
+  def handle18(num) do
+    if num >= 5 do
+      :more_or_equal_to_5
+    end
+  end
+
 end
 
 # animal_1 = {:cat, "Tihon"}
