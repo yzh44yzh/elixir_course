@@ -1,7 +1,7 @@
 defmodule DoEnd do
 
-  def fun_with_options(arg1, options) do
-    IO.puts("fun called with arg1:#{arg1} and options:#{inspect options}")
+  def my_fun(arg1, options) do
+    IO.puts("my_fun called with arg1:#{arg1} and options:#{inspect options}")
   end
 
   def if_1(condition) do
@@ -18,21 +18,21 @@ defmodule DoEnd do
     if condition, do: (
       a = 42
       {:true_branch, a + a}
-      ),
+    ),
     else: (
       b = 50
       {:false_branch, b * 2}
-      )
+    )
   end
 
   def if_3(condition) do
     if(condition, [
-          do: (
-            a = 42; {:true_branch, a + a}
-          ),
-          else: (
-            b = 50; {:false_branch, b * b}
-          )
+      do: (
+        a = 42; {:true_branch, a + a}
+      ),
+      else: (
+        b = 50; {:false_branch, b * b}
+      )
     ])
   end
 
@@ -50,5 +50,7 @@ defmodule DoEnd do
   def some_fun_2(arg1, arg2), do: (a = 42; arg1 + arg2 + a)
 
   def( some_fun_3(arg1, arg2), [{:do, (a = 42; arg1 + arg2 + a)}] )
+
+  defmodule(MyModule, [{:do, (def f1(), do: 42; def f2(), do: 100)}])
 
 end
