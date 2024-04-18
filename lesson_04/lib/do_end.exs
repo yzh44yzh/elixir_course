@@ -1,7 +1,8 @@
 defmodule DoEnd do
 
   def my_fun(arg1, options) do
-    IO.puts("my_fun called with arg1:#{arg1} and options:#{inspect options}")
+    dbg(arg1)
+    dbg(options)
   end
 
   def if_1(condition) do
@@ -50,6 +51,8 @@ defmodule DoEnd do
   def some_fun_2(arg1, arg2), do: (a = 42; arg1 + arg2 + a)
 
   def( some_fun_3(arg1, arg2), [{:do, (a = 42; arg1 + arg2 + a)}] )
+
+  # def( some_fun_4(arg1, arg2), [{:do, (a = 42; arg1 + arg2 + a)}, {:dododo, 42}] )
 
   defmodule(MyModule, [{:do, (def f1(), do: 42; def f2(), do: 100)}])
 
