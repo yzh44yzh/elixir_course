@@ -225,6 +225,10 @@ step 2: [1, 4, 9]
 Допустим, у вас есть стуктура AuthData, содержащая логин и пароль:
 
 ```elixir-iex
+defmodule Model.AuthData do
+  defstruct [:login, :password]
+end
+
 > data1 = %Model.AuthData{login: "Tihon", password: "123"}
 %Model.AuthData{login: "Tihon", password: "123"}
 ```
@@ -232,15 +236,32 @@ step 2: [1, 4, 9]
 С помощью атрибута @derive можно указать, какие поля скрывать или показывать в реализации Inpsect для этой структуры:
 
 ```elixir-iex
-> data2 = %Model.AuthDataS{login: "Tihon", password: "123"}
-#Model.AuthDataS<login: "Tihon", ...>
+defmodule Model.AuthData do
+  @derive {Inspect, only: [:login]}
+
+  defstruct [:login, :password]
+end
+
+> data2 = %Model.AuthData{login: "Tihon", password: "123"}
+#Model.AuthDataDerive<login: "Tihon", ...>
 ```
 
 Или можно явно реализовать Inspect:
 
 ```elixir-iex
-> data3 = %Model.AuthDataC{login: "Tihon", password: "123"}
-#AuthData<login:"Tihon">
+defmodule Model.AuthData do
+  defstruct [:login, :password]
+end
+
+defimpl Inspect, for: Model.AuthData do
+
+  def inspect(auth_data, opts) do
+    "Login: #{auth_data.login}"
+  end
+end
+
+> data3 = %Model.AuthData{login: "Tihon", password: "123"}
+Login: Tihon
 ```
 
 ### String.Chars и List.Chars
