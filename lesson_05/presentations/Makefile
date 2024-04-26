@@ -5,10 +5,10 @@ endef
 
 
 build:
-	$(call build_pdf,05_01_immutability)
+	$(call build_pdf,05_02_list)
 
 clean:
 	rm _build/*
 
 show:
-	evince 05_01_immutability.pdf &
+	evince 05_02_list.pdf &
