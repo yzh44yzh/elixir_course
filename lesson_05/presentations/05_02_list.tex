@@ -21,7 +21,7 @@
 \begin{frame}[fragile]
   \frametitle{Создание списка}
   \begin{lstlisting}
-    a + b = 42
+  my_list = [1, 2, 3, 4]
   \end{lstlisting}
 \end{frame}
 
@@ -35,6 +35,13 @@
   \frametitle{Добавление нового элемента}
   \centering
   \includegraphics[scale=0.6]{list_2}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Список как последовательность операторов cons}
+  \begin{lstlisting}
+  [1 | [2 | [3 | [4 | []]]]]
+  \end{lstlisting}
 \end{frame}
 
 \begin{frame}
@@ -59,6 +66,51 @@
   \frametitle{Полное копирование списка}
   \centering
   \includegraphics[scale=0.6]{list_6}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Двунаправленный список}
+  В нём есть циклические ссылки.
+  \par \bigskip
+  Из-за них невозможно переиспользование памяти
+  \par
+  (structure sharing).
+  \par \bigskip
+  И при любом изменении данных нужно полностью их копировать в другое место в памяти.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Стоимость операций для списков}
+  \begin{itemize}
+  \item добавить элемент в начало списка - O(1)
+  \item добавить элемент в конец списка - O(n)
+  \item определить длину списка - O(n)
+  \item получить N-й элемент - O(n)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Стоимость сложения двух списков}
+  \begin{lstlisting}
+    [1, 2, 3] ++ [4, 5, 6]
+  \end{lstlisting}
+  \par \bigskip
+  O(n), где \textbf{n} -- длина первого списка
+\end{frame}
+
+\begin{frame}
+  \frametitle{Стоимость операций для массивов}
+  \begin{itemize}
+  \item добавить элемент в начало массива - O(n)
+  \item добавить элемент в конец массива - O(1)/O(n)
+  \item определить длину массива - O(1)
+  \item получить/модифицировать N-й элемент - O(1)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Главное преимущество массивов}
+  Константное время доступа к любому элементу.
 \end{frame}
 
 \end{document}
