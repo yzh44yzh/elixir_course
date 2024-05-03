@@ -5,10 +5,10 @@ endef
 
 
 build:
-	$(call build_pdf,05_02_list)
+	$(call build_pdf,05_03_recursion)
 
 clean:
 	rm _build/*
 
 show:
-	evince 05_02_list.pdf &
+	evince 05_03_recursion.pdf &
