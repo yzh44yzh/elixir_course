@@ -5,12 +5,12 @@ defmodule UnboundedRecursion do
   end
 
   defp browse([], _parent, acc), do: acc
-  
+
   defp browse([path | tail], parent, acc) do
     new_acc = browse(path, parent, acc)
     browse(tail, parent, new_acc)
   end
-  
+
   defp browse(path, parent, acc) when is_binary(path) do
     full_path = Path.join(parent, path)
     cond do
