@@ -48,13 +48,7 @@
 ```elixir-iex
 $ iex lib/unbounded_recursion.exs
 iex(1)> alias UnboundedRecursion, as: R
-iex(2)> files = R.browse("/home/yuri/p/elixir_course/lesson_05")
-```
-
-Рендерим полученный список в виде дерева:
-
-```elixir-iex
-iex(3)> files |> Enum.join("\n") |> IO.puts
+iex(2)> R.browse("/home/yuri/p/elixir_course/lesson_05")
 ```
 
 В случае unbounded recursion нам нужны гарантии, что рекурсия не будет бесконечной и когда-либо завершится. При движении по направленному графу (это и обход ссылок в вебе, и обход каталогов в файловой системе) там могут быть циклические связи.
@@ -63,6 +57,72 @@ iex(3)> files |> Enum.join("\n") |> IO.puts
 
 Тут придется принять дополнительные меры, чтобы не попасть в бесконечную рекурсию. Меры могут быть разными. Можно просто ограничить число шагов рекурсии и остановиться. Можно игнорировать узлы определенного типа (например, символические ссылки в файловой системе). Можно сохранять пройденные узлы и проверять каждый новый узел, не был ли он обработан раньше.
 
-Для обхода файловой системы можно применять любой из трёх способов.
+Давайте сделаем обход файловой системы с ограничением глубины. Идея простая -- передавать в параметрах лимит глубины и текущую глубину.
 
-TODO второе упражнение -- ограничить глубину.
+Мы можем либо добавить два новых аргумента, которые нужно пробрасывать через все функции, либо сделать сложный аккумулятор, который будет хранить в себе всё необходимое.
+
+Идея простая, но код становится сложнее:
+
+```
+  def browse_with_limit(limit) do
+    browse_with_limit("/home/yuri/p/elixir_course/lesson_05", limit)
+  end
+
+  def browse_with_limit(path, limit) do
+    acc = %{
+      current_depth: 0,
+      limit: limit,
+      items: []
+    }
+
+    acc = do_browse_with_limit(path, acc)
+    acc.items
+  end
+
+  defp do_browse_with_limit(_path, %{
+         current_depth: limit,
+         limit: limit} = acc
+       ), do: acc
+
+  defp do_browse_with_limit(path, acc) do
+    items =
+      cond do
+        File.regular?(path) ->
+          [path | acc.items]
+
+        File.dir?(path) ->
+          {:ok, items} = File.ls(path)
+          acc = %{acc | current_depth: acc.current_depth + 1}
+          acc = do_browse_items(items, path, acc)
+          [path | acc.items]
+      end
+
+    %{acc | items: items}
+  end
+
+  defp do_browse_items([], _parent, acc), do: acc
+
+  defp do_browse_items([item | items], parent, acc) do
+    full_path = Path.join(parent, item)
+    acc = do_browse_with_limit(full_path, acc)
+    do_browse_items(items, parent, acc)
+  end
+```
+
+Вот это тело функции:
+```
+  defp do_browse_with_limit(_path, %{
+         current_depth: limit,
+         limit: limit} = acc
+       ), do: acc
+```
+это выход из рекурсии при достижении нужной глубины.
+
+А вот здесь:
+```
+  acc = %{acc | current_depth: acc.current_depth + 1}
+  acc = do_browse_items(items, path, acc)
+```
+мы увеличиваем текущую глубину.
+
+В остальном реализация остаётся такой же.
