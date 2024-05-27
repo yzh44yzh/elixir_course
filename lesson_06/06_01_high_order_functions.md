@@ -108,8 +108,13 @@ Enum.map(users, f)
 В данной реализации граница по возрасту прописана прямо в коде. Давайте сделаем более гибкую реализацию, чтобы граница передавалась внешним аргументом:
 
 ```
-  def filter_by_age(users, max_age) do
-    Enum.filter(users, fn({:user, _, _, age}) -> age < max_age end)
+  def split_by_age(users, age_limit) do
+    pred1 = fn {:user, _, _, age} -> age < age_limit end
+    pred2 = fn user -> not pred1.(user) end
+
+    users1 = Enum.filter(users, pred1)
+    users2 = Enum.filter(users, pred2)
+    {users1, users2}
   end
 ```
 
