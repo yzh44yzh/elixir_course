@@ -1,4 +1,4 @@
-defmodule RecurtionWithAcc do
+defmodule RecursionWithAcc do
 
   def test_data() do
     # {:user, id, name, age}
