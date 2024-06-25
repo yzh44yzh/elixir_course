@@ -2,13 +2,13 @@
 
 ## Ленивые вычисления
 
-Начать стоит с самой идеи ленивых вычислений. Идея простая -- у нас есть некие вычисления (некая функция), которые мы хотим сделать не прямо сейчас, а когда-нибудь потом, когда понадобится. Почему мы можем захотеть так сделать, увидим ниже на примерах.
+Начать стоит с самой идеи ленивых вычислений. Идея простая -- у нас есть некие вычисления, которые мы хотим сделать не прямо сейчас, а когда-нибудь потом, когда понадобится. Почему мы можем захотеть так сделать, увидим ниже на примерах.
 
 Язык Хаскель возводит эту идею в абсолют, в нем по умолчанию все вычисления ленивые. Но большинство языков предпочитают энергичные вычисления. (Энергичное -- противоположность ленивому вычислению, код выполняется сразу).
 
-На базовом уровне это реализуется просто -- создаем функцию, сохраняем ее в переменную, вызываем позже. Сложность появляется, когда мы хотим комбинировать такие функции вместе, и позже выполнять всю комбинацию целиком. Это и делает модуль [Stream](https://hexdocs.pm/elixir/Stream.html).
+На базовом уровне это реализуется просто -- создаем функцию, сохраняем ее в переменную, вызываем позже. Сложность появляется, когда мы хотим комбинировать такие функции вместе, и выполнять всю комбинацию целиком. Это и делает модуль [Stream](https://hexdocs.pm/elixir/Stream.html).
 
-Здесь мы увидим такой же набор функций, как в модуле Enum: map, filter, reduce и др. Но давайте посмотрим, в чем отличие.
+Здесь мы увидим такой же набор функций, как в модуле Enum: map, filter, zip и др. Но давайте посмотрим, в чем отличие.
 
 Возьмем некую коллекцию и прогоним ее через цепочку функций:
 
@@ -67,6 +67,7 @@ iex(10)> Enum.to_list(lazy_computation)
 
 Но это не единственная выгода.
 
+
 ## Большие коллекции
 
 Если мы создадим список из 10 миллионов элементов, то такой список займет много памяти и будет долго обрабатываться. Даже если нам нужны не все эти элементы, а лишь небольшая их часть:
@@ -105,34 +106,43 @@ UUID: universally unique identifier
 Мы хотим найти в нем самый длинный термин:
 
 ```elixir-eix
-File.read!("data/dictionary.txt") |>
-String.split("\n") |>
-Enum.map(fn(line) -> String.split(line, ":") end) |>
-Enum.map(fn([term, _definition]) -> ...
-Enum.max_by
-
+def find_longest(file) do
+  File.read!(file)
+  |> String.split("\n")
+  |> Enum.map(fn(line) -> String.split(line, ":") end)
+  |> Enum.map(fn([term | _]) -> term end)
+  |> Enum.map(fn(term) -> {String.length(term), term} end)
+  |> Enum.max_by(fn({len, _term}) -> len end)
+  |> elem(1)
+end
 ```
 В этой реализации мы загружаем в память весь файл, 15 Гб, и 4 раза выполняем проход по словарю.
 
 Воспользуемся Stream:
 
 ```elixir-eix
-File.stream!("data/dictionary.txt") |>
-Stream.map(fn(line) -> String.split(line, ":") end) |>
-Stream.map(fn([term, _definition]) -> ...
-Enum.max_by
-
+def find_longest_lazy(file) do
+  File.stream!(file)
+  |> Stream.map(fn(line) -> String.split(line, ":") end)
+  |> Stream.map(fn([term | _]) -> term end)
+  |> Stream.map(fn(term) -> {String.length(term), term} end)
+  |> Enum.max_by(fn({len, _term}) -> len end)
+  |> elem(1)
+end
 ```
 
 Функция File.stream! возвращает ленивую коллекцию, отдающую данные из файла построчно. В этом случае мы загружаем данные в память небольшими порциями и выполняем только один проход по нему. Последний вызов в цепочке должен активировать вычисления, поэтому там Enum, а не Stream.
 
-Этот код не обязательно будет быстрее, т.к. мы много раз читаем данные с диска, но он точно расходуем меньше оперативной памяти.
+Этот код не обязательно будет быстрее, т.к. мы много раз читаем данные с диска, но он точно расходует меньше оперативной памяти.
+
 
 ## Бесконечные коллекции
 
-Коллекции бывают не просто большие, они бывают бесконечные. В модуле Stream есть 5 функций, которые генерируют такие коллекции: **cycle**, **repeatedly**, **iterate**, **unfold** и **resource**. Рассмотрим две из них.
+Коллекции бывают не просто большие, они бывают бесконечные. В модуле Stream есть 5 функций, которые генерируют такие коллекции: **cycle**, **repeatedly**, **iterate**, **unfold** и **resource**. Рассмотрим некоторые из них.
 
-**Stream.cycle** принимает на вход коллекцию и генерирует бесконечную коллецию, состоящую из повторения элементов исходной:
+### Stream.cycle
+
+`Stream.cycle/1` принимает на вход коллекцию и генерирует бесконечную коллецию, состоящую из повторения элементов исходной:
 
 ```elixir-eix
 iex(9)> Stream.cycle([1, 2, 3]) |> Enum.take(20)
@@ -143,11 +153,18 @@ iex(9)> Stream.cycle([1, 2, 3]) |> Enum.take(20)
 
 ```elixir
 data = ["row 1", "row 2", "row 3", "row 4", "row 5"]
-Stream.cycle(["white", "grey"]) |>
-Stream.zip(data) |>
-Enum.map(
-fn {bg_color, row_data} -> "<tr class='#{bg_color}'><td>#{row_data}</td></tr>\n" end) |>
-IO.puts
+
+def make_table(data) do
+  content =
+    Stream.cycle(["white", "gray"])
+    |> Stream.zip(data)
+    |> Enum.map(fn {bg, row} ->
+      "<tr><td class='#{bg}'>#{row}</td></tr>"
+    end)
+    |> Enum.join("\n")
+
+  "<table>" <> content <> "</table>"
+end
 
 <tr class='white'><td>row 1</td></tr>
 <tr class='grey'><td>row 2</td></tr>
@@ -156,13 +173,47 @@ IO.puts
 <tr class='white'><td>row 5</td></tr>
 ```
 
-TODO: make_table2
-используем Stream.cycle и Stream.iterate.
+### Stream.iterate
 
-**Stream.unfold** можно рассматривать как функцию, противоположную fold (reduce). Если fold сворачивает список в одиночное значение, то unfold разворачивает список из одиночного значения. Она принимает на вход начальное состояние и разворачивающую функцию. Разворачивающая функция принимает на вход текущее состояние и возвращает кортеж из двух значений. Первый элемент кортежа -- это то, что становится очередным элементом списка. Второй элемент кортежа, это новое состояние, которое передается в разворачивающую функцию на следущем шаге.
+`Stream.iterate/2` принимает некое начальное значение и функцию, которая будет генирировать новое значение. На каждой итерации эта функция принимает свой предыдущий результат и на его основе генерирует новый результат:
+
+```
+iex(3)> iterator = Stream.iterate(1, fn arg -> arg * 2 end)
+#Function<63.53678557/2 in Stream.unfold/2>
+iex(4)> iterator |> Enum.take(10)
+[1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
+```
+
+Сделаем таблицу посложнее -- к чередованию фона ещё добавим нумерацию рядов:
+
+```
+def make_table_2(data) do
+  css_styles = Stream.cycle(["white_bg", "gray_bg"])
+  iterator = Stream.iterate(1, fn a -> a + 1 end)
+
+  content =
+    Stream.zip(css_styles, iterator)
+    |> Enum.zip(data)
+    |> Enum.map(fn {{css_style, index}, row} ->
+      "<tr class='#{css_style}'><td>#{index}</td><td>#{row}</td></tr>"
+    end)
+    |> Enum.join("\n")
+
+  "<table>\n" <> content <> "\n</table>"
+end
+```
+
+### Stream.unfold
+
+`Stream.unfold/2` можно рассматривать как функцию, противоположную fold (reduce). Если fold сворачивает список в одиночное значение, то unfold разворачивает список из одиночного значения.
+
+Она принимает на вход начальное состояние и разворачивающую функцию. Разворачивающая функция принимает на вход текущее состояние и возвращает кортеж из двух значений. Первый элемент кортежа -- это то, что становится очередным элементом списка. Второй элемент кортежа, это ново
+е состояние, которое передается в разворачивающую функцию на следущем шаге.
+
+То есть, это более сложная версия функции `iterate`.
 
 ```elixir
-unfolder = fn state -> { stream_value, new_state } end
+unfolder = fn state -> { curr_value, new_state } end
 Stream.unfold(initial_state, unfolder)
 ```
 
@@ -173,17 +224,71 @@ folder = fn(curr_value, acc) -> new_acc end
 Enum.reduce(collection, folder)
 ```
 
-Давайте рассмотрим пример. Вот так можно сгенерировать бесконечную последовательность чисел Фибоначчи:
+Пример, как генерируются значения:
 
 ```
-initial_state = {0, 1}
-unfolder = fn({val1, val2}) ->
-  curr_val = val1
-  new_state = {val2, val1 + val2}
-  {curr_val, new_state}
+def make_table_3() do
+  initial_state = {true, 1}
+
+  unfolder = fn {odd, index} ->
+    value = %{odd: odd, index: index}
+    new_state = {not odd, index + 1}
+    {value, new_state}
+  end
+
+  Stream.unfold(initial_state, unfolder)
 end
-Stream.unfold(initial_state, unfolder) |> Enum.take(15)
-[0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377]
+
+iex(4)> Lazy.make_table_2() |> Enum.take(10)
+[
+  %{index: 1, odd: true},
+  %{index: 2, odd: false},
+  %{index: 3, odd: true},
+  %{index: 4, odd: false},
+  %{index: 5, odd: true},
+  %{index: 6, odd: false},
+  %{index: 7, odd: true},
+  %{index: 8, odd: false},
+  %{index: 9, odd: true},
+  %{index: 10, odd: false}
+]
 ```
 
-Как всегда, нам нужна энергичная функция (Enum.take), чтобы запустить вычисления. И мы не можем увидеть бесконечную коллекцию как таковую, а можем только взять какую-то ее часть.
+Применим опять для создания таблицы:
+
+```
+def test_data do
+  [
+    {"Bob", 24},
+    {"Bill", 25},
+    {"Kate", 26},
+    {"Helen", 34},
+    {"Yury", 16}
+  ]
+end
+
+def make_table_3(users) do
+  initial_state = {true, 1}
+
+  unfolder = fn {odd, index} ->
+    value = %{odd: odd, index: index}
+    new_state = {not odd, index + 1}
+    {value, new_state}
+  end
+
+  rows =
+    Stream.unfold(initial_state, unfolder)
+    |> Stream.zip(users)
+    |> Enum.map(fn {state, user} ->
+      css_style = if state.odd, do: "white", else: "gray"
+      {name, age} = user
+      "<tr class='#{css_style}'><td>#{state.index}</td><td>#{name}</td><td>#{age}</td></tr>"
+    end)
+    |> Enum.join("\n")
+
+  "<table>#{rows}</table>"
+end
+```
+
+
+Кстати, вы могли заметить, что функции reduce/fold в модуле Stream нет. В теории можно было бы сделать и ленивый reduce, но в Эликсир не стали это делать.
