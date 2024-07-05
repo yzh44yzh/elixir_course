@@ -126,6 +126,85 @@ mix compile
 
 Тогда нам хватало кортежей и списков чтобы описать любые данные. Сейчас это слишком архаичный подход. Но я испытываю некоторую ностальгию по тем временам, так что не откажу себе в удовольствии начать с него.
 
+Моделируем сущности:
 ```
-TODO
+defmodule MyCalendar.Model.Tuple do
+
+  defmodule Place do
+
+    def new(office, room) do
+      {:place, office, room}
+    end
+
+  end
+
+  defmodule Participant do
+
+    def new(name, role) do
+      {:participant, name, role}
+    end
+
+  end
+
+  defmodule Topic do
+
+    def new(subject, description) do
+      {:topic, subject, description}
+    end
+
+  end
+
+  defmodule Event do
+
+    def new(title, place, time, participants, agenda) do
+      {:event, title, place, time, participants, agenda}
+    end
+
+  end
+
+end
 ```
+
+Создаём встречу:
+```
+defmodule MyCalendar do
+
+  def sample_event_tuple() do
+    alias MyCalendar.Model.Tuple, as: T
+
+    place = T.Place.new("Office #1", "Room 123")
+    time = ~U[2024-07-05 15:00:00Z]
+    participants = [
+      T.Participant.new("Kate", :project_manager),
+      T.Participant.new("Bob", :developer),
+      T.Participant.new("Bill", :qa),
+    ]
+    agenda = [
+      T.Topic.new("Release MyCalendar 1.0", "disscuss release"),
+      T.Topic.new("Buy cookies", "disscuss cookies")
+    ]
+    T.Event.new("Team Meeting", place, time, participants, agenda)
+  end
+end
+```
+
+Собираем и запускаем проект:
+```
+mix compile
+iex -S mix
+
+iex(1)> MyCalendar.sample_event_tuple()
+{:event, "Team Meeting", {:place, "Office #1", "Room 123"},
+ ~U[2024-07-05 15:00:00Z],
+ [
+   {:participant, "Kate", :project_manager},
+   {:participant, "Bob", :developer},
+   {:participant, "Bill", :qa}
+ ],
+ [
+   {:topic, "Release MyCalendar 1.0", "disscuss release"},
+   {:topic, "Buy cookies", "disscuss cookies"}
+ ]}
+```
+
+Начало положено :)
