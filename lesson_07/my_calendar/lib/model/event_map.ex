@@ -1,15 +1,11 @@
 defmodule MyCalendar.Model.Map do
 
-  defmodule Event do
+  defmodule Place do
 
-    def new(title, participants, datetime, place, agenda) do
+    def new(office, room) do
       %{
-        title: title,
-        type: :event,
-        participant: participants,
-        datetime: datetime,
-        place: place,
-        agenda: agenda
+        office: office,
+        room: room
       }
     end
 
@@ -17,23 +13,10 @@ defmodule MyCalendar.Model.Map do
 
   defmodule Participant do
 
-    def new(type, name, role) do
+    def new(name, role) do
       %{
-        type: type,
         name: name,
         role: role
-      }
-    end
-
-  end
-
-  defmodule Place do
-
-    def new(office, room) do
-      %{
-        type: :place,
-        office: office,
-        room: room
       }
     end
 
@@ -43,10 +26,27 @@ defmodule MyCalendar.Model.Map do
 
     def new(subject, description) do
       %{
-        type: :topic,
         subject: subject,
         description: description
       }
+    end
+
+  end
+
+  defmodule Event do
+
+    def new(title, place, time, participants, agenda) do
+      %{
+        title: title,
+        place: place,
+        time: time,
+        participants: participants,
+        agenda: agenda
+      }
+    end
+
+    def add_participant(event, participant) do
+      Map.update!(event, :participants, fn p -> [participant | p] end)
     end
 
   end
