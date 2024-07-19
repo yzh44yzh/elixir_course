@@ -47,6 +47,16 @@ defmodule MyCalendar.Model.Struct do
         ) do
       %Event{event | participants: [participant | participants]}
     end
+
+    def replace_participant(
+          %Event{participants: participants} = event,
+          %Participant{} = updated_participant
+        ) do
+      participants = Enum.filter(participants, fn p ->
+        p.name != updated_participant.name
+      end)
+      %Event{event | participants: [updated_participant | participants]}
+    end
   end
 
 end

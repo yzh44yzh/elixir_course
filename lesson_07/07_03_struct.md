@@ -12,7 +12,13 @@ defmodule MyCalendar.Model.Struct do
     defstruct [:office, :room]
   end
 end
+```
 
+Синтаксис простой, внутри модуля мы указываем макрос `defstruct` и список полей, которые должна иметь структура.
+
+Создаём экземпляр:
+
+```
 iex(3)> my_place = %MyCalendar.Model.Struct.Place{office: "Office #1", room: "1"}
 %MyCalendar.Model.Struct.Place{office: "Office #1", room: "1"}
 ```
@@ -28,21 +34,154 @@ iex(7)> other_place = %Place{office: "Office #2", room: "42"}
 %MyCalendar.Model.Struct.Place{office: "Office #2", room: "42"}
 ```
 
-TODO: значения по умолчанию
+Мы можем указать значения по-умолчанию для полей:
+```
+  defmodule Topic do
+    defstruct [
+      :subject,
+      {:priority, :medium},
+      :description
+    ]
+  end
+```
 
-TODO: enforce_keys (показать, что компилятор не даёт создать struct без этих полей)
+И тогда экземпляр можно создать не указывая все поля:
 
-TODO: Struct это абстракция поверх map.
+```
+iex(4)> alias MyCalendar.Model.Struct.Topic
+MyCalendar.Model.Struct.Topic
+iex(5)> topic = %Topic{subject: "Interview", description: "Job Interview"}
+%MyCalendar.Model.Struct.Topic{
+  subject: "Interview",
+  priority: :medium,
+  description: "Job Interview"
+}
+iex(6)> topic = %Topic{subject: "Interview", description: "Job Interview", priority: :high}
+%MyCalendar.Model.Struct.Topic{
+  subject: "Interview",
+  priority: :high,
+  description: "Job Interview"
+}
+```
 
-Важно знать, что Struct -- это уровень абстракции поверх Map. Эта абстракция существует на этапе компиляции, но в рантайме любая Struct это не более, чем Map с дополнительным ключом, указывающим ее тип:
+На самом деле значение по умолчанию есть у всех полей, так что можно никакие поля не указывать:
+```
+%MyCalendar.Model.Struct.Topic{
+  subject: nil,
+  priority: :medium,
+  description: nil
+}
+```
+
+Понятно, что в таком случае значением по-умолчанию будет `nil`.
+
+И это не всегда хорошо. Часто бывает необходимо сделать некоторые поля обязательными, так что бы нельзя было создать экземпляр без их указания. Это делается с помощью аттрибута модуля `@enforce_keys`:
+
+```
+  defmodule Topic do
+    @enforce_keys [:subject]
+    defstruct [
+      :subject,
+      {:priority, :medium},
+      :description
+    ]
+  end
+```
+
+И теперь если мы попытаемся создать экземпляр не указав `subject`, то получим исключение:
+```
+iex(7)> topic = %Topic{}
+** (ArgumentError) the following keys must also be given when building struct MyCalendar.Model.Struct.Topic: [:subject]
+
+iex(9)> topic = %Topic{subject: "Interview"}
+%MyCalendar.Model.Struct.Topic{
+  subject: "Interview",
+  priority: :medium,
+  description: nil
+}
+```
+
+Структура -- это абстракция поверх словарей. Она существует на этапе компиляции, но в рантайме любая структура превращается в словарь с дополнительным ключом `__struct__`, указывающим ее тип:
 
 ```elixir-iex
-> event = StructExample.create
-> event.__struct__
-Model.Event.Event
-> i event
-> event_m = Map.from_struct(event)
-> i event_m
+iex(11)> topic.__struct__
+MyCalendar.Model.Struct.Topic
+iex(13)> topic_m = Map.from_struct(topic)
+%{priority: :medium, description: nil, subject: "Interview"}
+iex(14)> i topic
+iex(15)> i topic_m
+```
+
+Реализуем все структуры для нашей модели:
+
+```
+defmodule MyCalendar.Model.Struct do
+
+  defmodule Place do
+    @enforce_keys [:office, :room]
+    defstruct [:office, :room]
+  end
+
+  defmodule Participant do
+    @enforce_keys [:name]
+    defstruct [:name, :role]
+  end
+
+  defmodule Topic do
+    @enforce_keys [:subject]
+    defstruct [
+      :subject,
+      {:priority, :medium}, # :high | :medium | :low
+      :description
+    ]
+  end
+
+  defmodule Event do
+    @enforce_keys [:title, :place, :time, :participants, :agenda]
+    defstruct [:title, :place, :time, :participants, :agenda]
+
+    def add_participant(
+          %Event{participants: participants} = event,
+          %Participant{} = participant
+        ) do
+      %Event{event | participants: [participant | participants]}
+    end
+  end
+
+end
+```
+
+Создадим событие:
+
+```
+  def sample_event_struct() do
+    alias MyCalendar.Model.Struct, as: S
+
+    place = %S.Place{office: "Office #1", room: "Room 123"}
+    time = ~U[2024-07-05 15:00:00Z]
+    participants = [
+      %S.Participant{name: "Kate", role: :project_manager},
+      %S.Participant{name: "Bob", role: :developer},
+      %S.Participant{name: "Bill", role: :qa}
+    ]
+    agenda = [
+      %S.Topic{subject: "Release MyCalendar 1.0", description: "disscuss release"},
+      %S.Topic{subject: "Buy cookies", description: "disscuss cookies", priority: :low}
+    ]
+    %S.Event{
+      title: "Team Meeting",
+      place: place,
+      time: time,
+      participants: participants,
+      agenda: agenda
+    }
+  end
+```
+
+И создадим экземпляр:
+
+```
+iex(17)> event = MyCalendar.sample_event_struct()
 ```
 
 
@@ -75,9 +214,49 @@ iex(12)> put_in(event, [:place, :room], "Room 789")
 
 Мы можем сделать так, чтобы динамические пути и модуль Access работали со структурами. Но для этого нужно реализовать behaviour Access.
 
-TODO: что такое behaviour
+Но прежде нужно объяснить, что это такое. И тут есть некоторая сложность, потому что в Эликсире есть **Protocol** (протокол) и **Behaviour** (поведение) -- две разные сущности, которые немного по-разному делают одно и тоже. Так получилось, потому что Behaviour достался в наследство от Эрланг. А Protocol -- это уже собственная абстракция Эликсир.
 
-Реализация:
+(Позже мы увидим аналогичную ситуацию с исключениями, где часть функциональности унаследована от Эрланг, а часть специфична для Эликсир, и эти части не очень хорошо друг с другом сочетаются).
+
+Обе абстракции -- и Protocol и Behaviour, являются аналогом Interface в Jave или Trait в Rust. Они описывают какие функции с какими аргументами должен реализовать модуль, чтобы его можно было использовать в некотором контексте.
+
+Протокол мы рассмотрим позже, а сейчас нам нужно поведение. Оно состоит из двух частей:
+- Behaviour module
+- Callback module
+
+Behaviour module указывает, какие функции обратного вызова (callback) он собирается вызываеть. В нашем случае это модуль `Access`. И он будет вызвать такие функции:
+- fetch(term, key)
+- get_and_update(data, key, function)
+- pop(data, key)
+
+Callback module реализует эти функции у себя. В нашем случае это модуль `Place`:
+```
+  defmodule Place do
+    @behaviour Access
+    @enforce_keys [:office, :room]
+    defstruct [:office, :room]
+
+    @impl true
+    def fetch(place, key) do
+      TODO
+    end
+
+    @impl true
+    def get_and_update(place, key, f) do
+      TODO
+    end
+
+    @impl true
+    def pop(place, key) do
+      TODO
+    end
+  end
+```
+
+Здесь мы указываем аттрибут `@behaviour Access`. Компилятор заглядывает в модуль `Access`, находит в нём описания callback, которые должны быть реализованы. Каждый callback мы помечаем аттрибутом `@impl true`, так что компилятор может проверить, что все они реализованы.
+
+Полная реализация:
+
 ```
   defmodule Place do
     @behaviour Access
@@ -103,7 +282,7 @@ TODO: что такое behaviour
   end
 ```
 
-Смотрим, как это работает.
+Теперь мы можем проверить, как это работает.
 
 Функцию `fetch` мы реализовали для обоих ключей:
 ```
@@ -152,8 +331,25 @@ iex(20)> john = %S.Participant{name: "John", role: :qa}
 iex(21)> S.Event.add_participant(event, john)
 ```
 
-TODO: реализовать replace_participant.
+Для `replace_participant` нам нужно идентифицировать участника. По-хорошему, это должен быть уникальный id. Но мы не предусмотрели такой id, так что будем использовать name. (Что годится для учебных целей, но не годится для реального проекта).
 
+```
+    def replace_participant(
+          %Event{participants: participants} = event,
+          %Participant{} = updated_participant
+        ) do
+      participants = Enum.filter(participants, fn p ->
+        p.name != updated_participant.name
+      end)
+      %Event{event | participants: [updated_participant | participants]}
+    end
+```
+
+Запускаем:
+```
+iex(22)> bill = %MyCalendar.Model.Struct.Participant{name: "Bill", role: :devops}
+iex(24)> MyCalendar.Model.Struct.Event.replace_participant(event, bill)
+```
 
 ## Struct vs Map
 
