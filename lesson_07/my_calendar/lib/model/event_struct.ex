@@ -1,5 +1,4 @@
 defmodule MyCalendar.Model.Struct do
-
   defmodule Place do
     @behaviour Access
     @enforce_keys [:office, :room]
@@ -32,7 +31,8 @@ defmodule MyCalendar.Model.Struct do
     @enforce_keys [:subject]
     defstruct [
       :subject,
-      {:priority, :medium}, # :high | :medium | :low
+      # :high | :medium | :low
+      {:priority, :medium},
       :description
     ]
   end
@@ -52,11 +52,12 @@ defmodule MyCalendar.Model.Struct do
           %Event{participants: participants} = event,
           %Participant{} = updated_participant
         ) do
-      participants = Enum.filter(participants, fn p ->
-        p.name != updated_participant.name
-      end)
+      participants =
+        Enum.filter(participants, fn p ->
+          p.name != updated_participant.name
+        end)
+
       %Event{event | participants: [updated_participant | participants]}
     end
   end
-
 end

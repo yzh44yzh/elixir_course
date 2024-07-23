@@ -7,6 +7,12 @@
 - дает компилятору больше информации для оптимизации кода;
 - улучшает самодокументируемость и читабельность кода.
 
+TODO
+The Design Principles of the Elixir Type System
+Giuseppe Castagna, Guillaume Duboc, and José Valim
+Gradual Set-Theoretic Types
+v1.17
+
 В случае с Эликсир есть нюансы, так как компилятор игнорирует атрибуты статической типизации, а все проверки выполняются отдельным тулом **dialyzer** уже после того, как код скопилирован.
 
 https://erlang.org/doc/man/dialyzer.html
@@ -16,6 +22,8 @@ Dialyzer, a DIscrepancy AnaLYZer for ERlang programs.
 
 Вернемся к нашим объектам Event и добавим описания типов:
 https://hexdocs.pm/elixir/typespecs.html
+
+TODO MyCalendar.Model.TypedStruct
 
 ```shell
 $ iex -S mix
@@ -64,6 +72,8 @@ Data type
 
 К счастью, есть сторонние библиотеки, реализующие макросы, позволяющие избежать такого дублирования. Но мы пока изучаем Эликсир в его оригинальном виде.
 
+TODO MyCalendar.sample_event_typed_struct()
+
 Давайте намеренно сделаем ошибку и посмотрим, как компилятор и dialyzer будет реагировать на нее:
 
 ```elixir
@@ -86,6 +96,7 @@ Generated event app
 ```
 
 Компилятор никак не реагирует на указание несуществующего типа.
+
 
 ## Подключаем dialyzer
 
