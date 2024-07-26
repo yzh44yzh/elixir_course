@@ -2,7 +2,7 @@ defmodule MyCalendar.Model.TypedStruct do
   defmodule Place do
     @type t() :: %Place{
             office: String.t(),
-            room: Room.t()
+            room: String.t()
           }
 
     @enforce_keys [:office, :room]

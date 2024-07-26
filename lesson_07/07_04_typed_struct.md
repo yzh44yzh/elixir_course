@@ -1,4 +1,6 @@
-# Struct с указанием типов.
+# Struct с указанием типов
+
+## Элементы статической типизации в Эликсир
 
 Хотя Эликсир является языком с динамической типизацией, он все же опционально поддерживает и статическую типизацию.
 
@@ -20,59 +22,143 @@ Dialyzer, a DIscrepancy AnaLYZer for ERlang programs.
 
 Этот тул изначально был создан для Эрланг. Но он умеет проверять и исходный код Эрланг, и скомпилированный байт-код. В случае с Эликсир dialyzer не может работать с исходным кодом, а проверяет только байт-код.
 
-Вернемся к нашим объектам Event и добавим описания типов:
 https://hexdocs.pm/elixir/typespecs.html
 
-TODO MyCalendar.Model.TypedStruct
 
-```shell
-$ iex -S mix
+## Описываем типы для структур
+
+Вернемся к нашему проекту и создадим модель на базе структур с описанием типов.
+
+```
+  defmodule Place do
+    @type t() :: %Place{
+            office: String.t(),
+            room: String.t()
+          }
+
+    @enforce_keys [:office, :room]
+
+    defstruct [:office, :room]
+  end
 ```
 
-```elixir-iex
-iex(1)> event = Event.sample_typed_struct_event()
-%Model.TypedEvent.Event{
-  agenda: [
-    %Model.TypedEvent.Topic{
+Принято создать тип с именем `t`, который описывает структуру в модуле. Тип может иметь любое имя, но модули в стандартной библиотеке используют имя `t`:
+- String.t()
+- Regexp.t()
+- DateTime.t()
+- Duration.t()
+
+Здесь мы три раза перечислили все поля структуры. Очевидно это не лучший синтаксис, но это то, что предлагает Эликсир из коробки.
+
+К счастью, есть сторонние библиотеки, которые позволяют избежать такого дублирования путём применения макросов. И есть упомянутая раньше библиотека **Ecto**, которая предлагает абстракцию **Schema**, и она делает то же самое -- генерирует структуры с помощью макросов без дублирования кода. Но сейчас мы изучаем "Эликсир из коробки".
+
+Мы можем хотя бы не повторять имя модуля дважды:
+
+```
+  defmodule Participant do
+    @type t() :: %__MODULE__{
+            name: String.t(),
+            role: atom()
+          }
+
+    @enforce_keys [:name]
+
+    defstruct [:name, :role]
+  end
 ```
 
-В iex мы не увидим никакой разницы:
+Макрос `%__MODULE__` раскрывается в имя модуля, внутри которого он находится. Громоздкая и не очень красивая конструкция. Зато если мы переименовываем модуль, что бывает не так уж редко, то макрос позволяет менять имя в одном месте, а не в нескольких местах.
 
-```elixir-iex
-iex(3)> i event
-Term
-  %Model.TypedEvent.Event{...}
-Data type
-  Model.TypedEvent.Event
+Некоторые типы являются базовыми, и их имена унаследованы от Эрланга:
+- atom()
+- number()
+- boolean()
+
 ```
+  defmodule Topic do
+    @type t() :: %__MODULE__{
+            subject: String.t(),
+            priority: :high | :medium | :low,
+            description: String.t()
+          }
 
-В коде к уже существующим атрибутам defstruct и @enforce_keys добавился еще аттрибут @type:
+    @enforce_keys [:subject]
 
-```elixir
-  defmodule Event do
-    @type t :: %__MODULE__{
-      title: String.t,
-      datetime: DateTime.t,
-      location: Location.t,
-      participants: list(Participant.t),
-      agenda: list(Topic.t)
-    }
-    @enforce_keys [:title, :datetime, :location, :participants, :agenda]
     defstruct [
-      :title,
-      :datetime,
-      :location,
-      :participants,
-      :agenda
+      :subject,
+      {:priority, :medium},
+      :description
     ]
   end
 ```
 
-Мы уже два раза продублировали каждое поле объекта, теперь пришлось повторить поля еще раз. Это, конечно, не самый удобный дизайн языка, который является следствием его постепенного развития. Сперва появлся defstruct, позже @enforce_keys, еще позже @type.
+Тип можно описать как множество возможных значений: `priority: :high | :medium | :low`. Это **перечисляемый тип**. И на самом деле именно он и должен называться **Enum**, как в большинстве других языков программирования. Но в Эликсир название **Enum** почему-то дано модулю для работы с коллециями.
 
-К счастью, есть сторонние библиотеки, реализующие макросы, позволяющие избежать такого дублирования. Но мы пока изучаем Эликсир в его оригинальном виде.
+```
+  defmodule Event do
+    @type t() :: %__MODULE__{
+            title: String.t(),
+            place: Place.t(),
+            time: DateTime.t(),
+            participants: [Participant.t()],
+            agenda: [Topic.t()]
+          }
 
-TODO MyCalendar.sample_event_typed_struct()
+    @enforce_keys [:title, :place, :time, :participants, :agenda]
+
+    defstruct [:title, :place, :time, :participants, :agenda]
+  end
+```
+
+Типы-контейнеры содержат внутри себя другие типы.
+
+Список можно описать так: `[inner_type()]` или так: `list(inner_type())`. Оба варианта работают, но на практике чаще встревается первый.
+
+Словарь можно описать так: `%{key_type() => value_type()}` или так: `map(key_type(), value_type())`. Здесь тоже первый вариант всречается чаще. Но не редко словарь указывают просто как `map()` без указания внутренних типов.
+
+Создадим экземпляр встречи:
+
+```
+defmodule MyCalendar do
+  ...
+  def sample_event_typed_struct() do
+    alias MyCalendar.Model.TypedStruct, as: TS
+
+    place = %TS.Place{office: "Office #1", room: "Room 123"}
+    time = ~U[2024-07-05 15:00:00Z]
+
+    participants = [
+      %TS.Participant{name: "Kate", role: :project_manager},
+      %TS.Participant{name: "Bob", role: :developer},
+      %TS.Participant{name: "Bill", role: :qa}
+    ]
+
+    agenda = [
+      %TS.Topic{subject: "Release MyCalendar 1.0", description: "disscuss release"},
+      %TS.Topic{subject: "Buy cookies", description: "disscuss cookies", priority: :low}
+    ]
+
+    %TS.Event{
+      title: "Team Meeting",
+      place: place,
+      time: time,
+      participants: participants,
+      agenda: agenda
+    }
+  end
+end
+```
+
+И запустим проект:
+
+```
+iex(1)> MyCalendar.sample_event_typed_struct()
+%MyCalendar.Model.TypedStruct.Event{
+  title: "Team Meeting",
+  ...
+```
+
+TODO stopped here
 
 Давайте намеренно сделаем ошибку и посмотрим, как компилятор и dialyzer будет реагировать на нее:
 
