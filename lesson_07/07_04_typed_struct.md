@@ -4,25 +4,20 @@
 
 Хотя Эликсир является языком с динамической типизацией, он все же опционально поддерживает и статическую типизацию.
 
-Статическая типизация:
+Статическая типизация полезна, она:
 - позволяет исключить определенный класс ошибок;
 - дает компилятору больше информации для оптимизации кода;
 - улучшает самодокументируемость и читабельность кода.
 
-TODO
-The Design Principles of the Elixir Type System
-Giuseppe Castagna, Guillaume Duboc, and José Valim
-Gradual Set-Theoretic Types
-v1.17
+В Эликсир с версии 1.17 внедряется система типов [Gradual Set-Theoretic Types](https://hexdocs.pm/elixir/main/gradual-set-theoretic-types.html), которую Жозе Валим разрабатывает вместе с опытными в этом деле людьми. Но это дело будущего, пока она работает очень ограничено.
 
-В случае с Эликсир есть нюансы, так как компилятор игнорирует атрибуты статической типизации, а все проверки выполняются отдельным тулом **dialyzer** уже после того, как код скопилирован.
+Я планирую посвятить этой теме отдельные видео. Но в данном курсе я про эту систему типов рассказывать не буду.
 
-https://erlang.org/doc/man/dialyzer.html
-Dialyzer, a DIscrepancy AnaLYZer for ERlang programs.
+Вместо этого мы рассмотрим **Dialyzer** -- старый инструмент, который появился ещё в Эрланг, а позже был адаптировани и для Эликсир.
 
-Этот тул изначально был создан для Эрланг. Но он умеет проверять и исходный код Эрланг, и скомпилированный байт-код. В случае с Эликсир dialyzer не может работать с исходным кодом, а проверяет только байт-код.
+[Dialyzer](https://erlang.org/doc/man/dialyzer.html), a DIscrepancy AnaLYZer for ERlang programs -- это статический анализатор, который ищёт проблемы в коде. И помимо прочего он выполняет проверку типов. Работает не идеально, но пользу приносит.
 
-https://hexdocs.pm/elixir/typespecs.html
+Чтобы Dialyzer приносил больше пользы нужно указывать в своём коде [описания типов](https://hexdocs.pm/elixir/typespecs.html).
 
 
 ## Описываем типы для структур
@@ -158,49 +153,24 @@ iex(1)> MyCalendar.sample_event_typed_struct()
   ...
 ```
 
-TODO stopped here
-
-Давайте намеренно сделаем ошибку и посмотрим, как компилятор и dialyzer будет реагировать на нее:
-
-```elixir
-  defmodule Location do
-    @type t :: %__MODULE__{
-      address: Address.t,
-      room: Broom.t
-    }
-    @enforce_keys [:address, :room]
-    defstruct [:address, :room]
-  end
-```
-
-Собираем проект:
-
-```shell
-$ mix compile
-Compiling 5 files (.ex)
-Generated event app
-```
-
-Компилятор никак не реагирует на указание несуществующего типа.
-
 
 ## Подключаем dialyzer
 
-Поскольку dialyzer разработан для Эрланг, напрямую использовать его в Эликсир проекте сложно. К счастью, есть сторонняя библиотека, которая делает эту задачу тривиальной.
+Поскольку dialyzer разработан для Эрланг, использовать его напрямую в Эликсир проекте не получится. Нужна библиотека, которая адаптирует его для Эликсир.
+
+Я не хотел использовать сторонние библиотеки в данном курсе, но в этом случае сделаю исключение.
 
 Библиотеку нужно указать как зависимость в файле mix.exs:
 
 ```elixir
   defp deps do
     [
-      {:dialyxir, "~1.2", only: [:dev], runtime: false}
+      {:dialyxir, "~> 1.4"}
     ]
   end
 ```
 
-Пока не будем вдаваться в детали, про управление зависимостями будет отдельная тема.
-
-Подключаем зависимость и собираем проект:
+Загружаем зависимость и собираем проект:
 
 ```shell
 mix deps.get
@@ -219,27 +189,68 @@ mix dialyzer
 
 Результат анализа:
 
-```shell
-Starting Dialyzer
-...
-Total errors: 1, Skipped: 0, Unnecessary Skips: 0
-done in 0m1.11s
-:0:unknown_type
-Unknown type: Broom.t/0.
 ```
-
-Ошибка найдена. Исправим ее и запустим анализ снова:
-
-```shell
+Finding suitable PLTs
+Checking PLT...
+...
 Starting Dialyzer
 ...
 Total errors: 0, Skipped: 0, Unnecessary Skips: 0
-done in 0m1.12s
+done in 0m3.47s
 done (passed successfully)
 ```
 
-dialyzer проверяет не только типы данных, но и правильность вызовов функций (вызванные функции и модули действительно существуют), правильность передачи им аргументов, неиспользуемые ветки кода и другие проблемы. Если типы данных не указаны, то во многих случаях dialyzer может вывести их сам.
+TODO stopped here
 
-К сожалению, многие разработчики этот тул игнорируют. Но чаще бывает, что используют, но нерегулярно. Из-за того, что dialyzer запускается отдельно от компилятора, его просто забывают запускать. В результате в коде проекта накапливаются невыявленные проблемы, и потом бывает сложно их исправить.
+Давайте намеренно сделаем ошибку и посмотрим, как компилятор и dialyzer будет реагировать на нее:
 
-Эту проблему решает встраивание запуска dialyzer в процесс CI, наряду с запуском тестов.
+```elixir
+  defmodule Event do
+    @type t() :: %__MODULE__{
+            title: String.t(),
+            place: Location.t(),
+            time: DateTime.t(),
+            participants: [Participant.t()],
+            agenda: [Topic.t()]
+          }
+```
+
+Мы указали несуществующий тип `Location.t()`.
+
+Компилятор не находит эту ошибку, dialyzer находит:
+
+```
+Total errors: 1, Skipped: 0, Unnecessary Skips: 0
+done in 0m3.43s
+lib/model/event_typed_struct.ex:43:unknown_type
+Unknown type: Location.t/0.
+```
+
+Сделаем другую ошибку:
+
+```
+  defmodule Event do
+    @type t() :: %__MODULE__{
+            title: String.t(),
+            place: place(),
+            time: DateTime.t(),
+            participants: [Participant.t()],
+            agenda: [Topic.t()]
+          }
+```
+
+Снова укажем несуществующий тип, но на этот раз без ссылки на модуль, где он, якобы, описан:
+
+```
+ $ mix compile
+Compiling 1 file (.ex)
+
+== Compilation error in file lib/model/event_typed_struct.ex ==
+** (Kernel.TypespecError) lib/model/event_typed_struct.ex:41: type place/0 undefined (no such type in MyCalendar.Model.TypedStruct.Event)
+```
+
+Теперь ошибку видит и компилятор тоже.
+
+Dialyzer нужно применять сразу со старта проекта. Добавить его в большой проект, который изначально разрабатывался без проверок dialyzer может быть довольно трудно.
+
+А чтобы не забывать его запускать, его стоит вклчюить в процесс CI, наряду с запуском тестов.
