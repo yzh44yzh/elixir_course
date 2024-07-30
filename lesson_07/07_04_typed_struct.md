@@ -376,6 +376,21 @@ _topic = %TS.Topic{subject: 42, description: false, priority: :critical}
 ```
 И вот теперь dialyzer видит несовпадение типов.
 
+TODO:
+```
+ iex -S mix
+Warning: the `dialyxir` application's start function was called, which likely means you
+did not add the dependency with the `runtime: false` flag.
+
+{:dialyxir, "~> 1.4", runtime: false}
+```
+
+TODO: проблема со значениями по-умолчанию
+```
+%TS.Topic{title: "Weather", description: "disscuss tomorow wearher"}
+```
+dialyzer выдаёт ошибку без объяснений.
+
 
 ## Выводы
 
