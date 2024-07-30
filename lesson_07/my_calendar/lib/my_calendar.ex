@@ -82,12 +82,17 @@ defmodule MyCalendar do
       %TS.Topic{subject: "Buy cookies", description: "disscuss cookies", priority: :low}
     ]
 
-    %TS.Event{
+    event = %TS.Event{
       title: "Team Meeting",
       place: place,
       time: time,
       participants: participants,
       agenda: agenda
     }
+
+    TS.Event.add_participant(event, nil)
+
+    topic = %TS.Topic{subject: 42, description: false, priority: :critical}
+    TS.Event.add_topic(event, topic)
   end
 end

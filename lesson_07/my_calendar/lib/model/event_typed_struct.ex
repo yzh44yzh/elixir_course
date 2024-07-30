@@ -49,5 +49,15 @@ defmodule MyCalendar.Model.TypedStruct do
     @enforce_keys [:title, :place, :time, :participants, :agenda]
 
     defstruct [:title, :place, :time, :participants, :agenda]
+
+    @spec add_participant(Event.t(), Participant.t() | nil) :: Event.t()
+    def add_participant(event, _participant) do
+      event
+    end
+
+    @spec add_topic(Event.t(), Topic.t()) :: Event.t()
+    def add_topic(event,  _topic) do
+      event
+    end
   end
 end

@@ -200,8 +200,6 @@ done in 0m3.47s
 done (passed successfully)
 ```
 
-TODO stopped here
-
 Давайте намеренно сделаем ошибку и посмотрим, как компилятор и dialyzer будет реагировать на нее:
 
 ```elixir
@@ -251,6 +249,136 @@ Compiling 1 file (.ex)
 
 Теперь ошибку видит и компилятор тоже.
 
-Dialyzer нужно применять сразу со старта проекта. Добавить его в большой проект, который изначально разрабатывался без проверок dialyzer может быть довольно трудно.
+Попробуем вызывать несуществующую функцию:
+```
+defmodule MyCalendar do
+  ...
+  def sample_event_typed_struct() do
+    ...
+    TS.Event.add_participant(event, nil)
+  end
+end
+```
 
-А чтобы не забывать его запускать, его стоит вклчюить в процесс CI, наряду с запуском тестов.
+Компилятор даёт понятное предупреждение:
+```
+$ mix compile
+Compiling 1 file (.ex)
+warning: MyCalendar.Model.TypedStruct.Event.add_participant/2 is undefined or private
+  lib/my_calendar.ex:93: MyCalendar.sample_event_typed_struct/0
+```
+
+Dialyzer тоже даёт понятное сообщение:
+```
+...
+lib/my_calendar.ex:93:call_to_missing
+Call to missing or private function MyCalendar.Model.TypedStruct.Event.add_participant/2.
+...
+```
+
+Давайте определим такую функцию:
+```
+  defmodule Event do
+    ...
+    def add_participant(%Event{} = event, %Participant{} = _participant) do
+      event
+    end
+ end
+```
+
+Теперь комплятор вполне доволен, и не выдаёт никаких предупреждений. А Dialyzer замечает проблему:
+```
+Total errors: 2, Skipped: 0, Unnecessary Skips: 0
+done in 0m3.45s
+lib/my_calendar.ex:68:no_return
+Function sample_event_typed_struct/0 has no local return.
+________________________________________________________________________________
+lib/my_calendar.ex:93:call
+The function call will not succeed.
+
+MyCalendar.Model.TypedStruct.Event.add_participant(
+  _event :: %MyCalendar.Model.TypedStruct.Event{
+  ...
+  },
+  nil
+)
+
+will never return since the 2nd arguments differ
+from the success typing arguments:
+
+(%MyCalendar.Model.TypedStruct.Event{}, %MyCalendar.Model.TypedStruct.Participant{})
+...
+```
+
+Мы передаём вторым аргументом `nil`, а функция ожидает `%Participant{}`.
+
+Уберём шаблоны из определения функции:
+```
+    def add_participant(event, _participant) do
+```
+
+Теперь и компилятор и dialyzer не замечают никаких проблем. И правильно, потому что тут и нет никаких проблем.
+
+А теперь добавим спецификацию к функции:
+```
+    @spec add_participant(Event.t(), Participant.t()) :: Event.t()
+    def add_participant(event, _participant) do
+```
+
+Копилятор игнорирует такие спецификации. А Dialyzer не игнорирует и находит проблему:
+```
+Total errors: 2, Skipped: 0, Unnecessary Skips: 0
+done in 0m3.42s
+lib/my_calendar.ex:68:no_return
+Function sample_event_typed_struct/0 has no local return.
+________________________________________________________________________________
+lib/my_calendar.ex:93:call
+The function call will not succeed.
+
+MyCalendar.Model.TypedStruct.Event.add_participant(
+  _event :: %MyCalendar.Model.TypedStruct.Event{
+  ...
+  },
+  nil
+)
+
+breaks the contract
+(t(), MyCalendar.Model.TypedStruct.Participant.t()) :: t()
+```
+
+Он опять видит, что второй аргумент `nil` не соответствует типу `Participant.t()`.
+
+Изменим спецификацию, укажем, что второй аргумент может быть `nil`:
+```
+    @spec add_participant(Event.t(), Participant.t() | nil) :: Event.t()
+    def add_participant(event, _participant) do
+```
+
+И теперь всё в порядке.
+
+Dialyzer не всегда замечает проблемы. Создадим неправильный topic:
+```
+_topic = %TS.Topic{subject: 42, description: false, priority: :critical}
+```
+Здесь все типы данных внутри структуры неправильные. Но компилятор и dialyzer не реагируют на это. Они просто не знают, что тип `t()` внутри модуля `Topic` имеет какое-то отношение к структуре `%Topic{}`.
+
+Но давайте определим функцию `add_topic`:
+```
+    @spec add_topic(Event.t(), Topic.t()) :: Event.t()
+    def add_topic(event,  _topic) do
+      event
+    end
+```
+И вызовем её:
+```
+    topic = %TS.Topic{subject: 42, description: false, priority: :critical}
+    TS.Event.add_topic(event, topic)
+```
+И вот теперь dialyzer видит несовпадение типов.
+
+
+## Выводы
+
+Мы видим, что Dialyzer -- полезный инструмент. Однако его нужно применять сразу со старта проекта. Добавить его в большой проект, в котором он раньше не применялся, может быть довольно трудно. Он выдаст много ошибок, которые нельзя будет исправить сразу. Нужно будет исправлять их постепенно, и это может занять недели и месяцы.
+
+Хорошая идея -- добавить Dialyzer в процесс CI, наряду с запуском тестов.
