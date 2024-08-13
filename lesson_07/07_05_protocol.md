@@ -3,16 +3,16 @@
 Мы уже знаем, что модуль Enum работает с самыми разными коллециями: List, Map, String, Range и другими.
 
 ```elixir-iex
-iex(1)> Enum.map([1, 2, 3], fn(i) -> i * 2 end)
+iex(1)> Enum.map([1, 2, 3], fn i -> i * 2 end)
 [2, 4, 6]
 
-iex(2)> Enum.map('Hello', fn(char) -> char + 1 end)
+iex(2)> Enum.map('Hello', fn char -> char + 1 end)
 'Ifmmp'
 
-iex(3)> Enum.map(1..10, fn(i) -> i * i end)
+iex(3)> Enum.map(1..10, fn i -> i * i end)
 [1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
 
-iex(5)> Enum.map(%{a: 1, b: 2}, fn({k, v}) -> {v, k} end)
+iex(5)> Enum.map(%{a: 1, b: 2}, fn {k, v} -> {v, k} end)
 [{1, :a}, {2, :b}]
 ```
 
@@ -21,17 +21,17 @@ iex(5)> Enum.map(%{a: 1, b: 2}, fn({k, v}) -> {v, k} end)
 ```
 defmodule Enum do
 
-  def map(value, f) when is_list(value), do: ...
+  def map(collection, f) when is_list(collection), do: ...
 
-  def map(value, f) when is_map(value), do: ...
+  def map(collection, f) when is_map(collection), do: ...
 
-  def reduce(value, acc, f) when is_list(value), do: ...
+  def reduce(collection, acc, f) when is_list(collection), do: ...
 
-  def reduce(value, acc, f) when is_map(value), do: ...
+  def reduce(collection, acc, f) when is_map(collection), do: ...
 
-  def filter(value, f) when is_list(value), do: ...
+  def filter(collection, f) when is_list(collection), do: ...
 
-  def filter(value, f) when is_map(value), do: ...
+  def filter(collection, f) when is_map(collection), do: ...
 
 do
 ```
@@ -139,6 +139,18 @@ defmodule MyCalendar do
     |> Calendar.add_item(sample_event_map())
   end
 end
+```
+
+TODO: event_tuple()
+```
+  defimpl CalendarItem, for: Tuple do
+    @spec get_title(CalendarItem.t()) :: String.t()
+    def get_title({:event, title, _, _, _, _}), do: title
+
+    @spec get_time(CalendarItem.t()) :: DateTime.t()
+    def get_time({:event, _, _, time, _, _}), do: time
+  end
+
 ```
 
 Попробуем в консоли, как это работает:
