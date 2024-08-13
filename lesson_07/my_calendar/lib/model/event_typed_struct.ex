@@ -38,6 +38,8 @@ defmodule MyCalendar.Model.TypedStruct do
   end
 
   defmodule Event do
+    # alias MyCalendar.Model.CalendarItem
+
     @type t() :: %__MODULE__{
             title: String.t(),
             place: Place.t(),
@@ -56,8 +58,16 @@ defmodule MyCalendar.Model.TypedStruct do
     end
 
     @spec add_topic(Event.t(), Topic.t()) :: Event.t()
-    def add_topic(event,  _topic) do
+    def add_topic(event, _topic) do
       event
     end
+
+    # defimpl CalendarItem do
+    #   @spec get_title(CalendarItem.t()) :: String.t()
+    #   def get_title(event), do: event.title
+
+    #   @spec get_time(CalendarItem.t()) :: DateTime.t()
+    #   def get_time(event), do: event.time
+    # end
   end
 end

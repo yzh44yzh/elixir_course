@@ -92,7 +92,17 @@ defmodule MyCalendar do
 
     TS.Event.add_participant(event, nil)
 
-    topic = %TS.Topic{subject: 42, description: false, priority: :critical}
+    # topic = %TS.Topic{subject: 42, description: false, priority: :critical}
+    topic = %TS.Topic{subject: "42", description: "false", priority: :high}
     TS.Event.add_topic(event, topic)
+  end
+
+  def sample_calendar() do
+    alias MyCalendar.Model.Calendar
+
+    %Calendar{items: []}
+    |> Calendar.add_item(sample_event_map())
+    |> Calendar.add_item(sample_event_struct())
+    |> Calendar.add_item(sample_event_typed_struct())
   end
 end

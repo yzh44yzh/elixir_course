@@ -38,6 +38,8 @@ defmodule MyCalendar.Model.Struct do
   end
 
   defmodule Event do
+    # alias MyCalendar.Model.CalendarItem
+
     @enforce_keys [:title, :place, :time, :participants, :agenda]
     defstruct [:title, :place, :time, :participants, :agenda]
 
@@ -59,5 +61,14 @@ defmodule MyCalendar.Model.Struct do
 
       %Event{event | participants: [updated_participant | participants]}
     end
+
+    # defimpl CalendarItem do
+
+    #   @spec get_title(CalendarItem.t()) :: String.t()
+    #   def get_title(event), do: event.title
+
+    #   @spec get_time(CalendarItem.t()) :: DateTime.t()
+    #   def get_time(event), do: event.time
+    # end
   end
 end
