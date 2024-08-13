@@ -21,93 +21,226 @@ iex(5)> Enum.map(%{a: 1, b: 2}, fn({k, v}) -> {v, k} end)
 ```
 defmodule Enum do
 
-  def map(value, fn) when is_list(value), do: ...
+  def map(value, f) when is_list(value), do: ...
 
-  def map(value, fn) when is_map(value), do: ...
+  def map(value, f) when is_map(value), do: ...
+
+  def reduce(value, acc, f) when is_list(value), do: ...
+
+  def reduce(value, acc, f) when is_map(value), do: ...
+
+  def filter(value, f) when is_list(value), do: ...
+
+  def filter(value, f) when is_map(value), do: ...
 
 do
 ```
 
-Такой вариант плохо масштабируется. Нам пришлось бы вносить изменения в модуль Enum каждый раз, когда мы хотим добавить новую коллекцию. В Эликсире это сделано лучше -- с помощью протоколов.
+В Эрланг есть `:lists.map/2`, которая работает только со списками, и `:maps.map/2`, которая работает со словарями. То же самое для `filter` и для `fold`. То есть, там сделаны отдельные реализации каждой функции для каждой коллекции.
 
-Протоколы очень похожи на интерфейсы в Java. Они описывают некий набор функций, с известными аргументами и возвращаемыми значениями, но без реализации.
+Этот вариант плохо масштабируется. Если в языке появляется новая коллекция, то для неё нужно делать новые реализации всех таких функций.
 
-Например, протокол Enumerable описывает какие функции должна реализовать новая коллекция, чтобы модуль Enum мог с ней работать. Протокол реализуется в модуле коллекции, а не в модуле Enum. Таким образом коллекции можно добавлять без изменений в Enum.
+Протокол решает эту проблему. Как и Behaviour, он похож на интерфейсы в Java. Протокол описывает некий набор функций с известными аргументами и возвращаемыми значениями.
+
+Например, протокол Enumerable описывает какие функции должна реализовать новая коллекция, чтобы модуль Enum мог с ней работать. Протокол реализуется в модуле коллекции, а не в модуле Enum. И после этого все функции модуля Enum могут работать с новой коллекцией.
+
 
 ## Calendar
 
-Рассмотрим пример. Допустим, у нас есть модуль Calendar, который умеет хранить и отображать некие CalendarItem с привязкой ко времени. CalendarItem описаны протоколом, так что Calendar не знает, какие конкретные реализации уже есть и еще будут. Например, у нас уже есть несколько Event с разными реализациями, которые хотелось бы добавлять в Calendar. А потом, вероятно, появятся еще какие-то CalendarItem.
+Давайте сделаем модуль Calendar, который умеет хранить и отображать те события, которые мы моделировали раньше.
 
-Модуль Calendar будет очень простым. Он умеет принимать item, хранить их в списке и как-то отображать.
+Модуль будет очень простым -- он умеет принимать события, хранить их в списке и как-то отображать.
 
-```elixir
-defmodule Model.Calendar do
-...
+
+```
+defmodule MyCalendar.Model do
+  defmodule Calendar do
+    alias MyCalendar.Model.CalendarItem
+
+    @type t :: %__MODULE__{
+            items: [CalendarItem.t()]
+          }
+
+    @enforce_keys [:items]
+    defstruct [:items]
+
+    @spec add_item(Calendar.t(), CalendarItem.t()) :: Calendar.t()
+    def add_item(calendar, item) do
+      items = [item | calendar.items]
+      %__MODULE__{calendar | items: items}
+    end
+
+    @spec show(Calendar.t()) :: String.t()
+    def show(calendar) do
+      ...
+    end
+  end
+end
 ```
 
-Протокол CalendarItems описывает две функции: datetime и description:
+События реализованы на разных структурах данных, но модуль Calendar будет работать с ними через протокол CalendarItem, который мы опишем так:
 
-```elixir
-defprotocol Model.CalendarItem do
-...
+```
+  defprotocol CalendarItem do
+    @spec get_title(CalendarItem.t()) :: String.t()
+    def get_title(item)
+
+    @spec get_time(CalendarItem.t()) :: DateTime.t()
+    def get_time(item)
+  end
 ```
 
-Теперь реализуем этот протокол для наших Event разного типа:
+Компилятор Эликсир автоматически создает тип для протокола, в нашем случае это `CalendarItem.t()`. И мы можем использовать этот тип в спецификациях функций `add_item` и `show`.
+
+
+Теперь добавим реализацию функции `show`:
+
+```
+defmodule MyCalendar.Model do
+  defmodule Calendar do
+    ...
+
+    @spec show(Calendar.t()) :: String.t()
+    def show(calendar) do
+      Enum.map(
+        calendar.items,
+        fn item ->
+          title = CalendarItem.get_title(item)
+          time = CalendarItem.get_time(item) |> DateTime.to_iso8601()
+          "#{title} at #{time}"
+        end
+      )
+      |> Enum.join("\n")
+    end
+  end
+```
+
+Реализуем этот протокол CalendarItem для словарей:
 
 ```elixir
-defimpl Model.CalendarItem, for: [Model.Event.Event, Model.TypedEvent.Event] do
-...
-defimpl Model.CalendarItem, for: Map do
-...
+  defimpl CalendarItem, for: Map do
+    @spec get_title(CalendarItem.t()) :: String.t()
+    def get_title(item), do: Map.get(item, :title, "No Title")
+
+    @spec get_time(CalendarItem.t()) :: DateTime.t()
+    def get_time(item), do: Map.get(item, :time)
+  end
 ```
 
 И теперь Calendar может работать с ними:
 
 ```elixir-iex
-alias Model.Calendar, as: C
-c = C.new
+defmodule MyCalendar do
+  ...
+  def sample_calendar() do
+    alias MyCalendar.Model.Calendar
 
-e1 = Event.sample_typed_struct_event()
-e2 = Event.sample_struct_event()
-e3 = Event.sample_map_event()
-c = C.add_item(c, e1)
-c = C.add_item(c, e2)
-c = C.add_item(c, e3)
-C.show(c)
+    %Calendar{items: []}
+    |> Calendar.add_item(sample_event_map())
+  end
+end
 ```
 
-У нас есть еще одна реализация Event, на базе кортежа. Мы не реализовывали протокол CalendarItem для нее. И если мы попробуем добавить в календарь такое событие:
+Попробуем в консоли, как это работает:
 
-```elixir-iex
-e4 = Event.sample_tuple_event()
-c = C.add_item(c, e4)
-C.show(c)
-
-** (Protocol.UndefinedError) protocol Model.CalendarItem not implemented for {:event, ...
 ```
-то получим исключение.
-
-Компилятор Эликсир автоматически создает тип для протокола, в нашем случае `CalendarItem.t`. И мы можем использовать этот тип в описании функции:
-
-```elixir
-@spec add_item(t, CalendarItem.t) :: t
+iex(1)> cal = MyCalendar.sample_calendar()
+iex(2)> MyCalendar.Model.Calendar.show(cal) |> IO.puts
 ```
 
-К сожалению, dialyzer не ловит ошибку:
-
-```elixir-iex
-c = C.add_item(c, e4)
+Если мы добавим событие типа `MyCalendar.Model.Struct.Event`:
+```
+    %Calendar{items: []}
+    |> Calendar.add_item(sample_event_map())
+    |> Calendar.add_item(sample_event_struct())
 ```
 
-Так что мы узнаем об этом только в рантайме.
+То при вызове `show` получим ошибку:
 
-Даже в таких очевидных случаях:
-
-```elixir
-Enum.map(:not_an_enum, fn(i) -> i end)
+```
+iex(2)> MyCalendar.Model.Calendar.show(cal) |> IO.puts
+** (Protocol.UndefinedError) protocol MyCalendar.Model.CalendarItem not implemented for %MyCalendar.Model.Struct.Event{...
 ```
 
-dyalyzer не находит ошибок.
+Добавим реализацию протокола для таких событий:
+
+```
+  defimpl CalendarItem, for: MyCalendar.Model.Struct.Event do
+    @spec get_title(CalendarItem.t()) :: String.t()
+    def get_title(event), do: event.title
+
+    @spec get_time(CalendarItem.t()) :: DateTime.t()
+    def get_time(event), do: event.time
+  end
+
+  defimpl CalendarItem, for: MyCalendar.Model.TypedStruct.Event do
+    @spec get_title(CalendarItem.t()) :: String.t()
+    def get_title(event), do: event.title
+
+    @spec get_time(CalendarItem.t()) :: DateTime.t()
+    def get_time(event), do: event.time
+  end
+```
+
+Добавим эти события в календарь:
+
+```
+    %Calendar{items: []}
+    |> Calendar.add_item(sample_event_map())
+    |> Calendar.add_item(sample_event_struct())
+    |> Calendar.add_item(sample_event_typed_struct())
+```
+
+И теперь функция `show` работает.
+
+Однако для структур принято определять протоколы внутри модуля структуры. Уберём реализации протокола в модуле `MyCalendar.Model` и добавим в модули структур:
+
+```
+defmodule MyCalendar.Model.Struct do
+  ...
+
+  defmodule Event do
+    alias MyCalendar.Model.CalendarItem
+
+    ...
+
+    defimpl CalendarItem do
+
+      @spec get_title(CalendarItem.t()) :: String.t()
+      def get_title(event), do: event.title
+
+      @spec get_time(CalendarItem.t()) :: DateTime.t()
+      def get_time(event), do: event.time
+    end
+  end
+end
+```
+
+и
+
+```
+defmodule MyCalendar.Model.TypedStruct do
+  ...
+
+  defmodule Event do
+    alias MyCalendar.Model.CalendarItem
+
+    ...
+
+    defimpl CalendarItem do
+
+      @spec get_title(CalendarItem.t()) :: String.t()
+      def get_title(event), do: event.title
+
+      @spec get_time(CalendarItem.t()) :: DateTime.t()
+      def get_time(event), do: event.time
+    end
+  end
+end
+```
+
+Функция `show` по-прежнему работает.
+
 
 ## Стандартные протоколы
 
