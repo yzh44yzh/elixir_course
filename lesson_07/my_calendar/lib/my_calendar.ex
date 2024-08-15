@@ -104,5 +104,6 @@ defmodule MyCalendar do
     |> Calendar.add_item(sample_event_map())
     |> Calendar.add_item(sample_event_struct())
     |> Calendar.add_item(sample_event_typed_struct())
+    |> Calendar.add_item(sample_event_tuple())
   end
 end

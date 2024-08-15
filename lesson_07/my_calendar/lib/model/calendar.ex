@@ -45,19 +45,27 @@ defmodule MyCalendar.Model do
     def get_time(item), do: Map.get(item, :time)
   end
 
-  defimpl CalendarItem, for: MyCalendar.Model.Struct.Event do
+  defimpl CalendarItem, for: Tuple do
     @spec get_title(CalendarItem.t()) :: String.t()
-    def get_title(event), do: event.title
+    def get_title({:event, title, _, _, _, _}), do: title
 
     @spec get_time(CalendarItem.t()) :: DateTime.t()
-    def get_time(event), do: event.time
+    def get_time({:event, _, _, time, _, _}), do: time
   end
 
-  defimpl CalendarItem, for: MyCalendar.Model.TypedStruct.Event do
-    @spec get_title(CalendarItem.t()) :: String.t()
-    def get_title(event), do: event.title
+  # defimpl CalendarItem, for: MyCalendar.Model.Struct.Event do
+  #   @spec get_title(CalendarItem.t()) :: String.t()
+  #   def get_title(event), do: event.title
 
-    @spec get_time(CalendarItem.t()) :: DateTime.t()
-    def get_time(event), do: event.time
-  end
+  #   @spec get_time(CalendarItem.t()) :: DateTime.t()
+  #   def get_time(event), do: event.time
+  # end
+
+  # defimpl CalendarItem, for: MyCalendar.Model.TypedStruct.Event do
+  #   @spec get_title(CalendarItem.t()) :: String.t()
+  #   def get_title(event), do: event.title
+
+  #   @spec get_time(CalendarItem.t()) :: DateTime.t()
+  #   def get_time(event), do: event.time
+  # end
 end
