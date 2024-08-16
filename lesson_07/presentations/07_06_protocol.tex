@@ -1,0 +1,93 @@
+\documentclass[10pt]{beamer}
+
+\usepackage{fontspec}
+\setmainfont{Ubuntu}[]
+\setsansfont{Ubuntu}[]
+\setmonofont{Ubuntu Mono}[]
+
+\usepackage{graphicx}
+\graphicspath{ {../img/} }
+
+\usepackage[absolute,overlay]{textpos} % [showboxes]
+
+\beamertemplatenavigationsymbolsempty
+
+\title{Стандартные протоколы}
+
+\begin{document}
+
+\begin{frame}
+  \frametitle{Стандартные протоколы}
+  В Elixir есть 5 стандартных протоколов:
+  \par \bigskip
+  \begin{itemize}
+  \item Enumerable
+  \item Collectable
+  \item Inspect
+  \item List.Chars
+  \item String.Chars
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Enumerable}
+  Все коллекции реализуют протокол Enumerable.
+  \par \bigskip
+  Поэтому функции модулей \textbf{Enum} и \textbf{Stream} работают с:
+  \par \bigskip
+  \begin{itemize}
+  \item List
+  \item Keyword List
+  \item Map
+  \item MapSet
+  \item Range
+  \item String
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Enumerable}
+  Протокол содержит 4 функции:
+  \par \bigskip
+  \begin{itemize}
+  \item count/1
+  \item member?/2
+  \item reduce/3
+  \item slice/1
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Enumerable}
+  Напомню, что функций в модуле \textbf{Enum} много:
+  \par \bigskip
+  \begin{itemize}
+  \item map, filter, reduce
+  \item all?, any?
+  \item sort, find
+  \item drop\_while, dedup\_by
+  \item chunk\_by, chunk\_while
+  \item и другие
+  \end{itemize}
+  \par \bigskip
+  Все они реализуются через 4 функции протокола.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Enumerable}
+  Теоретически достаточно только \textbf{reduce}.
+  \par \bigskip
+  Все остальное можно реализовать через него.
+  \par \bigskip
+  Но на практике это не эффективно.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Enumerable}
+  \textbf{Enumerable.reduce} это не то же самое, что \textbf{Enum.reduce}.
+  \par \bigskip
+  Там более сложная реализация, где можно управлять итерацией:
+  останавливать, возобновлять и прерывать.
+\end{frame}
+
+\end{document}
