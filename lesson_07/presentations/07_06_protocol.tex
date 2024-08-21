@@ -225,6 +225,7 @@ Logger.info("my event is #{
 \end{frame}
 
 \begin{frame}
+  \frametitle{Inspect}
   Например, если мы не хотим, чтобы приватные данные:
   \par \bigskip
   пароли, ключи, сертификаты,
@@ -232,17 +233,129 @@ Logger.info("my event is #{
   отображались в консоли и попадали в логи.
 \end{frame}
 
-\begin{frame}
-  \frametitle{Title}
-  \textbf{bold text} text
+\begin{frame}[fragile]
+  \frametitle{Inspect}
+  Допустим, у нас есть структура \textbf{AuthData},
   \par \bigskip
-  text
+  содержащая логин и пароль:
+  \par \bigskip
+  \begin{lstlisting}
+defmodule Model.AuthData do
+  defstruct [:login, :password]
+end
+
+iex(1)> ad = %Model.AuthData{login: "bob", password: "pass"}
+%Model.AuthData{login: "bob", password: "pass"}
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Inspect}
+  С помощью атрибута \textbf{@derive} можно указать,
+  \par \bigskip
+  какие поля нужно скрывать или показывать:
+  \par \bigskip
+  \begin{lstlisting}
+defmodule Model.AuthData do
+  @derive {Inspect, except: [:password]}
+  defstruct [:login, :password]
+end
+
+iex(2)> ad = %Model.AuthData{login: "bob", password: "pass"}
+#Model.AuthData<login: "bob", ...>
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Inspect}
+  Или можно явно реализовать протокол \textbf{Inspect}:
+  \par \bigskip
+  \begin{lstlisting}
+defmodule Model.AuthData do
+  defstruct [:login, :password]
+
+  defimpl Inspect do
+    alias Inspect.Algebra, as: A
+
+    def inspect(auth_data, opts) do
+      A.concat(["#AuthData<login:", A.to_doc(auth_data.login, opts), ">"])
+    end
+  end
+end
+
+iex(3)> ad = %Model.AuthData{login: "bob", password: "pass"}
+#AuthData<login:"bob">
+  \end{lstlisting}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Title}
-  \textbf{bold text} text
+  \frametitle{String.Chars и List.Chars}
+  Эти два протокола позволяют конвертировать данные в строку.
   \par \bigskip
+  \textbf{String.Chars} -- в строку в двойных кавычках,
+  \par \bigskip
+  то есть в бинарные данные в UTF8.
+  \par \bigskip
+  \textbf{List.Chars} -- в строку в одиночных кавычках,
+  \par \bigskip
+  то есть в список Unicode Codepoints.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{String.Chars и List.Chars}
+  В отличие от Inspect, не все типы
+  \par \bigskip
+  реализуют эти протоколы по умолчанию:
+  \par \bigskip
+  \begin{lstlisting}
+iex(1)> IO.puts("here is a number: #{42}")
+here is a number: 42
+:ok
+iex(2)> IO.puts("here is a map: #{ %{a: 42} }")
+** (Protocol.UndefinedError) protocol String.Chars not implemented for %{a: 42} of type Map
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{String.Chars и List.Chars}
+  Но не трудно реализовать этот протокол для своего типа:
+  \par \bigskip
+  \begin{lstlisting}
+defmodule CharsExample do
+  defstruct [:a, :b]
+
+  defimpl String.Chars do
+    def to_string(data) do
+      "#CharsExample<a=#{inspect data.a}, b=#{inspect data.b}>"
+    end
+  end
+end
+
+iex(1)> a = %CharsExample{a: 42, b: 100}
+%CharsExample{a: 42, b: 100}
+iex(2)> IO.puts("this is CharsExample #{a}")
+this is CharsExample #CharsExample<a=42, b=100>
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{String.Chars и List.Chars}
+  И для стандартного типа:
+  \par \bigskip
+  \begin{lstlisting}
+defimpl String.Chars, for: Map do
+  def to_string(map) do
+    "#Map of size:#{map_size(map)}"
+  end
+end
+
+iex(4)> IO.puts("here is a map: #{ %{a: 42} }")
+here is a map: #Map of size:1
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Protocol vs Behaviour}
   text
 \end{frame}
 
