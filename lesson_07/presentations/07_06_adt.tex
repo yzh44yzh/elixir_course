@@ -1,0 +1,213 @@
+\PassOptionsToPackage{x11names}{xcolor}
+\documentclass[10pt]{beamer}
+
+\usepackage{fontspec}
+\setmainfont{Ubuntu}[]
+\setsansfont{Ubuntu}[]
+\setmonofont{Ubuntu Mono}[]
+
+\usepackage{graphicx}
+\graphicspath{ {../img/} }
+
+\usepackage[absolute,overlay]{textpos} % [showboxes]
+
+\usepackage{listings}
+\lstdefinelanguage{elixir}{
+    morekeywords={case,catch,def,do,else,false,%
+        use,alias,receive,timeout,defmacro,defp,%
+        for,if,import,defmodule,defprotocol,%
+        nil,defmacrop,defoverridable,defimpl,%
+        super,fn,raise,true,try,end,with,%
+        unless},
+    otherkeywords={<-,->, |>, \%\{, \}, \{, \, (, )},
+    sensitive=true,
+    morecomment=[l]{\#},
+    morecomment=[n]{/*}{*/},
+	basicstyle=\ttfamily,
+	breaklines,
+	showstringspaces=false,
+	frame=trbl
+}
+
+%% https://latex-tutorial.com/color-latex/
+\lstset{
+  language=elixir,
+  keywordstyle=\color{SteelBlue4},
+  identifierstyle=\color{DeepSkyBlue3},
+  backgroundcolor=\color{Ivory1}
+}
+
+\beamertemplatenavigationsymbolsempty
+
+\title{Алгебраические типы данных}
+
+\begin{document}
+
+\begin{frame}
+  \frametitle{Алгебраические типы данных}
+  ADT (Algebraic data type)
+  \par \bigskip
+  Определённые операции над типами данных
+  \par \bigskip
+  позволяют создавать новые типы.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Алгебраические типы данных}
+  Эти операции определены математически:
+  \par \bigskip
+  \begin{itemize}
+  \item произведение (умножение, product)
+  \item сумма (перечисление, sum)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Произведение}
+  Самое простое произведение -- это кортеж:
+  \par \bigskip
+  \begin{lstlisting}
+  {
+    :event,
+    title,
+    place,
+    time,
+    participants,
+    agenda
+  }
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Произведение}
+  В языке OCaml тип кортежа так и обозначается -- через знак умножения:
+  \par \bigskip
+  \begin{lstlisting}
+  String * Place * DateTime * Participant list * Topic list
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Произведение}
+  Структура -- это тоже произведение:
+  \par \bigskip
+  \begin{lstlisting}
+  event = %TS.Event{
+    title: "Team Meeting",
+    place: place,
+    time: time,
+    participants: participants,
+    agenda: agenda
+  }
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Сумма}
+  Теперь посмотрим на \textbf{Topic.priority}
+  \par \bigskip
+  \begin{lstlisting}
+  defmodule Topic do
+    @type t() :: %__MODULE__{
+            subject: String.t(),
+            priority: :high | :medium | :low,
+            ...
+  \end{lstlisting}
+  \par \bigskip
+  Здесь есть три вида приоритетов:
+  \begin{itemize}
+  \item :high
+  \item :medium
+  \item :low
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Сумма}
+  Во многих языках для этого есть тип Enum,
+  \par \bigskip
+  который определяет конечное множество значений.
+  \par \bigskip
+  В Эликсир такой тип можно описать для Dialyzer:
+  \par \bigskip
+  \begin{lstlisting}
+  @type priority :: :high | :medium | :low
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Произведение и сумма}
+  Произведение и сумма (product \& sum)
+  \par \bigskip
+  позволяют описать любые объекты.
+\end{frame}
+
+\begin{frame}
+  \frametitle{ADT}
+  Это математический аппарат,
+  \par \bigskip
+  который используется при создании системы типов
+  \par \bigskip
+  в некоторых языках программирования,
+  \par \bigskip
+  особенно в функциональных языках.
+\end{frame}
+
+\begin{frame}
+  \frametitle{ADT}
+  Языки с полноценной реализацией ADT:
+  \par \bigskip
+  \begin{itemize}
+  \item Haskell
+  \item OCaml
+  \item Scala
+  \item F\#
+  \end{itemize}
+  \par \bigskip
+  имеют некоторые преимущества.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{ADT}
+  Например, при применении pattern matching к типу Enum
+  \par \bigskip
+  проверяется, что в шаблонах использованы все возможные значения:
+  \par \bigskip
+  \begin{lstlisting}
+  case topic.priority do
+    :high -> do_something
+    :medium -> do_something_else
+    :low -> do_something_else
+  end
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{ADT}
+  И если какого-то значения не хватает:
+  \par \bigskip
+  \begin{lstlisting}
+  case topic.priority do
+    :high -> do_something
+    :medium -> do_something_else
+  end
+  \end{lstlisting}
+  \par \bigskip
+  То компилятор выдаёт ошибку "не обработано значение :low".
+\end{frame}
+
+\begin{frame}
+  \frametitle{ADT}
+  Это полезно, когда мы в уже существующий тип
+  \par \bigskip
+  добавляем новое значение
+  \par \bigskip
+  и хотим, чтобы оно везде было обработано.
+\end{frame}
+
+\begin{frame}
+  \frametitle{ADT}
+  Увы, компилятор Эликсир и Dialyzer этого не делают.
+\end{frame}
+
+\end{document}
