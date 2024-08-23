@@ -1,0 +1,122 @@
+\PassOptionsToPackage{x11names}{xcolor}
+\documentclass[10pt]{beamer}
+
+\usepackage{fontspec}
+\setmainfont{Ubuntu}[]
+\setsansfont{Ubuntu}[]
+\setmonofont{Ubuntu Mono}[]
+
+\usepackage{graphicx}
+\graphicspath{ {../img/} }
+
+\usepackage[absolute,overlay]{textpos} % [showboxes]
+
+\usepackage{listings}
+\lstdefinelanguage{elixir}{
+    morekeywords={case,catch,def,do,else,false,%
+        use,alias,receive,timeout,defmacro,defp,%
+        for,if,import,defmodule,defprotocol,%
+        nil,defmacrop,defoverridable,defimpl,%
+        super,fn,raise,true,try,end,with,%
+        unless},
+    otherkeywords={<-,->, |>, \%\{, \}, \{, \, (, )},
+    sensitive=true,
+    morecomment=[l]{\#},
+    morecomment=[n]{/*}{*/},
+	basicstyle=\ttfamily,
+	breaklines,
+	showstringspaces=false,
+	frame=trbl
+}
+
+%% https://latex-tutorial.com/color-latex/
+\lstset{
+  language=elixir,
+  keywordstyle=\color{SteelBlue4},
+  identifierstyle=\color{DeepSkyBlue3},
+  backgroundcolor=\color{Ivory1}
+}
+
+\beamertemplatenavigationsymbolsempty
+
+\title{Что такое функциональное программирование?}
+
+\begin{document}
+
+\begin{frame}
+  \frametitle{Что такое функциональное программирование?}
+  Не так просто ответить на этот вопрос :)
+  \par \bigskip
+  Есть языки программирования,
+  \par \bigskip
+  которые традиционно относят к ФП:
+  \par \bigskip
+  \begin{itemize}
+  \item Lisp
+  \item Haskell
+  \item Standard ML
+  \item OCaml
+  \item Scala
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Что такое функциональное программирование?}
+  Однако многие из них мультипарадигменные.
+  \par \bigskip
+  То есть, они позволяют писать код не только в стиле ФП.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Что такое функциональное программирование?}
+  С другой стороны есть языки,
+  \par \bigskip
+  которые изначально не поддерживали ФП,
+  \par \bigskip
+  но со временем позаимствовали оттуда много элементов:
+  \par \bigskip
+  \begin{itemize}
+  \item Java
+  \item C++
+  \item Python
+  \item JavaScript
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Что такое функциональное программирование?}
+  Парадигмы смешиваются в рамках одного языка.
+  \par \bigskip
+  Но мы всё-таки можем отличить,
+  \par \bigskip
+  где код написан в стиле ФП, а где нет.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Элементы ФП}
+  Для функционального программирования характерно:
+  \par \bigskip
+  \begin{itemize}
+  \item Иммутабельные данные (Immutability);
+  \item Рекурсия, как основной способ итерации по коллекциям;
+  \item Функции высшего порядка (HOF);
+  \item Анонимные функции (замыкания, лямбды);
+  \item Алгебраические типы данных (ADT);
+  \item Сопоставление с образцом (Pattern Matching);
+  \item Ленивые вычисления (Lazy Evaluation).
+  \end{itemize}
+  \par \bigskip
+  Всё это есть в Эликсир.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Элементы ФП}
+  А вот этого нет в Эликсир:
+  \par \bigskip
+  \begin{itemize}
+  \item Автоматический вывод типов (Type Inference);
+  \item Чистые функции и контроль побочных эффектов.
+  \end{itemize}
+\end{frame}
+
+\end{document}
