@@ -23,9 +23,9 @@
 > some_fun()
 ** (CompileError) iex:1: undefined function some_fun/0
 
-> apply(SameModule, :some_fun, [])
-** (UndefinedFunctionError) function SameModule.some_fun/0 is undefined (module SameModule is not available)
-    SameModule.some_fun()
+> apply(SomeModule, :some_fun, [])
+** (UndefinedFunctionError) function SomeModule.some_fun/0 is undefined (module SomeModule is not available)
+    SomeModule.some_fun()
 ```
 
 ## Генерация исключения с помощью raise
@@ -40,50 +40,125 @@
 Можно указать аттрибут **message**, который есть у исключений всех типов:
 
 ```elixir-iex
-> raise(RuntimeError, message: "some error")
-** (RuntimeError) some error
+> raise(RuntimeError, message: "something happened")
+** (RuntimeError) something happened
 ```
 
 RuntimeError -- этот тип исключения используется по-умолчанию, так что его можно явно не указывать:
 
 ```elixir-iex
 > raise("some error")
-** (RuntimeError) some error
+** (RuntimeError) something happened
 ```
 
 ## Перехват исключения с помощью rescue
 
-Для перехвата исключения используется конструкция **try..rescue**. Она позволяет по-разному обрабатывать исключения разных типов:
+Для перехвата исключения используется конструкция **try..rescue**. Она позволяет по-разному обрабатывать исключения разных типов.
 
-```elixir-iex
+Давайте проверим, как это работает:
+
+```
+defmodule ExceptionExample do
+  def try_rescue() do
+    try do
+      :a = :b
+    rescue
+      error in [MatchError, ArithmeticError] ->
+        IO.puts("This is MatchError or ArithmeticError: #{inspect(error)}")
+
+      error in [RuntimeError] ->
+        IO.puts("This is RuntimeError: #{inspect(error)}")
+
+      error ->
+        IO.puts("unknown error: #{inspect(error)}")
+    end
+  end
+end
+```
+
+Внутри `rescue` можно указать несколько гардов, которые проверят тип исключения.
+
+Код `:a = :b` вызывает `MatchError`.
+
+```
 iex(5)> c("lib/exception.exs")
 [ExceptionExample]
 iex(8)> alias ExceptionExample, as: E
 iex(7)> E.try_rescue()
 This is MatchError or ArithmeticError: %MatchError{term: :b}
-after clause is always called
-:ok
+```
 
+Попробуем другое исключение:
+
+```
+  def try_rescue() do
+    try do
+      # :a = :b
+      42 + :a
+```
+
+Здесь будет `ArithmeticError`:
+
+```
 iex(8)> r E
 iex(9)> E.try_rescue()
 This is MatchError or ArithmeticError: %ArithmeticError{message: "bad argument in arithmetic expression"}
-after clause is always called
-:ok
+```
+
+Теперь `RuntimeError`:
+
+```
+  def try_rescue() do
+    try do
+      # :a = :b
+      # 42 + :a
+      raise(RuntimeError)
 
 iex(10)> r E
 iex(11)> E.try_rescue()
 This is RuntimeError: %RuntimeError{message: "runtime error"}
-after clause is always called
-:ok
+```
+
+И `UndefinedFunctionError` которое попадёт в последний гард:
+
+```
+  def try_rescue() do
+    try do
+      # :a = :b
+      # 42 + :a
+      # raise(RuntimeError)
+      apply(SomeModule, :some_fun, [])
 
 iex(12)> r E
 iex(13)> E.try_rescue()
 unknown error: %UndefinedFunctionError{arity: 0, function: :some_fun, message: nil, module: SameModule, reason: nil}
-after clause is always called
-:ok
 ```
 
-Конструкция **after** позволяет указать код, который выполнится в любом случае, не зависимо от того, произошло исключение или нет.
+И как полагается в обработке исключений, мы можем указать блок `after`:
+
+```
+    rescue
+      error in [MatchError, ArithmeticError] ->
+        IO.puts("This is MatchError or ArithmeticError: #{inspect(error)}")
+
+      error in [RuntimeError] ->
+        IO.puts("This is RuntimeError: #{inspect(error)}")
+
+      error ->
+        IO.puts("unknown error: #{inspect(error)}")
+    after
+      IO.puts("After clause is always called")
+    end
+```
+
+И он будет выполняться всегда, не зависимо от того, произошло исключение или нет:
+
+```
+iex(12)> r E
+iex(13)> E.try_rescue()
+unknown error: %UndefinedFunctionError{arity: 0, function: :some_fun, message: nil, module: SameModule, reason: nil}
+After clause is always called
+```
 
 
 ## Соглашение для функций, бросающих исключения

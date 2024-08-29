@@ -1,10 +1,11 @@
 defmodule ExceptionExample do
   def try_rescue() do
     try do
-      # :a = :b
+      :a = :b
       # 42 + :a
       # raise(RuntimeError)
-      apply(SameModule, :some_fun, [])
+      # raise(RuntimeError, message: "something happened")
+      # apply(SomeModule, :some_fun, [])
     rescue
       error in [MatchError, ArithmeticError] ->
         IO.puts("This is MatchError or ArithmeticError: #{inspect(error)}")
