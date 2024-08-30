@@ -15,7 +15,6 @@ defmodule ExceptionTypesExample do
     end
   end
 
-  # TODO try different elixir exceptions
   def generate_exception(:raise), do: raise("something went wrong")
   def generate_exception(:throw), do: throw(:something_went_wrong)
   def generate_exception(:error), do: :erlang.error(:something_went_wrong)
