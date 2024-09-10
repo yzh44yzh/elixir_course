@@ -64,6 +64,7 @@ end
 
 defmodule Model do
   defmodule AuthenticationError do
+    @enforce_keys [:type]
     defexception [:type, :token, :login]
 
     @impl true
@@ -77,13 +78,14 @@ defmodule Model do
     @impl true
     def message(error) do
       case error.type do
-        :token -> "invalid token"
-        :login -> "invalid login"
+        :token -> "AuthenticationError: invalid token"
+        :login -> "AuthenticationError: invalid login"
       end
     end
   end
 
   defmodule AuthorizationError do
+    @enforce_keys [:role, :action]
     defexception [:role, :action]
 
     @impl true
@@ -93,11 +95,12 @@ defmodule Model do
 
     @impl true
     def message(error) do
-      "role '#{error.role}' is not allowed to do action '#{error.action}'"
+      "AuthorizationError: role '#{error.role}' is not allowed to do action '#{error.action}'"
     end
   end
 
   defmodule SchemaValidationError do
+    @enforce_keys [:schema_name]
     defexception [:schema_name]
 
     @impl true
@@ -107,7 +110,7 @@ defmodule Model do
 
     @impl true
     def message(error) do
-      "data is not match to schema '#{error.schema_name}'"
+      "SchemaValidationError: data does not match to schema '#{error.schema_name}'"
     end
   end
 end
