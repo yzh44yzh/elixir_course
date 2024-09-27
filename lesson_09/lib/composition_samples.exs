@@ -28,7 +28,7 @@ defmodule Lesson_09.CompositionSamples do
     drop_database()
     a + 1
   end
-  
+
   def main() do
     # 42 |> f1 |> f2
     # 42 |> f3 |> elem(1) |> f2
