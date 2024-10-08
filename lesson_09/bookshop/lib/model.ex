@@ -18,7 +18,7 @@ defmodule Bookshop.Model do
       %__MODULE__{
         client: client,
         address: address,
-        books: books
+        books: Enum.sort(books)
       }
     end
   end

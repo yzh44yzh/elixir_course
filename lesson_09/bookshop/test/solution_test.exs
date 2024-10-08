@@ -2,7 +2,7 @@ defmodule Bookshop.SolutionTest do
   use ExUnit.Case
 
   alias Bookshop.Model, as: M
-  alias Bookshop.Solution2, as: S
+  alias Bookshop.Solution3, as: S
 
   test "create order" do
     valid_data = TestData.valid_data()
@@ -21,8 +21,8 @@ defmodule Bookshop.SolutionTest do
                     title: "Distributed systems for fun and profit",
                     author: "Mikito Takada"
                   },
-                  %M.Book{title: "Удовольствие от Х", author: "Стивен Строгац"},
-                  %M.Book{title: "Domain Modeling Made Functional", author: "Scott Wlaschin"}
+                  %M.Book{title: "Domain Modeling Made Functional", author: "Scott Wlaschin"},
+                  %M.Book{title: "Удовольствие от Х", author: "Стивен Строгац"}
                 ]
               }}
   end

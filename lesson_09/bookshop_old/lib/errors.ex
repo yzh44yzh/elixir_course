@@ -1,9 +1,9 @@
 defmodule BookShop.Error do
-  
+
   defmodule InvalidDataError do
 
     defexception []
-    
+
     @impl true
     def exception(_), do: %InvalidDataError{}
 
@@ -16,20 +16,20 @@ defmodule BookShop.Error do
   defmodule CatNotFoundError do
 
     defexception [:cat_name]
-    
+
     @impl true
     def exception(cat_name), do: %CatNotFoundError{cat_name: cat_name}
 
     @impl true
     def message(error), do: "cat '#{error.cat_name}' is not found"
-    
+
   end
 
 
   defmodule InvalidAddressError do
 
     defexception []
-    
+
     @impl true
     def exception(_), do: %InvalidAddressError{}
 
@@ -42,7 +42,7 @@ defmodule BookShop.Error do
   defmodule BookNotFoundError do
 
     defexception [:title]
-    
+
     @impl true
     def exception(title), do: %BookNotFoundError{title: title}
 
