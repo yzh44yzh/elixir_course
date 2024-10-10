@@ -11,7 +11,7 @@ defmodule FP do
     f.(BookShop.test_data)
   end
 
-  
+
   def bind(f1, f2) do
     fn(args) ->
       case f1.(args) do
@@ -57,5 +57,5 @@ defmodule FP do
       fn(c) -> a + b + c end
     end
   end
-  
+
 end
