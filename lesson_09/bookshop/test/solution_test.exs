@@ -2,35 +2,51 @@ defmodule Bookshop.SolutionTest do
   use ExUnit.Case
 
   alias Bookshop.Model, as: M
-  alias Bookshop.Solution3, as: S
+
+  @test_solutions [
+    Bookshop.Solution1,
+    Bookshop.Solution2,
+    Bookshop.Solution3,
+    Bookshop.Solution4,
+    Bookshop.Solution5
+  ]
 
   test "create order" do
     valid_data = TestData.valid_data()
 
-    assert S.handle(valid_data) ==
-             {:ok,
-              %M.Order{
-                client: %M.Cat{id: "Tihon", name: "Tihon"},
-                address: %M.Address{
-                  state: nil,
-                  city: nil,
-                  other: "Coolcat str 7/42 Minsk Belarus"
-                },
-                books: [
-                  %M.Book{
-                    title: "Distributed systems for fun and profit",
-                    author: "Mikito Takada"
-                  },
-                  %M.Book{title: "Domain Modeling Made Functional", author: "Scott Wlaschin"},
-                  %M.Book{title: "Удовольствие от Х", author: "Стивен Строгац"}
-                ]
-              }}
+    MyAssertions.assert_many(
+      @test_solutions,
+      :handle,
+      [valid_data],
+      {:ok,
+       %M.Order{
+         client: %M.Cat{id: "Tihon", name: "Tihon"},
+         address: %M.Address{
+           state: nil,
+           city: nil,
+           other: "Coolcat str 7/42 Minsk Belarus"
+         },
+         books: [
+           %M.Book{
+             title: "Distributed systems for fun and profit",
+             author: "Mikito Takada"
+           },
+           %M.Book{title: "Domain Modeling Made Functional", author: "Scott Wlaschin"},
+           %M.Book{title: "Удовольствие от Х", author: "Стивен Строгац"}
+         ]
+       }}
+    )
   end
 
   test "invalid incoming data" do
     invalid_data = TestData.invalid_data()
 
-    assert S.handle(invalid_data) == {:error, :invalid_incoming_data}
+    MyAssertions.assert_many(
+      @test_solutions,
+      :handle,
+      [invalid_data],
+      {:error, :invalid_incoming_data}
+    )
   end
 
   test "invalid cat" do
@@ -38,7 +54,12 @@ defmodule Bookshop.SolutionTest do
       TestData.valid_data()
       |> Map.put("cat", "Baton")
 
-    assert S.handle(data) == {:error, :cat_not_found}
+    MyAssertions.assert_many(
+      @test_solutions,
+      :handle,
+      [data],
+      {:error, :cat_not_found}
+    )
   end
 
   test "invalid address" do
@@ -46,7 +67,12 @@ defmodule Bookshop.SolutionTest do
       TestData.valid_data()
       |> Map.put("address", "42")
 
-    assert S.handle(data) == {:error, :invalid_address}
+    MyAssertions.assert_many(
+      @test_solutions,
+      :handle,
+      [data],
+      {:error, :invalid_address}
+    )
   end
 
   test "invalid book" do
@@ -56,6 +82,11 @@ defmodule Bookshop.SolutionTest do
       TestData.valid_data()
       |> update_in(["books"], fn books -> [invalid_book | books] end)
 
-    assert S.handle(data) == {:error, :book_not_found}
+    MyAssertions.assert_many(
+      @test_solutions,
+      :handle,
+      [data],
+      {:error, :book_not_found}
+    )
   end
 end

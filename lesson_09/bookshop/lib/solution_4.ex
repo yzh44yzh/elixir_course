@@ -18,7 +18,8 @@ defmodule Bookshop.Solution4 do
         state = %{data: data, cat: cat}
         {:ok, state}
 
-      error -> error
+      error ->
+        error
     end
   end
 
@@ -28,24 +29,21 @@ defmodule Bookshop.Solution4 do
         state = Map.put(state, :address, address)
         {:ok, state}
 
-      error -> error
+      error ->
+        error
     end
   end
 
   def step_validate_books(state) do
     state.data["books"]
     |> Enum.map(&C.validate_book/1)
-    |> Enum.reduce({[], nil}, fn
-      {:ok, book}, {books, nil} -> {[book | books], nil}
-      {:error, error}, {books, nil} -> {books, {:error, error}}
-      _maybe_book, acc -> acc
-    end)
+    |> FP.sequence()
     |> case do
-      {books, nil} ->
+      {:ok, books} ->
         state = Map.put(state, :books, books)
         {:ok, state}
 
-      {_, error} ->
+      error ->
         error
     end
   end

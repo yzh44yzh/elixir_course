@@ -1,5 +1,4 @@
 defmodule Bookshop.Errors do
-
   defmodule InvalidIncomingData do
     defexception []
 

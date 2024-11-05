@@ -9,17 +9,21 @@ defmodule Bookshop.Solution3 do
   def handle(data) do
     try do
       data = C.validate_incoming_data!(data)
+
       %{
         "cat" => cat_name,
         "address" => address_str,
         "books" => book_data
       } = data
+
       cat = C.validate_cat!(cat_name)
       address = C.validate_address!(address_str)
+
       books =
         Enum.map(book_data, fn data ->
           C.validate_book!(data)
         end)
+
       order = M.Order.create(cat, address, books)
       {:ok, order}
     rescue
@@ -28,5 +32,4 @@ defmodule Bookshop.Solution3 do
         {:error, E.description(e)}
     end
   end
-
 end
