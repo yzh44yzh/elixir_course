@@ -8,7 +8,8 @@ defmodule Bookshop.SolutionTest do
     Bookshop.Solution2,
     Bookshop.Solution3,
     Bookshop.Solution4,
-    Bookshop.Solution5
+    Bookshop.Solution5,
+    Bookshop.Solution6
   ]
 
   test "create order" do
