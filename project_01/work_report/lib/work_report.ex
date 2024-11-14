@@ -23,13 +23,11 @@ defmodule WorkReport do
     ]
   end
 
-  def do_report(params, file) do
-    month = Map.get(params, :month, :erlang.date() |> elem(1))
-    day = Map.get(params, :day, :erlang.date() |> elem(2))
+  def do_report(params, _file) do
+    _month = Map.get(params, :month, :erlang.date() |> elem(1))
+    _day = Map.get(params, :day, :erlang.date() |> elem(2))
 
-    file
-    |> WorkReport.Parser.parse()
-    |> show(month, day)
+    # TODO your implementation here
   end
 
   def help() do
@@ -48,24 +46,4 @@ defmodule WorkReport do
     IO.puts(@name <> " v" <> @version)
   end
 
-  alias WorkReport.Model, as: M
-  alias WorkReport.Formatter
-
-  @spec show([M.MonthReport.t()], integer(), integer()) :: :ok
-  defp show(month_reports, month_num, day_num) do
-    case Enum.find(month_reports, fn m -> m.month_num == month_num end) do
-      nil ->
-        IO.puts("month #{month_num} not found")
-
-      month_report ->
-        case Enum.find(month_report.days, fn d -> d.day_num == day_num end) do
-          nil ->
-            IO.puts("day #{day_num} not found")
-
-          day_report ->
-            Formatter.format_day(day_report) |> IO.puts()
-            Formatter.format_month(month_report) |> IO.puts()
-        end
-    end
-  end
 end
