@@ -1,0 +1,166 @@
+\PassOptionsToPackage{x11names}{xcolor}
+\documentclass[10pt]{beamer}
+
+\usepackage{fontspec}
+\setmainfont{Ubuntu}[]
+\setsansfont{Ubuntu}[]
+\setmonofont{Ubuntu Mono}[]
+
+\usepackage[absolute,overlay]{textpos} % [showboxes]
+
+\usepackage{listings}
+\lstdefinelanguage{elixir}{
+    morekeywords={case,catch,def,do,else,false,%
+        use,alias,receive,timeout,defmacro,defp,%
+        for,if,import,defmodule,defprotocol,%
+        nil,defmacrop,defoverridable,defimpl,%
+        super,fn,raise,true,try,end,with,%
+        unless},
+    otherkeywords={<-,->, |>, \%\{, \}, \{, \, (, )},
+    sensitive=true,
+    morecomment=[l]{\#},
+    morecomment=[n]{/*}{*/},
+	basicstyle=\ttfamily,
+	breaklines,
+	showstringspaces=false,
+	frame=trbl
+}
+
+%% https://latex-tutorial.com/color-latex/
+\lstset{
+  language=elixir,
+  keywordstyle=\color{SteelBlue4},
+  identifierstyle=\color{DeepSkyBlue3},
+  backgroundcolor=\color{Ivory1}
+}
+
+\beamertemplatenavigationsymbolsempty
+
+\title{Что такое монада?}
+
+\begin{document}
+
+\begin{frame}
+  \frametitle{Что такое монада?}
+  Копнём функциональное программирование глубже:
+  \par \bigskip
+  \begin{itemize}
+  \item Монады,
+  \item Каррирование,
+  \item Монадные трансформеры.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Элементы ФП}
+  Из 7-го урока:
+  \par \bigskip
+  \begin{itemize}
+  \item Иммутабельные данные (Immutability);
+  \item Рекурсия, как основной способ итерации по коллекциям;
+  \item Функции высшего порядка (HOF);
+  \item Анонимные функции (замыкания, лямбды);
+  \item Алгебраические типы данных (ADT);
+  \item Сопоставление с образцом (Pattern Matching);
+  \item Ленивые вычисления (Lazy Evaluation).
+  \item Автоматический вывод типов (Type Inference);
+  \item Чистые функции и контроль побочных эффектов.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Что такое ФП?}
+  Код, который \textbf{в основном} состоит из элементов ФП.
+  \par \bigskip
+  Хотя в нём могут быть не-ФП элементы:
+  \begin{itemize}
+  \item мутабельная память,
+  \item циклы for вместо рекурсии,
+  \item побочные эффекты.
+  \end{itemize}
+  \par \bigskip
+  Дело в пропорции тех и других элементов.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Что такое монада?}
+  Монада -- это значение, обернутое в некоторый контекст.
+  \par \bigskip
+  \begin{lstlisting}
+{:ok, book} =
+  Bookshop.Controller.validate_book(data)
+  \end{lstlisting}
+  Значение \textbf{book} обернуто в контекст \textbf{\{:ok, ...\}}.
+  \par \bigskip
+  \begin{lstlisting}
+{:error, :book_not_found} =
+  Bookshop.Controller.validate_book(data)
+  \end{lstlisting}
+  Значение \textbf{:book\_not\_found} обернуто в контекст \textbf{\{:error, ...\}}.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Монада Result}
+  Такой тип данных:
+  \par \bigskip
+  \begin{lstlisting}
+{:ok, successful_value} | {:error, error_value}
+  \end{lstlisting}
+  \par \bigskip
+  Это монада \textbf{Result} -- одна из самых популярных монад.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Монада Result}
+  Есть практически во всех ФП языках и во многих не ФП языках:
+  \begin{itemize}
+  \item Haskell \textbf{Result e t}
+  \item OCaml \textbf{('e, 't) result}
+  \item Rust \textbf{Result<T, E>}
+  \item Scala \textbf{Either[E, T]}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Монада Maybe}
+  line 1
+  \par \bigskip
+  line 2
+\end{frame}
+
+\begin{frame}
+  \frametitle{Frame 1}
+  line 1
+  \par \bigskip
+  line 2
+\end{frame}
+
+\begin{frame}
+  \frametitle{Frame 1}
+  line 1
+  \par \bigskip
+  line 2
+\end{frame}
+
+\begin{frame}
+  \frametitle{Frame 1}
+  line 1
+  \par \bigskip
+  line 2
+\end{frame}
+
+\begin{frame}
+  \frametitle{Frame 1}
+  line 1
+  \par \bigskip
+  line 2
+\end{frame}
+
+\begin{frame}
+  \frametitle{Frame 1}
+  line 1
+  \par \bigskip
+  line 2
+\end{frame}
+
+\end{document}
