@@ -121,46 +121,95 @@
   \end{itemize}
 \end{frame}
 
+\begin{frame}[fragile]
+  \frametitle{Монада Maybe}
+  Тоже встречается часто:
+  \begin{lstlisting}
+> m = %{a: 42}
+> Map.fetch(m, :a)
+{:ok, 42}
+> Map.fetch(m, :b)
+:error
+  \end{lstlisting}
+  \par \bigskip
+  Описывается типом:
+  \begin{lstlisting}
+{:ok, value} | :no_value
+  \end{lstlisting}
+\end{frame}
+
 \begin{frame}
   \frametitle{Монада Maybe}
-  line 1
+  Это упрощённый Result. 
   \par \bigskip
-  line 2
+  Контекст здесь в том, что значение может быть,
+  \par \bigskip
+  или может отсутстовать.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Монада Future}
+  \begin{lstlisting}
+> future_value = Task.async(fn() -> 42 end)
+%Task{
+  owner: #PID<0.107.0>,
+  pid: #PID<0.113.0>,
+  ref: #Reference<0.3496306138.1615593474.196666>
+}
+> Task.await(future_value)
+42
+  \end{lstlisting}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Frame 1}
-  line 1
+  \frametitle{Монада Future}
+  Это асинхронное вычисление.
   \par \bigskip
-  line 2
+  Значение изначально отпутствует.
+  \par \bigskip
+  Контекст позволяет получить его позже, когда оно появится.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Оператор Bind}
+  В 4-м решеним мы реализовали функцию bind:
+  \par \bigskip
+  \begin{lstlisting}
+@spec bind(m_fun(), m_fun()) :: m_fun()
+def bind(f1, f2) do
+  fn args ->
+    case f1.(args) do
+      {:ok, result} -> f2.(result)
+      {:error, error} -> {:error, error}
+    end
+  end
+end
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Оператор Bind}
+  И применяли её для связывания функций:
+  \par \bigskip
+  \begin{lstlisting}
+f =
+  FP.bind(&C.validate_incoming_data/1,
+          &step_validate_cat/1)
+  |> FP.bind(&step_validate_address/1)
+  |> FP.bind(&step_validate_books/1)
+  |> FP.bind(&step_create_order/1)
+
+f.(data)
+  \end{lstlisting}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Frame 1}
-  line 1
+  \frametitle{Оператор Bind}
+  Наша функция работает только с монадой \textbf{Result}.
   \par \bigskip
-  line 2
-\end{frame}
-
-\begin{frame}
-  \frametitle{Frame 1}
-  line 1
+  Не сложно сделать похожую функцию для \textbf{Maybe}.
   \par \bigskip
-  line 2
-\end{frame}
-
-\begin{frame}
-  \frametitle{Frame 1}
-  line 1
-  \par \bigskip
-  line 2
-\end{frame}
-
-\begin{frame}
-  \frametitle{Frame 1}
-  line 1
-  \par \bigskip
-  line 2
+  А вот сделать связывание для \textbf{Future} уже сложнее.
 \end{frame}
 
 \end{document}

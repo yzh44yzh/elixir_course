@@ -55,13 +55,13 @@ Maybe описывается типом:
 Еще одна полезная монада -- **Future**:
 
 ```elixir
-iex(5)> future_value = Task.async(fn() -> 42 end)
+> future_value = Task.async(fn() -> 42 end)
 %Task{
   owner: #PID<0.107.0>,
   pid: #PID<0.113.0>,
   ref: #Reference<0.3496306138.1615593474.196666>
 }
-iex(6)> Task.await(future_value)
+> Task.await(future_value)
 42
 ```
 
