@@ -112,12 +112,15 @@ future3 = request_service_3()
 value3 = Task.await(future3)
 ```
 
-Мы могли бы реализовать `bind_async_funs`, делающую композицию из таких асинхронных функций.
+Мы могли бы реализовать функцию `bind_async`, делающую композицию из таких асинхронных функций.
 
 
 ```elixir
-bind_future(&request_service_1/0, &request_service_2/0)
-|> bind_future(&request_service_3/0)
+bind_async(
+  &request_service_1/0, 
+  &request_service_2/0
+)
+|> bind_async(&request_service_3/0)
 ```
 
 Это может быть простая реализация, которая делает блокировку после каждого вызова, дожидается результата, затем делает следущий вызов.
@@ -132,6 +135,16 @@ bind_future(&request_service_1/0, &request_service_2/0)
 Польза от Result и Future очевидна. Но почему они собраны в некую общую группу с названием "монады"? Что их объединяет?
 
 Как мы видим, их объединяет возможность делать композицию функций с помощью bind.
+
+```
+validate_book
+>>= buy_book
+>>= deliver_book
+
+request_service_1
+>>= request_service_2
+>>= request_service_3
+```
 
 Нам понадобились две разные bind для Result и для Future. Но вспомним, что в Эликсир есть протоколы: Enumerable, Inspect, String.Chars и др. Они позволяют делать одинаковые операции над разными типами данных. Если бы в Эликсир существовал протокол Monad, то можно было бы реализовать один bind для всех монад. В Хаскеле это так и есть.
 

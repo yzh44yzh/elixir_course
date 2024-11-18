@@ -212,4 +212,211 @@ f.(data)
   А вот сделать связывание для \textbf{Future} уже сложнее.
 \end{frame}
 
+\begin{frame}[fragile]
+  \frametitle{Оператор Bind}
+  Допустим, у нас есть несколько асинхронных запросов:
+  \par \bigskip
+  \begin{lstlisting}
+future1 = request_service_1()
+value1 = Task.await(future1)
+
+future2 = request_service_2()
+value2 = Task.await(future2)
+
+future3 = request_service_3()
+value3 = Task.await(future3)
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Оператор Bind}
+  И мы хотим реализовать такой bind,
+  \par \bigskip
+  который свяжет эти запросы:
+  \par \bigskip
+  \begin{lstlisting}
+bind_async(
+  &request_service_1/0, 
+  &request_service_2/0
+)
+|> bind_async(&request_service_3/0)
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Оператор Bind}
+  Простая реализация, с блокировкой после каждого вызова.
+  \par \bigskip
+  Сложная реализация, с паралельными вызовами.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Что общего у всех монад?}
+  Почему мы собрали \textbf{Result} и \textbf{Future} в одну группу?
+  \par \bigskip
+  Что у них общего?
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Что общего у всех монад?}
+  Общее то, что для них можно сделать композицию функций
+  \par \bigskip
+  с помощью \textbf{bind}:
+  \par \bigskip
+  \begin{lstlisting}
+  validate_book
+  >>= buy_book
+  >>= deliver_book
+
+  request_service_1
+  >>= request_service_2
+  >>= request_service_3
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Что общего у всех монад?}
+  При желании в Эликсире тоже можно реализовать такой bind,
+  \par \bigskip
+  который будет работать с любыми монадами.
+  \par \bigskip
+  Есть и библиотека, которая делает нечто подобное:
+  \par \bigskip
+  \textcolor{DeepSkyBlue3}{https://hexdocs.pm/monad/Monad.html}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Другие операции над монадами}
+  Кроме bind возможны и другие операции над монадами.
+  \par \bigskip
+  Обозначим простое значение как \textbf{v},
+  \par \bigskip
+  а значение внутри монады как \textbf{M<v>}.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Другие операции над монадами}
+  Для 2-х вариантов значений могут быть 4 варианта функций:
+  \par \bigskip
+  \begin{lstlisting}
+f1(v) :: v
+f2(v) :: M<v>
+f3(M<v>) :: v
+f4(M<v>) :: M<v>
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Другие операции над монадами}
+  Все эти варианты нужно комбинировать между собой:
+  \par \bigskip
+  \begin{lstlisting}
+  f1 |> f1
+  f2 >>= f2
+  f3 |> wrap_into_monad |> f3
+  f4 |> f4
+  \end{lstlisting}
+  \par \bigskip
+  В Хаскеле 1й и 4й варианты отличаются, а в Эликсир нет.
+  \par \bigskip
+  \begin{lstlisting}
+  f1 . f1
+  f2 >>= f2
+  f3 . return . f3
+  f4 >> f4
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{ФП -- это композиция функций}
+В теории любая программа сводится к цепочке функций,
+  \par \bigskip
+скомпонованых друг с другом разными способами:
+  \par \bigskip
+  \begin{lstlisting}
+  f1 >>= f2 . f3 >> f4 >>= f5 . f6
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}
+  \frametitle{ФП -- это композиция функций}
+Цепочка представляет собой happy path,
+  \par \bigskip
+а операторы композиции скрывают ветвления.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Каррирование}
+  Пока мы видели функции с одним аргументом.
+  \par \bigskip
+  А что, если аргументов больше?
+\end{frame}
+
+\begin{frame}
+  \frametitle{Каррирование}
+  Здесь помогает каррирование.
+  \par \bigskip
+  Функцию f/3 можно представить как функцию f/1,
+  \par
+  возвращающую f/2.
+  \par \bigskip
+  А функцию f/2 можно представить, как f/1,
+  \par
+  возвращающую f/1.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Каррирование}
+  \begin{lstlisting}
+def f2(a) do
+  fn(b) -> a + b end
+end
+
+def f3(a) do
+  fn(b) ->
+    fn(c) -> a + b + c end
+  end
+end
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Каррирование}
+  \begin{lstlisting}
+> f1 = f2(1)
+> res = f1.(2)
+
+> res = f2(1).(2)
+
+> f2 = f3(1)
+> f1 = f2.(2)
+> res = f1.(3)
+
+> res = f3(1).(2).(3)
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Каррирование}
+  Любую функцию можно представить как функцию
+  \par
+  от одного аргумента.
+  \par \bigskip
+  В Эликсир это возможно, но совершенно непрактично.
+  \par \bigskip
+  В Хаскель это работает автоматически для любой функции.
+  \par \bigskip
+  За счёт каррирования мы можем применять
+  \par
+  все способы композиции ко всем функциям.
+\end{frame}
+
+\begin{frame}
+  \frametitle{}
+\end{frame}
+
+\begin{frame}
+  \frametitle{}
+\end{frame}
+
 \end{document}
