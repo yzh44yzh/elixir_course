@@ -411,12 +411,91 @@ end
   все способы композиции ко всем функциям.
 \end{frame}
 
-\begin{frame}
-  \frametitle{}
+\begin{frame}[fragile]
+  \frametitle{Монадные трансформеры}
+  На пути композиции рано или поздно мы столкнемся
+  \par
+  с монадами, вложенными друг в друга:
+  \par \bigskip
+  \begin{lstlisting}
+  Result<Maybe<v>>
+  Future<Result<v>>
+  \end{lstlisting}
+  \par \bigskip
+  И тогда нам понадобятся преобразования одних монад в другие. 
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Монадные трансформеры}
+  Функция \textbf{FP.sequence/1} является монадным трансформером.  
+  \par \bigskip
+  \begin{lstlisting}
+  @spec sequence([result()]) ::
+    {:ok, [succesful()]} | {:error, error()}
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Монадные трансформеры}
+  Функция \textbf{FP.sequence/1} является монадным трансформером.  
+  \par \bigskip
+  \begin{lstlisting}
+iex(1)> [
+...(1)> {:ok, :book_1},
+...(1)> {:ok, :book_2},
+...(1)> {:ok, :book_3}
+...(1)> ] |> FP.sequence()
+{:ok, [:book_3, :book_2, :book_1]}
+
+iex(2)> [
+...(2)> {:ok, :book_1},
+...(2)> {:error, :book_not_found},
+...(2)> {:ok, :book_3}
+...(2)> ] |> FP.sequence()
+{:error, :book_not_found}
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Монадные трансформеры}
+  Она преобразует
+  \par \bigskip
+  \begin{lstlisting}
+  [ Result<Book.t, Error> ]
+  \end{lstlisting}
+  в
+  \begin{lstlisting}
+  Result< [Book.t], Error>
+  \end{lstlisting}
+  \par \bigskip
+  То есть преобразует список над Result в Result над списком.
 \end{frame}
 
 \begin{frame}
-  \frametitle{}
+  \frametitle{Итоги}
+  В разных ФП языках монады и композиция функций
+  \par \bigskip
+  поддерживаются на разном уровне.
+  \par \bigskip
+  Лучше всего они развиты в \textbf{Haskell}, \textbf{Scala}, \textbf{OCaml} и \textbf{F\#}.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Итоги}
+  В \textbf{Elixir} поддержка монад откровенно слабая.
+  \par \bigskip
+  На практике удобно пользоваться \textbf{pipe}, \textbf{pipeline} и \textbf{with}.
+  \par \bigskip
+  Остальное не очень хорошо вписывается в дизайн языка.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Итоги}
+  Монады -- совсем другой мир.
+  \par \bigskip
+  Мир интересный, но, увы, не востребованный
+  \par \bigskip
+  в коммерческом программировании.
 \end{frame}
 
 \end{document}
