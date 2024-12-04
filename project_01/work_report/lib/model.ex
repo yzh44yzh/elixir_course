@@ -7,12 +7,12 @@ defmodule WorkReport.Model do
     @moduledoc false
     @type t() :: %__MODULE__{
             title: String.t(),
-            total_count: integer()
+            time_spent: integer()
           }
 
     @enforce_keys [:title]
 
-    defstruct [:title, total_count: 0]
+    defstruct [:title, time_spent: 0]
   end
 
   defmodule Task do
@@ -70,22 +70,22 @@ defmodule WorkReport.Model do
   defmodule MonthReport do
     @moduledoc false
     @type t() :: %__MODULE__{
-            avg_time_spent_in_minutes: integer(),
+            avg_time_spent: integer(),
             categories: [CategoryReport.t()],
             days_spent: integer(),
-            total_time_spent_in_minutes: integer()
+            total_time_spent: integer()
           }
 
     @enforce_keys [
-      :avg_time_spent_in_minutes,
+      :avg_time_spent,
       :categories,
       :days_spent,
-      :total_time_spent_in_minutes
+      :total_time_spent
     ]
 
-    defstruct avg_time_spent_in_minutes: 0,
+    defstruct avg_time_spent: 0,
               categories: [],
               days_spent: 0,
-              total_time_spent_in_minutes: 0
+              total_time_spent: 0
   end
 end

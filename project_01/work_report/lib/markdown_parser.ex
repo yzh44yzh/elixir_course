@@ -34,14 +34,14 @@ defmodule WorkReport.MarkdownParser do
 
       [_, category, description, time_spent, _, _] ->
         # TODO: convert time to minutes
-        %Task{category: category, description: description, time_spent: time_spent}
+        %Task{category: category, description: description, time_spent: parse_time(time_spent)}
     end
   end
 
   @spec parse_time(String.t()) :: integer()
   def parse_time(time_string) do
-    [_str, _hours_str, hours, _minutes_str, minutes] =
-      Regex.run(~r/^((\d{0,2})h)?\s?((\d{0,2})m)?$/, time_string)
+    %{"hours" => hours, "minutes" => minutes} =
+      Regex.named_captures(~r/^((?<hours>\d{0,2})h)?\s?((?<minutes>\d{0,2})m)?$/, time_string)
 
     string_to_int(hours) * @minutes_in_one_hour + string_to_int(minutes)
   end
