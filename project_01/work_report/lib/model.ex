@@ -1,4 +1,4 @@
-defmodule Model do
+defmodule WorkReport.Model do
   @moduledoc """
   Models' definitions
   """
