@@ -24,6 +24,7 @@ defmodule WorkReport do
   end
 
   def do_report(params, _file) do
+    # TODO: add range check for month (1...12) and day (1...31)
     _month = Map.get(params, :month, :erlang.date() |> elem(1))
     _day = Map.get(params, :day, :erlang.date() |> elem(2))
 
