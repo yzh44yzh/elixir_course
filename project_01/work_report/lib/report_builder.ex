@@ -15,17 +15,53 @@ defmodule WorkReport.ReportBuilder do
 
   alias WorkReport.Model.{CategoryReport, Day, DayReport, Month, MonthReport, Task}
 
-  @spec build_report(month :: Month.t(), month_number :: integer(), day_number :: integer()) ::
-          {MonthReport.t(), DayReport.t()}
-  def build_report(month, month_number, day_number) do
-    month
+  defmodule MonthNotFoundError do
+    defexception [:message]
+
+    @impl true
+    def exception(month_number) do
+      %MonthNotFoundError{message: "Month number #{inspect(month_number)} was not found!"}
+    end
   end
 
-  # avg_time_spent: integer(),
-  # categories: [CategoryReport.t()],
-  # days_spent: integer(),
-  # total_time_spent: integer()
-  @spec build_month_report(month :: Month) :: MonthReport.t()
+  defmodule DayNotFoundError do
+    defexception [:message]
+
+    @impl true
+    def exception(day_number) do
+      %DayNotFoundError{message: "Day number #{inspect(day_number)} was not found!"}
+    end
+  end
+
+  @spec build_report(month :: Month.t(), month_number :: integer(), day_number :: integer()) ::
+          {MonthReport.t(), DayReport.t()}
+  def build_report(month, month_number, day_number) when month.number == month_number do
+    {build_month_report(month), build_day_report(month, day_number)}
+  end
+
+  def build_report(month, month_number, day_number) do
+    raise MonthNotFoundError, month_number
+  end
+
+  @spec build_day_report(month :: Month.t(), day_number :: integer()) ::
+          DayReport.t() | {:error, String.t()}
+  def build_day_report(%Month{days: days}, day_number) do
+    case Enum.find(days, fn %Day{number: number} -> number == day_number end) do
+      nil ->
+        raise DayNotFoundError, day_number
+
+      %Day{tasks: tasks} ->
+        %DayReport{total_time_spent: count_tasks_time_spent(tasks), tasks: tasks}
+    end
+  end
+
+  @spec count_tasks_time_spent(tasks :: [Task.t()]) :: integer()
+  def count_tasks_time_spent(tasks) do
+    tasks
+    |> Stream.map(fn %Task{time_spent: time_spent} -> time_spent end)
+    |> Enum.sum()
+  end
+
   def build_month_report(%Month{days: days}) do
     days_spent = length(days)
 
@@ -33,10 +69,7 @@ defmodule WorkReport.ReportBuilder do
       days
       |> Enum.flat_map(fn %Day{tasks: tasks} -> tasks end)
 
-    total_time_spent =
-      tasks
-      |> Stream.map(fn %Task{time_spent: time_spent} -> time_spent end)
-      |> Enum.sum()
+    total_time_spent = count_tasks_time_spent(tasks)
 
     avg_time_spent = trunc(total_time_spent / days_spent)
 
