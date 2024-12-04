@@ -1,8 +1,9 @@
 defmodule MarkdownParserTest do
   use ExUnit.Case
 
-  alias WorkReport.{MarkdownParser}
-  alias WorkReport.Model.{Day, Task}
+  alias WorkReport.MarkdownParser
+  alias WorkReport.MarkdownParser.{InvalidMonthError, InvalidDayStringError}
+  alias WorkReport.Model.{Day, Month, Task}
 
   # TODO: Add StreamData package to tests for property-based testing
 
@@ -29,6 +30,12 @@ defmodule MarkdownParserTest do
                tasks: []
              }
     end
+
+    test "should raise an error for invalid day string" do
+      assert_raise InvalidDayStringError, "Invalid day string: some shit", fn ->
+        MarkdownParser.parse_day_string("some shit")
+      end
+    end
   end
 
   describe "parse_task_list" do
@@ -53,26 +60,61 @@ defmodule MarkdownParserTest do
     end
   end
 
-  # describe "parse_day" do
-  test "should" do
-    assert MarkdownParser.parse_day(
-             "## 3 mon\n[DEV] Review Shitty Pull Requests - 30m\n[COMM] Daily Meeting with arabs - 15m\n[DEV] Implement cool feature for legacy monster - 4h\n"
-           ) == %Day{
-             number: 3,
-             title: "mon",
-             tasks: [
-               %Task{category: "DEV", description: "Review Shitty Pull Requests", time_spent: 30},
-               %Task{category: "COMM", description: "Daily Meeting with arabs", time_spent: 15},
-               %Task{
-                 category: "DEV",
-                 description: "Implement cool feature for legacy monster",
-                 time_spent: 240
-               }
-             ]
-           }
+  describe "parse_month_string" do
+    test "should parse correct month string" do
+      assert MarkdownParser.parse_month_string("# January") == %Month{
+               number: 1,
+               title: "January",
+               days: []
+             }
+
+      assert MarkdownParser.parse_month_string("# February") == %Month{
+               number: 2,
+               title: "February",
+               days: []
+             }
+
+      assert MarkdownParser.parse_month_string("# March") == %Month{
+               number: 3,
+               title: "March",
+               days: []
+             }
+    end
+
+    test "should raise error for invalid month name" do
+      assert_raise InvalidMonthError, "Wrong month name given! Got: \"Some\"", fn ->
+        MarkdownParser.parse_month_string("# Some")
+      end
+    end
   end
 
-  # end
+  describe "parse_day" do
+    test "should parse valid day string" do
+      assert MarkdownParser.parse_day(
+               "## 3 mon\n[DEV] Review Shitty Pull Requests - 30m\n[COMM] Daily Meeting with arabs - 15m\n[DEV] Implement cool feature for legacy monster - 4h\n"
+             ) == %Day{
+               number: 3,
+               title: "mon",
+               tasks: [
+                 %Task{
+                   category: "DEV",
+                   description: "Review Shitty Pull Requests",
+                   time_spent: 30
+                 },
+                 %Task{category: "COMM", description: "Daily Meeting with arabs", time_spent: 15},
+                 %Task{
+                   category: "DEV",
+                   description: "Implement cool feature for legacy monster",
+                   time_spent: 240
+                 }
+               ]
+             }
+    end
+
+    # test "should raise an error for invalid day string" do
+    #   assert MarkdownParser.parse_day("some shit") == nil
+    # end
+  end
 
   describe "parse_time" do
     test "should parse time string" do

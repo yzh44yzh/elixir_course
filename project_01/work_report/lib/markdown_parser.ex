@@ -1,8 +1,16 @@
 defmodule WorkReport.MarkdownParser do
-  alias WorkReport.Model.{Day, Task}
+  alias WorkReport.Model.{Day, Month, Task}
   @behaviour WorkReport.Parser
 
   @minutes_in_one_hour 60
+
+  defmodule InvalidMonthError do
+    defexception [:message]
+  end
+
+  defmodule InvalidDayStringError do
+    defexception [:message]
+  end
 
   @impl WorkReport.Parser
   def parse_report(report, opts) do
@@ -12,16 +20,39 @@ defmodule WorkReport.MarkdownParser do
       |> dbg()
 
     days
-    |> Enum.map(fn day -> String.split(day, "\n") end)
-    |> dbg()
-    |> Enum.map(fn [day | tasks] ->
-      [
-        day |> String.split(" "),
-        tasks
-        |> Enum.map(&parse_task/1)
-        |> Enum.reject(&is_nil/1)
-      ]
-    end)
+    |> Enum.map(&parse_day/1)
+  end
+
+  @spec get_month_number(month_title :: String.t()) :: integer() | nil
+  def get_month_number(month_title) do
+    case month_title do
+      "January" -> 1
+      "February" -> 2
+      "March" -> 3
+      "April" -> 4
+      "May" -> 5
+      "June" -> 6
+      "July" -> 7
+      "August" -> 8
+      "September" -> 9
+      "October" -> 10
+      "November" -> 11
+      "December" -> 12
+      _ -> raise InvalidMonthError, message: "Wrong month name given! Got: \"#{month_title}\""
+    end
+  end
+
+  @spec parse_month_string(full_month_string :: String.t()) :: Month.t()
+  def parse_month_string(full_month_string) do
+    regexp = ~r/^#\s(?<title>\w+)$/
+
+    case Regex.named_captures(regexp, full_month_string) do
+      %{"title" => title} ->
+        %Month{number: get_month_number(title), title: title}
+
+      nil ->
+        nil
+    end
   end
 
   @spec parse_day(full_day_string :: binary()) :: Day.t()
@@ -40,7 +71,7 @@ defmodule WorkReport.MarkdownParser do
         %Day{number: String.to_integer(number), title: title}
 
       nil ->
-        nil
+        raise InvalidDayStringError, "Invalid day string: #{day_string}"
     end
   end
 
