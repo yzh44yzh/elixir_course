@@ -14,13 +14,14 @@ defmodule WorkReport.MarkdownParser do
 
   @impl WorkReport.Parser
   def parse_report(report, opts) do
-    [month | days] =
+    [month_string | day_string_list] =
       report
       |> String.split("\n\n")
-      |> dbg()
 
-    days
-    |> Enum.map(&parse_day/1)
+    month = parse_month_string(month_string)
+    days = day_string_list |> Enum.map(&parse_day/1)
+
+    Map.put(month, :days, days)
   end
 
   @spec get_month_number(month_title :: String.t()) :: integer() | nil
