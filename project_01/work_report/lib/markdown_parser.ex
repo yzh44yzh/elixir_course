@@ -1,6 +1,8 @@
-defmodule WorkReport.MarkdowParser do
+defmodule WorkReport.MarkdownParser do
   alias WorkReport.Model.Task
   @behaviour WorkReport.Parser
+
+  @minutes_in_one_hour 60
 
   @impl WorkReport.Parser
   def parse_report(report, opts) do
@@ -21,18 +23,34 @@ defmodule WorkReport.MarkdowParser do
   end
 
   @spec parse_task(task :: binary()) :: Task.t()
-  defp parse_task(task) do
-    task |> dbg()
-    regexp = ~r/^(\[\w+\])\s(.+)\s\-\s([\w+|\s]+)$/
-    result = Regex.scan(regexp, task)
+  def parse_task(task) do
+    # Regexp to parse task string format: [Type] Some title - 1h 30m
+    regexp = ~r/^\[(\w+)\]\s(.+)\s\-\s((\d{0,2}h)?\s?(\d{0,2}m)?)$/
+    result = Regex.run(regexp, task) |> dbg()
 
     case result do
-      [] ->
+      nil ->
         nil
 
-      [[_, category, description, time_spent]] ->
+      [_, category, description, time_spent, _, _] ->
         # TODO: convert time to minutes
         %Task{category: category, description: description, time_spent: time_spent}
     end
+  end
+
+  @spec parse_time(String.t()) :: integer()
+  def parse_time(time_string) do
+    [_str, _hours_str, hours, _minutes_str, minutes] =
+      Regex.run(~r/^((\d{0,2})h)?\s?((\d{0,2})m)?$/, time_string)
+
+    string_to_int(hours) * @minutes_in_one_hour + string_to_int(minutes)
+  end
+
+  def string_to_int("") do
+    0
+  end
+
+  def string_to_int(str) do
+    String.to_integer(str)
   end
 end
