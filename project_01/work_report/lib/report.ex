@@ -1,6 +1,13 @@
 defmodule Report do
   @moduledoc """
     Report model
+
+    report.md -> parse() -> %Month{}
+
+    %Month{} -> build_report(day: 5) -> %DayReport{}
+    %Month{} -> build_report(month: 2) -> %MonthReport{}
+    %Month{} -> build_report(month: 2, day: 5) -> {%MonthReport{}, %DayReport{}}
+
   """
 
   defmodule Month do
@@ -19,6 +26,16 @@ defmodule Report do
     """
   end
 
+  defmodule MonthReport do
+    @moduledoc """
+    Month report model:
+      categories: %Category{title :: string, total :: int()},
+      total_time_spent: int(),
+      days_count :: int(),
+      avg_time_spent :: int()
+    """
+  end
+
   defmodule Day do
     @moduledoc """
     Day model:
@@ -30,6 +47,14 @@ defmodule Report do
         tasks: [%Task{}],
         total_time_spent :: int()
       }
+    """
+  end
+
+  defmodule DayReport do
+    @moduledoc """
+    Day report model:
+      tasks: [%Task{}],
+      total_time_spent :: int()
     """
   end
 
