@@ -25,15 +25,14 @@ defmodule WorkReport.MarkdownParser do
   @spec parse_task(task :: binary()) :: Task.t()
   def parse_task(task) do
     # Regexp to parse task string format: [Type] Some title - 1h 30m
-    regexp = ~r/^\[(\w+)\]\s(.+)\s\-\s((\d{0,2}h)?\s?(\d{0,2}m)?)$/
-    result = Regex.run(regexp, task) |> dbg()
+    regexp =
+      ~r/^\[(?<category>\w+)\]\s(?<description>.+)\s\-\s(?<time_spent>(\d{0,2}h)?\s?(\d{0,2}m)?)$/
 
-    case result do
+    case Regex.named_captures(regexp, task) do
       nil ->
         nil
 
-      [_, category, description, time_spent, _, _] ->
-        # TODO: convert time to minutes
+      %{"category" => category, "description" => description, "time_spent" => time_spent} ->
         %Task{category: category, description: description, time_spent: parse_time(time_spent)}
     end
   end
