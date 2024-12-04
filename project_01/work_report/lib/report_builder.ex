@@ -39,9 +39,7 @@ defmodule WorkReport.ReportBuilder do
     {build_month_report(month), build_day_report(month, day_number)}
   end
 
-  def build_report(month, month_number, day_number) do
-    raise MonthNotFoundError, month_number
-  end
+  def build_report(month, month_number, day_number), do: raise(MonthNotFoundError, month_number)
 
   @spec build_day_report(month :: Month.t(), day_number :: integer()) ::
           DayReport.t() | {:error, String.t()}

@@ -1,18 +1,30 @@
 defmodule WorkReport.MarkdownParser do
   alias WorkReport.Model.{Day, Month, Task}
-  @behaviour WorkReport.Parser
+  alias WorkReport.Parser
+
+  @behaviour Parser
 
   @minutes_in_one_hour 60
 
-  defmodule InvalidMonthError do
+  defmodule InvalidMonthTitleError do
     defexception [:message]
+
+    @impl true
+    def exception(month_title) do
+      %InvalidMonthTitleError{message: "Wrong month name given! Got: \"#{month_title}\""}
+    end
   end
 
   defmodule InvalidDayStringError do
     defexception [:message]
+
+    @impl true
+    def exception(day_string) do
+      %InvalidDayStringError{message: "Invalid day string: #{day_string}"}
+    end
   end
 
-  @impl WorkReport.Parser
+  @impl Parser
   def parse_report(report, opts) do
     [month_string | day_string_list] =
       report
@@ -39,7 +51,7 @@ defmodule WorkReport.MarkdownParser do
       "October" -> 10
       "November" -> 11
       "December" -> 12
-      _ -> raise InvalidMonthError, message: "Wrong month name given! Got: \"#{month_title}\""
+      _ -> raise InvalidMonthTitleError, month_title
     end
   end
 
@@ -72,7 +84,7 @@ defmodule WorkReport.MarkdownParser do
         %Day{number: String.to_integer(number), title: title}
 
       nil ->
-        raise InvalidDayStringError, "Invalid day string: #{day_string}"
+        raise InvalidDayStringError, day_string
     end
   end
 
@@ -106,11 +118,6 @@ defmodule WorkReport.MarkdownParser do
     string_to_int(hours) * @minutes_in_one_hour + string_to_int(minutes)
   end
 
-  def string_to_int("") do
-    0
-  end
-
-  def string_to_int(str) do
-    String.to_integer(str)
-  end
+  def string_to_int(""), do: 0
+  def string_to_int(str), do: String.to_integer(str)
 end

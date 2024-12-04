@@ -2,7 +2,7 @@ defmodule MarkdownParserTest do
   use ExUnit.Case
 
   alias WorkReport.MarkdownParser
-  alias WorkReport.MarkdownParser.{InvalidMonthError, InvalidDayStringError}
+  alias WorkReport.MarkdownParser.{InvalidMonthTitleError, InvalidDayStringError}
   alias WorkReport.Model.{Day, Month, Task}
 
   # TODO: Add StreamData package to tests for property-based testing
@@ -82,7 +82,7 @@ defmodule MarkdownParserTest do
     end
 
     test "should raise error for invalid month name" do
-      assert_raise InvalidMonthError, "Wrong month name given! Got: \"Some\"", fn ->
+      assert_raise InvalidMonthTitleError, "Wrong month name given! Got: \"Some\"", fn ->
         MarkdownParser.parse_month_string("# Some")
       end
     end
