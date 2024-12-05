@@ -58,13 +58,15 @@ defmodule WorkReport.Model do
   defmodule DayReport do
     @moduledoc false
     @type t() :: %__MODULE__{
+            number: integer(),
             tasks: [Task.t()],
+            title: String.t(),
             total_time_spent: integer()
           }
 
-    @enforce_keys [:tasks, :total_time_spent]
+    @enforce_keys [:number, :tasks, :title, :total_time_spent]
 
-    defstruct [:tasks, :total_time_spent]
+    defstruct [:number, :tasks, :title, :total_time_spent]
   end
 
   defmodule MonthReport do
@@ -73,6 +75,8 @@ defmodule WorkReport.Model do
             avg_time_spent: integer(),
             categories: [CategoryReport.t()],
             days_spent: integer(),
+            number: integer(),
+            title: String.t(),
             total_time_spent: integer()
           }
 
@@ -80,12 +84,22 @@ defmodule WorkReport.Model do
       :avg_time_spent,
       :categories,
       :days_spent,
-      :total_time_spent
+      :number,
+      :total_time_spent,
+      :title
     ]
 
-    defstruct avg_time_spent: 0,
-              categories: [],
-              days_spent: 0,
-              total_time_spent: 0
+    defstruct [
+      :number,
+      :title,
+      avg_time_spent: 0,
+      categories: [],
+      days_spent: 0,
+      total_time_spent: 0
+    ]
+  end
+
+  defmodule Report do
+    @type t() :: MonthReport.t() | DayReport.t()
   end
 end

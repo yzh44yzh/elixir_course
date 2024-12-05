@@ -1,13 +1,15 @@
 defmodule WorkReport.Formatter do
-  alias WorkReport.Model.MonthReport
+  alias WorkReport.Model.Report
 
-  @callback format_report(month_report :: MonthReport.t(), opts :: Keyword.t()) :: binary()
+  @callback format_report_list(report_list :: [Report.t()], opts :: Keyword.t()) ::
+              binary()
 
-  @spec print_report(month_report :: MonthReport.t(), opts :: Keyword.t()) :: binary()
-  def print_report(month_report, opts) do
+  @spec print_report(report_list :: [Report.t()], opts :: Keyword.t()) ::
+          binary()
+  def print_report(report_list, opts) do
     {formatter, opts} = Keyword.pop(opts, :formatter)
 
-    formatter.format_report(month_report, opts)
+    formatter.format_report_list(report_list, opts)
   end
 
   @spec format_time(integer) :: String.t()

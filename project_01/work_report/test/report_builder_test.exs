@@ -69,7 +69,6 @@ defmodule ReportBuilderTest do
   test "build_month_report should build month report" do
     assert ReportBuilder.build_month_report(get_month_model_fixture()) ==
              %MonthReport{
-               some: "test",
                avg_time_spent: 302,
                categories: [
                  %CategoryReport{title: "COMM", time_spent: 35},
@@ -77,6 +76,8 @@ defmodule ReportBuilderTest do
                  %CategoryReport{title: "DOC", time_spent: 60}
                ],
                days_spent: 2,
+               number: 1,
+               title: "January",
                total_time_spent: 605
              }
   end
@@ -92,9 +93,12 @@ defmodule ReportBuilderTest do
                     %CategoryReport{title: "DOC", time_spent: 60}
                   ],
                   days_spent: 2,
+                  number: 1,
+                  title: "January",
                   total_time_spent: 605
                 },
                 %DayReport{
+                  number: 3,
                   tasks: [
                     %Task{
                       description: "Implement search",
@@ -117,6 +121,7 @@ defmodule ReportBuilderTest do
                       category: "DOC"
                     }
                   ],
+                  title: "mon",
                   total_time_spent: 420
                 }}
     end

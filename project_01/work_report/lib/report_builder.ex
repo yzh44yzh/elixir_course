@@ -13,7 +13,7 @@ defmodule WorkReport.ReportBuilder do
     %Report{} -> Printer.print_report(%Report{}, TerminalPrinter)
   """
 
-  alias WorkReport.Model.{CategoryReport, Day, DayReport, Month, MonthReport, Task}
+  alias WorkReport.Model.{CategoryReport, Day, DayReport, Month, MonthReport, Task, Report}
 
   defmodule MonthNotFoundError do
     defexception [:message]
@@ -34,12 +34,12 @@ defmodule WorkReport.ReportBuilder do
   end
 
   @spec build_report(month :: Month.t(), month_number :: integer(), day_number :: integer()) ::
-          {MonthReport.t(), DayReport.t()}
+          [Report.t()]
   def build_report(month, month_number, day_number) when month.number == month_number do
-    {build_month_report(month), build_day_report(month, day_number)}
+    [build_month_report(month), build_day_report(month, day_number)]
   end
 
-  def build_report(month, month_number, day_number), do: raise(MonthNotFoundError, month_number)
+  def build_report(_month, month_number, _day_number), do: raise(MonthNotFoundError, month_number)
 
   @spec build_day_report(month :: Month.t(), day_number :: integer()) ::
           DayReport.t() | {:error, String.t()}
@@ -48,8 +48,13 @@ defmodule WorkReport.ReportBuilder do
       nil ->
         raise DayNotFoundError, day_number
 
-      %Day{tasks: tasks} ->
-        %DayReport{total_time_spent: count_tasks_time_spent(tasks), tasks: tasks}
+      %Day{number: number, tasks: tasks, title: title} ->
+        %DayReport{
+          number: number,
+          tasks: tasks,
+          title: title,
+          total_time_spent: count_tasks_time_spent(tasks)
+        }
     end
   end
 
@@ -60,7 +65,8 @@ defmodule WorkReport.ReportBuilder do
     |> Enum.sum()
   end
 
-  def build_month_report(%Month{days: days}) do
+  @spec build_month_report(month :: Month.t()) :: MonthReport.t()
+  def build_month_report(%Month{days: days, number: number, title: title}) do
     days_spent = length(days)
 
     tasks =
@@ -86,6 +92,8 @@ defmodule WorkReport.ReportBuilder do
       avg_time_spent: avg_time_spent,
       categories: categories,
       days_spent: days_spent,
+      number: number,
+      title: title,
       total_time_spent: total_time_spent
     }
   end
