@@ -1,4 +1,7 @@
 defmodule WorkReport.Parser do
+  @moduledoc """
+  Interface for report parser.
+  """
   alias WorkReport.Model.Month
 
   @callback parse_report(report :: binary(), opts :: Keyword.t()) ::
@@ -10,10 +13,5 @@ defmodule WorkReport.Parser do
     file = File.read!(report_file_path)
 
     parser.parse_report(file, opts)
-  end
-
-  @spec parse_time(String.t()) :: integer()
-  def parse_time(_time_str) do
-    42
   end
 end

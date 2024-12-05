@@ -26,7 +26,7 @@ defmodule WorkReport.TerminalFormatter do
       }) do
     report = [
       "Month: #{title}",
-      categories |> Stream.map(&format_category_report/1) |> format_list(),
+      categories |> Enum.map(&format_category_report/1) |> format_list(),
       "\s\s\s" <>
         "Total: #{format_time(total_time_spent)}, " <>
         "Days: #{days_spent}, " <>
@@ -45,7 +45,7 @@ defmodule WorkReport.TerminalFormatter do
       }) do
     report = [
       "Day: #{number} #{title}",
-      tasks |> Stream.map(&format_task/1) |> format_list(),
+      tasks |> Enum.map(&format_task/1) |> format_list(),
       "\s\s\s" <>
         "Total: #{format_time(total_time_spent)}"
     ]

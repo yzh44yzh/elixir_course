@@ -3,6 +3,15 @@ defmodule WorkReport do
   # Analyze report file and gather work statistics
   """
 
+  alias WorkReport.{
+    Parser,
+    MarkdownParser,
+    ReportBuilder,
+    ReportBuilder.MonthNotFoundError,
+    Formatter,
+    TerminalFormatter
+  }
+
   @name "Work Report"
   @version "1.0.0"
 
@@ -23,12 +32,30 @@ defmodule WorkReport do
     ]
   end
 
-  def do_report(params, _file) do
-    # TODO: add range check for month (1...12) and day (1...31)
-    _month = Map.get(params, :month, :erlang.date() |> elem(1))
-    _day = Map.get(params, :day, :erlang.date() |> elem(2))
+  def do_report(params, file) do
+    month = Map.get(params, :month, :erlang.date() |> elem(1))
+    day = Map.get(params, :day, :erlang.date() |> elem(2))
 
-    # TODO your implementation here
+    cond do
+      month not in 1..12 -> raise "Month is out of range 1..12"
+      day not in 1..31 -> raise "Day is out of range 1..31"
+      true -> build_report(file, month: month, day: day)
+    end
+  end
+
+  def build_report(path, opts) do
+    {month, opts} = Keyword.pop(opts, :month)
+    {day, _opts} = Keyword.pop(opts, :day)
+
+    try do
+      with {:ok, report_model} <- Parser.build_month_model(path, parser: MarkdownParser) do
+        report_model
+        |> ReportBuilder.build_report(month, day)
+        |> Formatter.print_report(formatter: TerminalFormatter)
+      end
+    rescue
+      e in MonthNotFoundError -> "month not found"
+    end
   end
 
   def help() do
@@ -46,5 +73,4 @@ defmodule WorkReport do
   def version() do
     IO.puts(@name <> " v" <> @version)
   end
-
 end

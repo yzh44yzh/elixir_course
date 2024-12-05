@@ -85,45 +85,47 @@ defmodule ReportBuilderTest do
   describe "build_report" do
     test "should build full report" do
       assert ReportBuilder.build_report(get_month_model_fixture(), 1, 3) ==
-               {%MonthReport{
-                  avg_time_spent: 302,
-                  categories: [
-                    %CategoryReport{title: "COMM", time_spent: 35},
-                    %CategoryReport{title: "DEV", time_spent: 510},
-                    %CategoryReport{title: "DOC", time_spent: 60}
-                  ],
-                  days_spent: 2,
-                  number: 1,
-                  title: "January",
-                  total_time_spent: 605
-                },
-                %DayReport{
-                  number: 3,
-                  tasks: [
-                    %Task{
-                      description: "Implement search",
-                      time_spent: 240,
-                      category: "DEV"
-                    },
-                    %Task{
-                      description: "Daily Meeting with indians",
-                      time_spent: 20,
-                      category: "COMM"
-                    },
-                    %Task{
-                      description: "Implement endoint for auth",
-                      time_spent: 100,
-                      category: "DEV"
-                    },
-                    %Task{
-                      description: "Read API docs and manuals",
-                      time_spent: 60,
-                      category: "DOC"
-                    }
-                  ],
-                  title: "mon",
-                  total_time_spent: 420
-                }}
+               [
+                 %MonthReport{
+                   avg_time_spent: 302,
+                   categories: [
+                     %CategoryReport{title: "COMM", time_spent: 35},
+                     %CategoryReport{title: "DEV", time_spent: 510},
+                     %CategoryReport{title: "DOC", time_spent: 60}
+                   ],
+                   days_spent: 2,
+                   number: 1,
+                   title: "January",
+                   total_time_spent: 605
+                 },
+                 %DayReport{
+                   number: 3,
+                   tasks: [
+                     %Task{
+                       description: "Implement search",
+                       time_spent: 240,
+                       category: "DEV"
+                     },
+                     %Task{
+                       description: "Daily Meeting with indians",
+                       time_spent: 20,
+                       category: "COMM"
+                     },
+                     %Task{
+                       description: "Implement endoint for auth",
+                       time_spent: 100,
+                       category: "DEV"
+                     },
+                     %Task{
+                       description: "Read API docs and manuals",
+                       time_spent: 60,
+                       category: "DOC"
+                     }
+                   ],
+                   title: "mon",
+                   total_time_spent: 420
+                 }
+               ]
     end
 
     test "should raise an error for wrong month number" do
