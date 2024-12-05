@@ -4,8 +4,8 @@ defmodule WorkReport.TerminalFormatter do
   @behaviour Formatter
 
   @impl Formatter
-  def format_report(month_report, opts) do
-    # TODO
+  def format_report(month_report, _opts \\ []) do
+    month_report
   end
 
   @spec format_time(integer) :: String.t()

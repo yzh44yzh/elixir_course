@@ -25,7 +25,7 @@ defmodule WorkReport.MarkdownParser do
   end
 
   @impl Parser
-  def parse_report(report, opts) do
+  def parse_report(report, _opts \\ []) do
     [month_string | day_string_list] =
       report
       |> String.split("\n\n")
@@ -33,7 +33,7 @@ defmodule WorkReport.MarkdownParser do
     month = parse_month_string(month_string)
     days = day_string_list |> Enum.map(&parse_day/1)
 
-    Map.put(month, :days, days)
+    {:ok, Map.put(month, :days, days)}
   end
 
   @spec get_month_number(month_title :: String.t()) :: integer() | nil

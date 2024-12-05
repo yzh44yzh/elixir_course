@@ -1,5 +1,5 @@
 defmodule WorkReport.Parser do
-  alias Model.Month
+  alias WorkReport.Model.Month
 
   @callback parse_report(report :: binary(), opts :: Keyword.t()) ::
               {:ok, Month.t()} | {:error, String.t()}

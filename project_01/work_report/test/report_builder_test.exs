@@ -69,6 +69,7 @@ defmodule ReportBuilderTest do
   test "build_month_report should build month report" do
     assert ReportBuilder.build_month_report(get_month_model_fixture()) ==
              %MonthReport{
+               some: "test",
                avg_time_spent: 302,
                categories: [
                  %CategoryReport{title: "COMM", time_spent: 35},
