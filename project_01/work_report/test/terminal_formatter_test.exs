@@ -68,8 +68,8 @@ defmodule TerminalFormatterTest do
       day_report = get_day_report_fixture()
 
       assert TerminalFormatter.format_report_list([month_report, day_report]) ==
-               [get_month_report_expected_formatting(), get_day_report_expected_formatting()]
-               |> Enum.join("\n\n")
+               ([get_month_report_expected_formatting(), get_day_report_expected_formatting()]
+                |> Enum.join("\n\n")) <> "\n"
     end
   end
 
@@ -120,7 +120,7 @@ defmodule TerminalFormatterTest do
       assert TerminalFormatter.format_time(2) == "2m"
       assert TerminalFormatter.format_time(60) == "1h"
       assert TerminalFormatter.format_time(65) == "1h 5m"
-      assert TerminalFormatter.format_time(0) == "0m"
+      assert TerminalFormatter.format_time(0) == "0"
     end
   end
 end

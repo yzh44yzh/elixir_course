@@ -73,7 +73,10 @@ defmodule ReportBuilderTest do
                categories: [
                  %CategoryReport{title: "COMM", time_spent: 35},
                  %CategoryReport{title: "DEV", time_spent: 510},
-                 %CategoryReport{title: "DOC", time_spent: 60}
+                 %CategoryReport{title: "OPS", time_spent: 0},
+                 %CategoryReport{title: "DOC", time_spent: 60},
+                 %CategoryReport{title: "WS", time_spent: 0},
+                 %CategoryReport{title: "EDU", time_spent: 0}
                ],
                days_spent: 2,
                number: 1,
@@ -86,18 +89,6 @@ defmodule ReportBuilderTest do
     test "should build full report" do
       assert ReportBuilder.build_report(get_month_model_fixture(), 1, 3) ==
                [
-                 %MonthReport{
-                   avg_time_spent: 302,
-                   categories: [
-                     %CategoryReport{title: "COMM", time_spent: 35},
-                     %CategoryReport{title: "DEV", time_spent: 510},
-                     %CategoryReport{title: "DOC", time_spent: 60}
-                   ],
-                   days_spent: 2,
-                   number: 1,
-                   title: "January",
-                   total_time_spent: 605
-                 },
                  %DayReport{
                    number: 3,
                    tasks: [
@@ -124,18 +115,33 @@ defmodule ReportBuilderTest do
                    ],
                    title: "mon",
                    total_time_spent: 420
+                 },
+                 %MonthReport{
+                   avg_time_spent: 302,
+                   categories: [
+                     %CategoryReport{title: "COMM", time_spent: 35},
+                     %CategoryReport{title: "DEV", time_spent: 510},
+                     %CategoryReport{title: "OPS", time_spent: 0},
+                     %CategoryReport{title: "DOC", time_spent: 60},
+                     %CategoryReport{title: "WS", time_spent: 0},
+                     %CategoryReport{title: "EDU", time_spent: 0}
+                   ],
+                   days_spent: 2,
+                   number: 1,
+                   title: "January",
+                   total_time_spent: 605
                  }
                ]
     end
 
     test "should raise an error for wrong month number" do
-      assert_raise MonthNotFoundError, "Month number 2 was not found!", fn ->
+      assert_raise MonthNotFoundError, "month 2 not found", fn ->
         ReportBuilder.build_report(get_month_model_fixture(), 2, 3)
       end
     end
 
     test "should raise an error for wrong day number" do
-      assert_raise DayNotFoundError, "Day number 22 was not found!", fn ->
+      assert_raise DayNotFoundError, "day 22 not found", fn ->
         ReportBuilder.build_report(get_month_model_fixture(), 1, 22)
       end
     end

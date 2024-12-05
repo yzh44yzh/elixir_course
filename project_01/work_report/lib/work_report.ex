@@ -8,6 +8,7 @@ defmodule WorkReport do
     MarkdownParser,
     ReportBuilder,
     ReportBuilder.MonthNotFoundError,
+    ReportBuilder.DayNotFoundError,
     Formatter,
     TerminalFormatter
   }
@@ -47,15 +48,18 @@ defmodule WorkReport do
     {month, opts} = Keyword.pop(opts, :month)
     {day, _opts} = Keyword.pop(opts, :day)
 
-    try do
-      with {:ok, report_model} <- Parser.build_month_model(path, parser: MarkdownParser) do
-        report_model
-        |> ReportBuilder.build_report(month, day)
-        |> Formatter.print_report(formatter: TerminalFormatter)
+    result =
+      try do
+        with {:ok, report_model} <- Parser.build_month_model(path, parser: MarkdownParser) do
+          report_model
+          |> ReportBuilder.build_report(month, day)
+          |> Formatter.print_report(formatter: TerminalFormatter)
+        end
+      rescue
+        e in [MonthNotFoundError, DayNotFoundError] -> e.message
       end
-    rescue
-      e in MonthNotFoundError -> "month not found"
-    end
+
+    IO.puts(result)
   end
 
   def help() do

@@ -26,6 +26,7 @@ defmodule WorkReport.MarkdownParser do
 
   @impl Parser
   def parse_report(report, _opts \\ []) do
+    # TODO: implement parsing for multiple months
     [month_string | day_string_list] =
       report
       |> String.split("\n\n")
@@ -70,7 +71,8 @@ defmodule WorkReport.MarkdownParser do
 
   @spec parse_day(full_day_string :: binary()) :: Day.t()
   def parse_day(full_day_string) do
-    [day_string | task_string_list] = String.split(full_day_string, "\n")
+    [day_string | task_string_list] =
+      String.split(full_day_string, "\n") |> Enum.reject(fn str -> str == "" end)
 
     parse_day_string(day_string) |> parse_task_list(task_string_list)
   end

@@ -13,7 +13,7 @@ defmodule WorkReport.TerminalFormatter do
 
   @impl Formatter
   def format_report_list(report_list, _opts \\ []) do
-    report_list |> Stream.map(&format_report/1) |> Enum.join("\n\n")
+    (report_list |> Stream.map(&format_report/1) |> Enum.join("\n\n")) <> "\n"
   end
 
   @spec format_report(report :: MonthReport.t()) :: binary()
@@ -74,7 +74,7 @@ defmodule WorkReport.TerminalFormatter do
     minutes = rem(time, @minutes_in_one_hour)
 
     case {hours, minutes} do
-      {0, 0} -> "0m"
+      {0, 0} -> "0"
       {0, minutes} -> "#{minutes}m"
       {hours, 0} -> "#{hours}h"
       {hours, minutes} -> "#{hours}h #{minutes}m"

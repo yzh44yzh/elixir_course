@@ -1,16 +1,6 @@
 defmodule WorkReport.ReportBuilder do
   @moduledoc """
-    Report model
-
-    // MarkdownParser module implements behaviour from Parser module.
-    report.md -> Parser.parse_report(report_file, MarkdownParser) -> %Month{}
-
-    %Month{} -> build_report(day: 5) -> {_, %DayReport{}} // %Report{month: nil, day: %DayReport{}}
-    %Month{} -> build_report(month: 2) -> {%MonthReport{}, _} // %Report{month: %MonthReport{}, day: nil}
-    %Month{} -> build_report(month: 2, day: 5) -> {%MonthReport{}, %DayReport{}} // %Report{month: %MonthReport{}, day: %DayReport{}}
-
-    // TerminalPrinter module implements behaviour from Printer module.
-    %Report{} -> Printer.print_report(%Report{}, TerminalPrinter)
+    Report entities
   """
 
   alias WorkReport.Model.{CategoryReport, Day, DayReport, Month, MonthReport, Task, Report}
@@ -20,7 +10,7 @@ defmodule WorkReport.ReportBuilder do
 
     @impl true
     def exception(month_number) do
-      %MonthNotFoundError{message: "Month number #{inspect(month_number)} was not found!"}
+      %MonthNotFoundError{message: "month #{inspect(month_number)} not found"}
     end
   end
 
@@ -29,14 +19,14 @@ defmodule WorkReport.ReportBuilder do
 
     @impl true
     def exception(day_number) do
-      %DayNotFoundError{message: "Day number #{inspect(day_number)} was not found!"}
+      %DayNotFoundError{message: "day #{inspect(day_number)} not found"}
     end
   end
 
   @spec build_report(month :: Month.t(), month_number :: integer(), day_number :: integer()) ::
           [Report.t()]
   def build_report(month, month_number, day_number) when month.number == month_number do
-    [build_month_report(month), build_day_report(month, day_number)]
+    [build_day_report(month, day_number), build_month_report(month)]
   end
 
   def build_report(_month, month_number, _day_number), do: raise(MonthNotFoundError, month_number)
@@ -79,13 +69,23 @@ defmodule WorkReport.ReportBuilder do
 
     categories =
       tasks
-      |> Enum.group_by(
-        fn %Task{category: category} -> category end,
-        fn %Task{time_spent: time_spent} -> time_spent end
+      |> Enum.reduce(
+        [
+          {:COMM, 0},
+          {:DEV, 0},
+          {:OPS, 0},
+          {:DOC, 0},
+          {:WS, 0},
+          {:EDU, 0}
+        ],
+        fn %Task{category: category, time_spent: time_spent}, acc ->
+          Keyword.update(acc, String.to_atom(category), time_spent, fn count ->
+            count + time_spent
+          end)
+        end
       )
-      |> Map.to_list()
-      |> Enum.map(fn {category, time_spent_values} ->
-        %CategoryReport{title: category, time_spent: Enum.sum(time_spent_values)}
+      |> Enum.map(fn {category, time_spent_value} ->
+        %CategoryReport{title: Atom.to_string(category), time_spent: time_spent_value}
       end)
 
     %MonthReport{
