@@ -1,4 +1,4 @@
-Day: 09 tue
+Day: 9 tue
  - DEV: TASK-15 implement feature - 42m
  - COMM: Daily Meeting - 24m
  - DEV: TASK-15 implement - 25m
