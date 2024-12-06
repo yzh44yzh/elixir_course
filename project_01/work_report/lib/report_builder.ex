@@ -23,13 +23,21 @@ defmodule WorkReport.ReportBuilder do
     end
   end
 
-  @spec build_report(month :: Month.t(), month_number :: integer(), day_number :: integer()) ::
+  @spec build_report(
+          month_list :: [Month.t()],
+          month_number :: integer(),
+          day_number :: integer()
+        ) ::
           [Report.t()]
-  def build_report(month, month_number, day_number) when month.number == month_number do
-    [build_day_report(month, day_number), build_month_report(month)]
-  end
+  def build_report(month_list, month_number, day_number) do
+    case Enum.find(month_list, fn %Month{number: number} -> number == month_number end) do
+      nil ->
+        raise MonthNotFoundError, month_number
 
-  def build_report(_month, month_number, _day_number), do: raise(MonthNotFoundError, month_number)
+      %Month{} = month ->
+        [build_day_report(month, day_number), build_month_report(month)]
+    end
+  end
 
   @spec build_day_report(month :: Month.t(), day_number :: integer()) ::
           DayReport.t() | {:error, String.t()}

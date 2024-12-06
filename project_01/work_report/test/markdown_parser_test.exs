@@ -110,10 +110,6 @@ defmodule MarkdownParserTest do
                ]
              }
     end
-
-    # test "should raise an error for invalid day string" do
-    #   assert MarkdownParser.parse_day("some shit") == nil
-    # end
   end
 
   describe "parse_time" do

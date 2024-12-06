@@ -26,15 +26,17 @@ defmodule WorkReport.MarkdownParser do
 
   @impl Parser
   def parse_report(report, _opts \\ []) do
-    # TODO: implement parsing for multiple months
-    [month_string | day_string_list] =
+    result =
       report
-      |> String.split("\n\n")
+      |> String.split("\n\n\n")
+      |> Stream.map(fn month_string -> String.split(month_string, "\n\n") end)
+      |> Enum.map(fn [month_string | day_string_list] ->
+        month = parse_month_string(month_string)
+        days = day_string_list |> Enum.map(&parse_day/1)
+        Map.put(month, :days, days)
+      end)
 
-    month = parse_month_string(month_string)
-    days = day_string_list |> Enum.map(&parse_day/1)
-
-    {:ok, Map.put(month, :days, days)}
+    {:ok, result}
   end
 
   @spec get_month_number(month_title :: String.t()) :: integer() | nil
