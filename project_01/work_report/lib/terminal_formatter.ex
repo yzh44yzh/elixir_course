@@ -80,12 +80,4 @@ defmodule WorkReport.TerminalFormatter do
       {hours, minutes} -> "#{hours}h #{minutes}m"
     end
   end
-
-  @spec format_day(day :: integer()) :: String.t()
-  def format_day(day) do
-    cond do
-      day < 10 -> "0#{day}"
-      true -> Integer.to_string(day)
-    end
-  end
 end

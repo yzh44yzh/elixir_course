@@ -122,12 +122,5 @@ defmodule TerminalFormatterTest do
       assert TerminalFormatter.format_time(65) == "1h 5m"
       assert TerminalFormatter.format_time(0) == "0"
     end
-
-    test "should format a day of a month" do
-      assert TerminalFormatter.format_day(2) == "02"
-      assert TerminalFormatter.format_day(7) == "07"
-      assert TerminalFormatter.format_day(15) == "15"
-      assert TerminalFormatter.format_day(29) == "29"
-    end
   end
 end
