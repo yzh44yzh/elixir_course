@@ -1,4 +1,8 @@
 defmodule WorkReport.MarkdownParser do
+  @moduledoc """
+  This module is markdown syntax specific parser of work report.
+  Function parse_report() recieves binary content of the file and returns list of models.
+  """
   alias WorkReport.Model.{Day, Month, Task}
   alias WorkReport.Parser
 

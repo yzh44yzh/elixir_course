@@ -1,6 +1,6 @@
 defmodule WorkReport.ReportBuilder do
   @moduledoc """
-    Report entities
+    Module takes models of subject area and returns list of report models.
   """
 
   alias WorkReport.Model.{CategoryReport, Day, DayReport, Month, MonthReport, Task, Report}

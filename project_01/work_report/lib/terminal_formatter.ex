@@ -1,4 +1,8 @@
 defmodule WorkReport.TerminalFormatter do
+  @moduledoc """
+  Module is a terminal specific implementation of the formatter.
+  It takes the list of report models and returns binary for printing full report.
+  """
   alias WorkReport.{
     Formatter,
     Model.CategoryReport,

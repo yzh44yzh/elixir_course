@@ -1,6 +1,6 @@
 defmodule WorkReport.Model do
   @moduledoc """
-  Models' definitions
+  Models' definitions.
   """
 
   defmodule CategoryReport do
