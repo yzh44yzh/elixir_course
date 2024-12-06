@@ -8,7 +8,8 @@ defmodule WorkReport.MixProject do
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      escript: [main_module: WorkReport, app: nil]
+      escript: [main_module: WorkReport, app: nil],
+      elixirc_paths: ["lib", "test"]
     ]
   end
 

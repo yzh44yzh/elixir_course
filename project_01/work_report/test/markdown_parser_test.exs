@@ -5,7 +5,23 @@ defmodule MarkdownParserTest do
   alias WorkReport.MarkdownParser.{InvalidMonthTitleError, InvalidDayStringError}
   alias WorkReport.Model.{Day, Month, Task}
 
-  # TODO: Add StreamData package to tests for property-based testing
+  import TestFixtures
+
+  describe "parse_report" do
+    test "should parse single month report" do
+      report = Path.expand("test/sample/single-report.md") |> File.read!()
+
+      assert MarkdownParser.parse_report(report) ==
+               {:ok, single_model_list_fixture_1()}
+    end
+
+    test "should parse plural month report" do
+      report = Path.expand("test/sample/plural-report.md") |> File.read!()
+
+      assert MarkdownParser.parse_report(report) ==
+               {:ok, TestFixtures.plural_model_list_fixture_1()}
+    end
+  end
 
   describe "parse_task" do
     test "should parse a task" do
