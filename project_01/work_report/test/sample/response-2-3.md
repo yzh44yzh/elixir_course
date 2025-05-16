@@ -9,9 +9,9 @@ Day: 15 thu
 Month: April
  - COMM: 41m
  - DEV: 6h 37m
- - OPS: 0
  - DOC: 32m
- - WS: 0
  - EDU: 0
+ - OPS: 0
+ - WS: 0
    Total: 7h 50m, Days: 2, Avg: 3h 55m
 

@@ -1,4 +1,4 @@
-Day: 09 tue
+Day: 9 tue
  - DEV: TASK-15 implement feature - 42m
  - COMM: Daily Meeting - 24m
  - DEV: TASK-15 implement - 25m
@@ -11,9 +11,9 @@ Day: 09 tue
 Month: March
  - COMM: 3h 30m
  - DEV: 4h 54m
- - OPS: 0
  - DOC: 24m
- - WS: 0
  - EDU: 0
+ - OPS: 0
+ - WS: 0
    Total: 8h 48m, Days: 2, Avg: 4h 24m
 

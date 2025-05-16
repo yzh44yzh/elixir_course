@@ -64,13 +64,14 @@ Day: 3 mon
  - DEV: Learn how to search for logs in Kibana - 34m
  - DOC: Write a document about logs in ELK - 22m
    Total: 4h 10m
+
 Month: May
  - COMM: 2h 58m
  - DEV: 7h 56m
- - OPS: 56m
  - DOC: 1h 39m
- - WS: 0
  - EDU: 0
+ - OPS: 56m
+ - WS: 0
    Total: 13h 29m, Days: 3, Avg: 4h 29m
 ```
 

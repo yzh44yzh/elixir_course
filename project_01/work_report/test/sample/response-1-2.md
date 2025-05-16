@@ -12,9 +12,9 @@ Day: 4 tue
 Month: May
  - COMM: 2h 58m
  - DEV: 7h 56m
- - OPS: 56m
  - DOC: 1h 39m
- - WS: 0
  - EDU: 0
+ - OPS: 56m
+ - WS: 0
    Total: 13h 29m, Days: 3, Avg: 4h 29m
 
