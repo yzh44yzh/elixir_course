@@ -9,5 +9,8 @@
 *.out
 _build
 
+# Vim
+*.swp
+
 # Emacs
 \#*

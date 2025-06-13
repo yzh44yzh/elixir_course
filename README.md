@@ -4,9 +4,7 @@
 
 Курс содержит большое количество упражнений, домашних заданий и курсовой проект.
 
-Курс доступен в формате видео-лекций и live coding на моём [ютуб-аккаунте](https://www.youtube.com/playlist?list=PLYuTgpYrBrVKnzanStbVGD09Cdx4YNEpO).
-
-Формат электронной книги есть в планах, но пока не реализован.
+Курс доступен в формате видео-лекций и live coding на [YouTube](https://www.youtube.com/playlist?list=PLYuTgpYrBrVKnzanStbVGD09Cdx4YNEpO) и на [RuTube](https://rutube.ru/plst/433906/).
 
 Поддержать работу над курсом можно на [Boosty](https://boosty.to/yury.zhloba).
 
