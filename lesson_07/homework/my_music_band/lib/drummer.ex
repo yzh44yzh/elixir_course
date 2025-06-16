@@ -1,6 +1,8 @@
 defmodule MyMusicBand.Drummer do
+  @behaviour MyMusicBand.Player
+
   alias MyMusicBand.Model.Sound
-  import Sound, only: [is_drum: 1]
+  alias MyMusicBand.PlayerLogic
 
   defstruct [:sounds, :current_stream]
 
@@ -9,47 +11,14 @@ defmodule MyMusicBand.Drummer do
           current_stream: Enumerable.t()
         }
 
+  @impl true
   @spec init([Sound.drum_sound()]) :: {:ok, t()} | {:error, [{integer(), :atom}]}
   def init(sounds) do
-    case validate_sounds(sounds) do
-      ^sounds ->
-        {:ok,
-         %__MODULE__{
-           sounds: sounds,
-           current_stream: Stream.cycle(sounds)
-         }}
-
-      {:error, error} ->
-        {:error, error}
-    end
+    PlayerLogic.init(%__MODULE__{}, sounds, &Sound.is_drum/1)
   end
 
-  @spec next(t()) :: {Sound.drum_sound(), t()}
-  def next(%__MODULE__{current_stream: stream} = drummer) do
-    {sound, new_stream} = get_sound(stream)
-    drummer = %{drummer | current_stream: new_stream}
-    {sound, drummer}
-  end
-
-  defp get_sound(stream) do
-    case stream |> Stream.take(1) |> Enum.to_list() do
-      [sound] ->
-        {sound, stream |> Stream.drop(1)}
-
-      _ ->
-        {nil, stream}
-    end
-  end
-
-  defp validate_sounds(sounds) do
-    case Enum.with_index(sounds, 1)
-         |> Enum.filter(fn {sound, _index} -> !is_drum(sound) end)
-         |> Enum.map(fn {sound, index} -> {index, sound} end) do
-      [] ->
-        sounds
-
-      errors ->
-        {:error, errors}
-    end
+  @impl true
+  def next(drummer) do
+    PlayerLogic.next(drummer)
   end
 end
