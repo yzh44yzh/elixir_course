@@ -19,7 +19,7 @@ defmodule MyMusicBand.Band do
   def next(band) do
     {sounds, updated_players} =
       Enum.map(band.players, fn player ->
-        Player.next(player)
+        player.__struct__.next(player)
       end)
       |> Enum.unzip()
 
