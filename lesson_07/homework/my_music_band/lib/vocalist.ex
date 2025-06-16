@@ -1,7 +1,3 @@
 defmodule MyMusicBand.Vocalist do
-
-  def init(arg), do: nil
-
-  def next(arg), do: nil
-
-end 
+  use MyMusicBand.Model.Musician, validator: &MyMusicBand.Model.Sound.is_vocal/1
+end
