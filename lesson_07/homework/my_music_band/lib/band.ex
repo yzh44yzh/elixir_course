@@ -1,16 +1,16 @@
 defmodule MyMusicBand.Band do
-  alias MyMusicBand.{Vocalist, Guitarist, Drummer}
+  alias MyMusicBand.Player
 
   defstruct players: []
 
   @type t() :: %__MODULE__{
-          players: list(Guitarist.t() | Drummer.t() | Vocalist.t())
+          players: list(Player.t())
         }
 
   @spec init() :: t()
   def init(), do: %__MODULE__{}
 
-  @spec add_player(t(), Guitarist.t() | Drummer.t() | Vocalist.t()) :: t()
+  @spec add_player(t(), Player.t()) :: t()
   def add_player(band, player) do
     %{band | players: band.players ++ [player]}
   end
@@ -19,7 +19,7 @@ defmodule MyMusicBand.Band do
   def next(band) do
     {sounds, updated_players} =
       Enum.map(band.players, fn player ->
-        player.__struct__.next(player)
+        Player.next(player)
       end)
       |> Enum.unzip()
 

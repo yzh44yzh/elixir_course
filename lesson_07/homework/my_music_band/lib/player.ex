@@ -1,13 +1,21 @@
-defmodule MyMusicBand.Player do
+defprotocol MyMusicBand.Player do
   @moduledoc """
-  Defines the behavior for all musicians in the band.
+  Define the protocol for all musicians in the band.
   """
+  alias MyMusicBand.{Vocalist, Drummer, Guitarist}
 
-  @type t :: %{sounds: list(atom), current_stream: Enumerable.t()}
-
-  @doc "Initializes the state of the musician with his part"
-  @callback init(list(atom)) :: {:ok, t()} | {:error, any()}
+  @type player() :: Guitarist.t() | Drummer.t() | Vocalist.t()
 
   @doc "Returns the next sound and the updated state"
-  @callback next(t()) :: {atom(), t()}
+  @spec next(player()) :: {atom(), player()}
+  def next(player)
+end
+
+defimpl MyMusicBand.Player, for: Any do
+  alias MyMusicBand.{Vocalist, Drummer, Guitarist, Player}
+
+  @spec next(Player.player()) :: {atom(), Player.player()}
+  def next(player) do
+    MyMusicBand.PlayerLogic.next(player)
+  end
 end

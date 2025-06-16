@@ -1,8 +1,8 @@
 defmodule MyMusicBand.Guitarist do
-  @behaviour MyMusicBand.Player
-
   alias MyMusicBand.Model.Sound
   alias MyMusicBand.PlayerLogic
+
+  @derive MyMusicBand.Player
 
   defstruct [:sounds, :current_stream]
 
@@ -11,14 +11,11 @@ defmodule MyMusicBand.Guitarist do
           current_stream: Enumerable.t()
         }
 
-  @impl true
   @spec init([Sound.guitar_sound()]) :: {:ok, t()} | {:error, [{integer(), :atom}]}
   def init(sounds) do
     PlayerLogic.init(%__MODULE__{}, sounds, &Sound.is_guitar/1)
   end
 
-  @impl true
-  def next(guitaris) do
-    PlayerLogic.next(guitaris)
-  end
+  @spec next(t()) :: {atom(), t()}
+  def next(guitaris), do: PlayerLogic.next(guitaris)
 end
